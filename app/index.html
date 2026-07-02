@@ -1621,22 +1621,29 @@ async function dbSavePrices(){
 }
 
 let loadTimer = null;
+/* Supabase vraća najviše 1000 redova po upitu — čitaj u serijama dok ne stigne sve */
+async function fetchAll(table){
+  const out = [];
+  const CH = 1000;
+  for (let from = 0;; from += CH){
+    const { data, error } = await sb.from(table).select('*').range(from, from + CH - 1);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < CH) break;
+  }
+  return out;
+}
 async function loadAll(){
   if (!sb) return;
   try {
     const [c, p, s, b, st] = await Promise.all([
-      sb.from('clients').select('*'),
-      sb.from('pets').select('*'),
-      sb.from('stays').select('*'),
-      sb.from('boxes').select('*'),
-      sb.from('settings').select('*'),
+      fetchAll('clients'), fetchAll('pets'), fetchAll('stays'), fetchAll('boxes'), fetchAll('settings'),
     ]);
-    for (const r of [c, p, s, b, st]) if (r.error) throw r.error;
-    D.clients = c.data.map(DB_UNMAP.clients);
-    D.pets = p.data.map(DB_UNMAP.pets);
-    D.stays = s.data.map(DB_UNMAP.stays);
-    if (b.data.length) D.boxes = b.data.map(DB_UNMAP.boxes);
-    const pr = st.data.find(x => x.key === 'prices');
+    D.clients = c.map(DB_UNMAP.clients);
+    D.pets = p.map(DB_UNMAP.pets);
+    D.stays = s.map(DB_UNMAP.stays);
+    if (b.length) D.boxes = b.map(DB_UNMAP.boxes);
+    const pr = st.find(x => x.key === 'prices');
     if (pr && pr.value) D.prices = pr.value;
     OFFLINE = false;
     save(); render();
