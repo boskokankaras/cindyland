@@ -30,7 +30,7 @@ npx netlify deploy --prod --dir app        # objava (site se veže uz `netlify l
 ```
 
 - Lokalni pregled: server servira ROOT projekta (root `index.html` preusmjerava na `app/`), jer app u lokalnom režimu vuče `../seed/seed.json` za demo. **`seed/` NIKAD ne smije u deploy** (podaci klijenata) — zato je deploy `--dir app`.
-- `.env` (van gita): `SUPABASE_DB_HOST=aws-1-eu-central-1.pooler.supabase.com` (pooler, NE direktni db host — IPv6), `SUPABASE_DB_USER=postgres.<ref>`, `SUPABASE_DB_PASSWORD=...`.
+- `.env` (van gita): `SUPABASE_DB_HOST=aws-0-eu-west-1.pooler.supabase.com` (pooler za eu-west-1, NE direktni db host — IPv6), `SUPABASE_DB_USER=postgres.<ref>`, `SUPABASE_DB_PASSWORD=...`.
 
 ## Istorija iz Excela (seed)
 
