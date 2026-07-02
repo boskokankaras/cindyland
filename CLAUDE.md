@@ -38,7 +38,11 @@ npx netlify deploy --prod --dir app        # objava (site se veže uz `netlify l
 - Parser `scripts/parse_excel.py`: spaja uzastopne dane u boravke, spaja preko granice mjeseca, „Preuzimanje" ćelija zatvara boravak, cjenovna ćelija dijeli boravak na naplatne segmente (stalni gosti plaćaju mjesečno — Xenny 300€/mj, Kan karting 330€/mj), najava cijene na prvi dan se ne duplira. Rezultat: ~1.430 boravaka, ~850 klijenata, ~93.000 € naplaćeno.
 - **Granica tačnosti:** njene ručne mjesečne sume su često veće od zbira € u tabeli — dio naplata je vodila van tabele. Istorija u app-u = ono što je upisano u tabelu. Klijent = ime iz ćelije (nekad pas, nekad vlasnik, nekad oboje — tako je vodila).
 
-## Status / sljedeći koraci
+## Produkcija (LIVE od 2.7.2026)
 
-- Čeka od Boška: (1) novi Supabase projekat → URL + anon ključ + DB šifra u `.env` i `app/config.js`; (2) email adrese za Vesnu i Novicu (naloge pravi Boško u dashboardu, registracija u app ne postoji); (3) GitHub repo `cindyland` (privatan) + `git push`; (4) `netlify sites:create` + prvi deploy na Boškovo „objavi".
-- Redoslijed uključenja: setup.sql → import-seed.mjs → nalozi u dashboardu → config.js ključevi → deploy → UPUTSTVO.md link Vesni i Novici.
+- **Live: https://cindyland.netlify.app** (Netlify site id `54a5dee4-62ca-4925-bb81-d735ec41b441`; deploy: `npx netlify deploy --prod --dir app --site 54a5dee4-...`). Repo: `https://github.com/boskokankaras/cindyland` (privatan; pull prije rada, push poslije).
+- Supabase projekat `ggcvkeltmarcxlmaczmf`, **region eu-west-1 (Irska!)** — pooler host je `aws-0-eu-west-1.pooler.supabase.com` (NE eu-central kao K-Sport). URL `https://ggcvkeltmarcxlmaczmf.supabase.co`; anon ključ u `app/config.js`; DB šifra u `.env`.
+- Šema + istorija uvezeni (850 klijenata / 855 ljubimaca / 1.432 boravka / 93.323 € naplaćeno) — `setup.sql` + `import-seed.mjs` izvršeni i provjereni kroz REST.
+- Nalozi (kreirani direktno u `auth.users`+`auth.identities` SQL-om, prijava testirana): Vesna `vmitrovic1989@gmail.com` / `Vesna2026`, Novica `nolje.mne@gmail.com` / `Novica2026`. Novi nalog/promjena šifre: Supabase dashboard ili SQL recept iz sesije 2.7.
+- **PostgREST vraća max 1000 redova po upitu** — `loadAll()` čita u serijama (`fetchAll` sa `.range()`); ne vraćati na obični `select('*')`.
+- Na svakom sljedećem deployu: bump `APP_VERSION` + `CACHE` (korisnici dobiju „Nova verzija je spremna").
