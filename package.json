@@ -1,0 +1,10 @@
+{
+  "name": "cindyland",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cindyland — evidencija pansiona za pse i mačke (PWA, bez builda; app/ je deploy folder)",
+  "type": "module",
+  "devDependencies": {
+    "pg": "^8.13.0"
+  }
+}
