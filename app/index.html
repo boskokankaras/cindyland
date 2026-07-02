@@ -407,7 +407,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.0';
+const APP_VERSION = 'v1.0.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1917,7 +1917,16 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && (e.target.id === 'loginPass' || e.target.id === 'loginEmail')) doLogin();
 });
 
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ autoCheckUpdate(); if (sb && APP_SHOWN) scheduleReload(); } });
+/* kad prođe ponoć (ili se app otvori u novom danu) — „Danas" se sam prebaci na novi dan */
+let LAST_DAY = todayISO();
+function dayTick(){
+  if (todayISO() === LAST_DAY) return;
+  LAST_DAY = todayISO();
+  if (APP_SHOWN) render();
+}
+setInterval(dayTick, 60 * 1000);
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ dayTick(); autoCheckUpdate(); if (sb && APP_SHOWN) scheduleReload(); } });
 window.addEventListener('focus', autoCheckUpdate);
 setInterval(autoCheckUpdate, 30 * 60 * 1000);
 
