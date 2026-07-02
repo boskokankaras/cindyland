@@ -80,15 +80,17 @@ p{text-wrap:pretty}
 .tab{flex:1;display:flex;align-items:center;justify-content:center;padding:11px 0;border-radius:19px;color:var(--muted);position:relative;transition:color .18s,background .18s}
 .tab svg{width:26px;height:26px;flex-shrink:0}
 .tab.active{color:var(--primary);background:var(--primary-soft)}
+.tab-lbl{display:none}
 .tab-dot{position:absolute;top:7px;right:calc(50% - 17px);width:8px;height:8px;border-radius:50%;background:var(--primary);border:2px solid #fff}
+.side-head,.side-add,.side-foot{display:none}
 .fab{
-  position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(88px + env(safe-area-inset-bottom));z-index:39;
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom));z-index:39;
   height:54px;border-radius:99px;background:var(--primary);color:#fff;padding:0 22px 0 18px;
   box-shadow:0 8px 24px rgba(224,82,58,.42);display:flex;align-items:center;justify-content:center;gap:8px;
-  font-weight:750;font-size:15.5px;transition:transform .15s;
+  font-weight:750;font-size:15.5px;transition:scale .15s;
 }
 .fab svg{width:22px;height:22px;flex-shrink:0}
-.fab:active{transform:scale(.94)}
+.fab:active{scale:.94}
 
 /* ===== kartice i liste ===== */
 .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
@@ -320,8 +322,40 @@ p{text-wrap:pretty}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
-@media (min-width:641px){
-  .fab{right:calc(50% - 320px + 16px)}
+/* ===== desktop (računar) ===== */
+@media (min-width:900px){
+  .tabbar{
+    left:0;top:0;bottom:0;transform:none;width:232px;height:auto;
+    flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;
+    border-radius:0;padding:20px 14px;background:var(--card);
+    box-shadow:none;border-right:1.5px solid var(--line);-webkit-backdrop-filter:none;backdrop-filter:none;
+  }
+  .side-head{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:850;letter-spacing:-.02em;padding:4px 10px 16px}
+  .side-head .paw{width:28px;height:28px;flex-shrink:0;color:var(--primary)}
+  .side-add{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--primary);color:#fff;border-radius:13px;padding:13px;
+    font-weight:750;font-size:15px;margin:0 2px 16px;transition:scale .15s;
+  }
+  .side-add svg{width:19px;height:19px}
+  .side-add:active{scale:.96}
+  .tab{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:13px;font-size:15px;font-weight:650}
+  .tab-lbl{display:inline}
+  .tab-dot{position:static;margin-left:auto;border:none}
+  .side-foot{display:block;margin-top:auto;text-align:center;color:var(--muted);font-size:12px;padding:10px 0 4px}
+  .fab{display:none !important}
+  #app{margin:0 0 0 232px;max-width:none;padding:0 40px 60px}
+  #view > *:not(.bgrid-wrap){max-width:780px}
+  .cal-grid{max-width:660px}
+  .cal-cell{aspect-ratio:auto;height:78px}
+  .bgrid-wrap{max-height:calc(100dvh - 275px)}
+  .sheet{
+    top:50%;left:50%;bottom:auto;height:auto;max-height:92dvh;width:660px;
+    border-radius:22px;opacity:0;transform:translate(-50%,-46%) scale(.97);
+    transition:transform .22s cubic-bezier(.32,.72,.24,1),opacity .18s;box-shadow:var(--shadow-pop);
+  }
+  .sheet.open{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .sheet-handle{display:none}
 }
 </style>
 </head>
@@ -577,11 +611,15 @@ function renderTopbar(){
   $('#topbar').innerHTML = `<h1 class="topbar-title">${paw}${titles[TAB]}</h1>${sub}`;
 }
 function renderTabbar(){
-  $('#tabbar').innerHTML = TABS.map(t => `
+  $('#tabbar').innerHTML = `
+    <div class="side-head"><span class="paw">${I.paw}</span>Cindyland</div>
+    <button class="side-add" data-act="stay-new">${I.plus} Dodaj boravak</button>` +
+    TABS.map(t => `
     <button class="tab ${TAB === t.id ? 'active' : ''}" data-act="tab" data-id="${t.id}" aria-label="${t.lbl}">
-      ${t.ico}
+      ${t.ico}<span class="tab-lbl">${t.lbl}</span>
       ${t.id === 'jos' && PWA.needRefresh ? '<span class="tab-dot"></span>' : ''}
-    </button>`).join('');
+    </button>`).join('') +
+    `<div class="side-foot num">${APP_VERSION}</div>`;
 }
 
 /* ============ DANAS ============ */

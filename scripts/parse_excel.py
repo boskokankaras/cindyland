@@ -219,6 +219,8 @@ for r in merged:
     cnt = Counter(name_key(c) for c in cands)
     best_key = max(cnt.items(), key=lambda kv: (kv[1], len(kv[0])))[0]
     name = max((c for c in cands if name_key(c) == best_key), key=len)
+    if not re.search(r'[a-zA-ZčćžšđČĆŽŠĐ]', name):
+        skipped += 1; continue  # "ime" bez ijednog slova = zabilješka, ne gost
 
     # cjenovne ćelije: (iso_datum, iznos); "90 + 10 transport" bez € tretiraj kao cijenu
     pcells = []
