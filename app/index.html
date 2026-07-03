@@ -293,20 +293,21 @@ p{text-wrap:pretty}
 .paid-row .pr-lbl{font-weight:650;font-size:15px}
 
 /* ===== početna — pregled ===== */
-.grp-tile{background:var(--bg);border-radius:14px;padding:11px 12px;text-align:left;transition:transform .12s;display:block;width:100%}
-.grp-tile:active{transform:scale(.95)}
-.gt-head{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-.gt-head svg{width:15px;height:15px;flex-shrink:0}
-.gt-num{font-size:21px;font-weight:800;margin-top:4px}
-.gt-num small{font-size:12px;color:var(--muted);font-weight:600}
-.gt-bar{display:block;height:5px;border-radius:99px;background:var(--line);margin-top:7px;overflow:hidden}
-.gt-fill{display:block;height:100%;border-radius:99px;transition:width .4s ease}
-.gt-free{font-size:11.5px;color:var(--muted);margin-top:5px}
-.inout{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.io-tile{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:13px;padding:11px 13px;font-weight:650;font-size:14px}
-.io-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.io-ico svg{width:15px;height:15px}
-.io-num{font-size:19px;font-weight:800;margin-left:auto}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hero-lbl{font-size:12.5px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.hero-num{font-size:42px;font-weight:850;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
+.hero-num small{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:2px}
+.hero-paw{width:46px;height:46px;color:var(--primary-soft);flex-shrink:0}
+.hero-rings{display:flex;justify-content:space-between;gap:6px;margin-top:14px}
+.ring-tile{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 2px 7px;border-radius:16px;transition:transform .12s,background .15s}
+.ring-tile:active{transform:scale(.94);background:var(--bg)}
+.ring-wrap{position:relative;width:76px;height:76px}
+.ring-wrap svg{width:100%;height:100%;display:block}
+.ring-num{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;padding-top:26px;font-weight:800;font-size:18px;line-height:1}
+.ring-num small{font-size:10.5px;font-weight:650;color:var(--muted)}
+.ring-lbl{font-size:13px;font-weight:750;margin-top:5px}
+.ring-free{font-size:11px;color:var(--muted)}
+.empty-line{color:var(--muted);font-size:14px;text-align:center;padding:7px 2px}
 .b-danger{background:var(--danger-soft);color:var(--danger)}
 .row-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
 .pet-photo{width:68px;height:68px;border-radius:16px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
@@ -454,7 +455,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.3';
+const APP_VERSION = 'v1.0.4';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -620,6 +621,16 @@ function petAvatar(p){
   const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
   return `<div class="row-av ${cls}">${p.photo ? `<img src="${esc(p.photo)}" alt="" loading="lazy">` : (p.species === 'macka' ? I.cat : I.dog)}</div>`;
 }
+function ringSVG(used, total, color){
+  const r = 27, c = 2 * Math.PI * r;
+  const frac = total ? Math.min(1, used / total) : 0;
+  return `<svg viewBox="0 0 76 76" aria-hidden="true">
+    <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--line)" stroke-width="7.5"/>
+    ${frac > 0 ? `<circle cx="38" cy="38" r="${r}" fill="none" stroke="${color}" stroke-width="7.5"
+      stroke-linecap="round" stroke-dasharray="${(frac * c).toFixed(1)} ${c.toFixed(1)}"
+      transform="rotate(-90 38 38)"/>` : ''}
+  </svg>`;
+}
 function boxBadge(st){
   const b = boxById(st.boxId);
   if (!b) return '';
@@ -698,40 +709,40 @@ function vDanas(){
   if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom — prikazujem posljednje poznato stanje.</span></div>`;
   html += backupBannerHTML();
 
+  const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c);
   html += `<div class="card">
-    <div style="display:flex;align-items:baseline;gap:9px">
-      <span class="big-amount num">${petCount}</span>
-      <span style="color:var(--muted);font-weight:600">u pansionu danas</span>
+    <div class="hero-top">
+      <div>
+        <div class="hero-lbl">U pansionu danas</div>
+        <div class="hero-num num">${petCount}<small>${' ' + plural(petCount, 'ljubimac', 'ljubimca', 'ljubimaca')}</small></div>
+      </div>
+      <span class="hero-paw">${I.paw}</span>
     </div>
-    <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-      ${groups.map(f => `<button class="grp-tile" data-act="group-open" data-id="${f.g}">
-        <span class="gt-head" style="color:var(--${f.g})">${f.g === 'm' ? I.cat : I.dog}${GROUPS_1[f.g]}</span>
-        <div class="gt-num num">${f.used}<small> / ${f.total}</small></div>
-        <span class="gt-bar"><i class="gt-fill" style="width:${f.total ? Math.round(f.used / f.total * 100) : 0}%;background:var(--${f.g})"></i></span>
-        <div class="gt-free">${f.total - f.used ? 'slobodno još ' + (f.total - f.used) : 'sve puno'}</div>
+    <div class="hero-rings">
+      ${groups.map(f => `<button class="ring-tile" data-act="group-open" data-id="${f.g}">
+        <span class="ring-wrap">${ringSVG(f.used, f.total, `var(--${f.g})`)}<span class="ring-num num">${f.used}<small>/${f.total}</small></span></span>
+        <span class="ring-lbl" style="color:var(--${f.g})">${GROUPS_1[f.g]}</span>
+        <span class="ring-free">${f.total - f.used > 0 ? 'slobodno: ' + (f.total - f.used) : 'popunjeno'}</span>
       </button>`).join('')}
     </div>
-    <div class="inout">
-      <div class="io-tile"><span class="io-ico" style="background:var(--ok-soft);color:var(--ok)">${I.in}</span>Dolaze danas<span class="io-num num">${arrivals.length}</span></div>
-      <div class="io-tile"><span class="io-ico" style="background:var(--mb-soft);color:var(--mb)">${I.out}</span>Odlaze danas<span class="io-num num">${departures.length}</span></div>
-    </div>
-    ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:10px">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
+    ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:8px;text-align:center">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
   </div>`;
 
-  if (departures.length){
-    html += `<div class="sec-title">Danas odlaze <span class="cnt num">${departures.length}</span></div><div class="card">` +
-      departures.map(st => stayRowHTML(st, 'out')).join('') + '</div>';
+  if (!all.length){
+    html += `<div class="card"><div class="empty">${I.paw}Danas nema nikoga u pansionu.<br>Dodaj boravak dugmetom dole desno.</div></div>`;
+    return html;
   }
-  if (arrivals.length){
-    html += `<div class="sec-title">Danas dolaze <span class="cnt num">${arrivals.length}</span></div><div class="card">` +
-      arrivals.map(st => stayRowHTML(st, 'in')).join('') + '</div>';
-  }
+  html += `<div class="sec-title">Danas dolaze <span class="cnt num">${arrivals.length}</span></div>`;
+  html += arrivals.length
+    ? `<div class="card">${arrivals.map(st => stayRowHTML(st, 'in')).join('')}</div>`
+    : `<div class="card"><p class="empty-line">Danas niko ne dolazi.</p></div>`;
+  html += `<div class="sec-title">Danas napuštaju <span class="cnt num">${departures.length}</span></div>`;
+  html += departures.length
+    ? `<div class="card">${departures.map(st => stayRowHTML(st, 'out')).join('')}</div>`
+    : `<div class="card"><p class="empty-line">Danas niko ne napušta pansion.</p></div>`;
   if (staying.length){
     html += `<div class="sec-title">U pansionu <span class="cnt num">${staying.length}</span></div><div class="card">` +
       staying.map(st => stayRowHTML(st)).join('') + '</div>';
-  }
-  if (!all.length){
-    html += `<div class="card"><div class="empty">${I.paw}Danas nema nikoga u pansionu.<br>Dodaj boravak dugmetom dole desno.</div></div>`;
   }
   return html;
 }
