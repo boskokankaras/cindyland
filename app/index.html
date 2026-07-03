@@ -260,6 +260,8 @@ p{text-wrap:pretty}
 .sheet-x{width:34px;height:34px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted)}
 .sheet-x svg{width:16px;height:16px}
 .sheet-body{flex:1;overflow-y:auto;padding:6px 18px calc(24px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sheet-fab{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));z-index:6}
+.sheet.has-fab .sheet-body{padding-bottom:calc(105px + env(safe-area-inset-bottom))}
 @media (max-width:640px){
   .sheet{height:100dvh;border-radius:0}
   .sheet-handle{display:none}
@@ -422,6 +424,7 @@ p{text-wrap:pretty}
     </button>
   </div>
   <div class="sheet-body" id="sheetBody"></div>
+  <button class="fab sheet-fab" id="sheetFab" style="display:none"></button>
 </section>
 
 <div id="modalHost"></div>
@@ -454,7 +457,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.6';
+const APP_VERSION = 'v1.0.7';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1190,9 +1193,19 @@ function installHelpSheet(){
 <script>
 /* ============ SHEET / MODAL okvir ============ */
 let sheetOpen = false;
-function openSheet(title, html){
+function openSheet(title, html, fab){
   $('#sheetTitle').textContent = title;
   $('#sheetBody').innerHTML = html;
+  const f = $('#sheetFab');
+  if (fab){
+    f.innerHTML = I.plus + ' ' + esc(fab.label);
+    f.dataset.act = fab.act;
+    f.style.display = 'flex';
+    $('#sheet').classList.add('has-fab');
+  } else {
+    f.style.display = 'none';
+    $('#sheet').classList.remove('has-fab');
+  }
   $('#sheet').classList.add('open');
   $('#sheetOverlay').classList.add('open');
   document.body.classList.add('noscroll');
@@ -1288,6 +1301,7 @@ function sfSync(){
   if (SF.newClient){
     if (g('sfNcName')) SF.newClient.name = g('sfNcName').value;
     if (g('sfNcPhone')) SF.newClient.phone = g('sfNcPhone').value;
+    if (g('sfNcNote')) SF.newClient.note = g('sfNcNote').value;
   }
   if (SF.petForm){
     if (g('sfPfName')) SF.petForm.name = g('sfPfName').value;
@@ -1374,6 +1388,29 @@ function petMiniFormHTML(pf, idPrefix){
   </div>`;
 }
 
+function sfClientListHTML(){
+  const q = SF.clientQ.trim().toLowerCase();
+  let list = [...D.clients].sort((a, b) => a.name.localeCompare(b.name, 'sr'));
+  if (q){
+    list = list.filter(c => c.name.toLowerCase().includes(q) || (c.phone || '').toLowerCase().includes(q) ||
+      petsOfClient(c.id).some(p => (p.name || '').toLowerCase().includes(q)));
+  }
+  if (!list.length){
+    return `<div class="card"><p class="empty-line">Nema rezultata${SF.clientQ.trim() ? ' za „' + esc(SF.clientQ.trim()) + '"' : ''} — dodaj novog klijenta dugmetom ispod.</p></div>`;
+  }
+  return '<div class="card">' + list.map(c => {
+    const pets = petsOfClient(c.id).map(petLabel).join(', ');
+    return `<div class="row tappable" data-act="sf-client-pick" data-id="${c.id}">
+      <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
+      <div class="row-main">
+        <div class="row-name">${esc(c.name)}${c.blacklist ? ' <span class="badge b-danger" style="vertical-align:1px">crna lista</span>' : ''}</div>
+        <div class="row-meta">${esc(pets || 'bez ljubimaca')}${c.phone ? ' · ' + esc(c.phone) : ''}</div>
+      </div>
+      <span class="chev" style="width:18px;height:18px">${I.chev}</span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
 function renderStayForm(){
   const edit = !!SF.id;
 
@@ -1389,21 +1426,17 @@ function renderStayForm(){
     ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> — ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
   } else if (SF.newClient){
     clientHTML = `<div class="mini-form" style="margin-top:0">
-      <div class="lbl" style="display:flex;justify-content:space-between">Novi vlasnik <button style="color:var(--primary);font-weight:700" data-act="sf-client-clear">nazad na pretragu</button></div>
-      <div class="fld"><input type="text" id="sfNcName" placeholder="Ime i prezime *" value="${esc(SF.newClient.name)}"></div>
-      <div class="fld" style="margin-bottom:0"><input type="tel" id="sfNcPhone" placeholder="Telefon (opciono)" value="${esc(SF.newClient.phone)}"></div>
+      <div class="lbl" style="display:flex;justify-content:space-between">Novi klijent <button style="color:var(--primary);font-weight:700" data-act="sf-client-clear">nazad na pretragu</button></div>
+      <div class="fld"><label class="lbl">Ime i prezime *</label><input type="text" id="sfNcName" value="${esc(SF.newClient.name)}"></div>
+      <div class="fld"><label class="lbl">Telefon</label><input type="tel" id="sfNcPhone" value="${esc(SF.newClient.phone)}"></div>
+      <div class="fld" style="margin-bottom:2px"><label class="lbl">Napomena</label><textarea id="sfNcNote" placeholder="npr. preporuka, komšija…">${esc(SF.newClient.note || '')}</textarea></div>
     </div>`;
   } else {
-    const q = SF.clientQ.trim().toLowerCase();
-    const matches = q ? D.clients.filter(c => c.name.toLowerCase().includes(q) || petsOfClient(c.id).some(p => (p.name || '').toLowerCase().includes(q))).slice(0, 6)
-                      : [...D.clients].sort((a, b) => a.name.localeCompare(b.name, 'sr')).slice(0, 6);
-    clientHTML = `<input type="search" id="sfClientQ" placeholder="Pretraži ili upiši ime…" value="${esc(SF.clientQ)}" autocomplete="off">
-      <div class="pick-list">
-        ${matches.map(c => `<div class="pick-item" data-act="sf-client-pick" data-id="${c.id}">
-          <span><b>${esc(c.name)}</b> <span class="pi-meta">${esc(petsOfClient(c.id).map(petLabel).join(', '))}</span></span>${I.chev}
-        </div>`).join('')}
-        <div class="pick-item" data-act="sf-client-new" style="color:var(--primary);font-weight:700">${I.plus} Novi vlasnik${SF.clientQ.trim() ? ': „' + esc(SF.clientQ.trim()) + '"' : ''}</div>
-      </div>`;
+    clientHTML = `<div style="position:relative;margin-bottom:12px">
+      <input type="search" id="sfClientQ" placeholder="Pretraži klijente i ljubimce…" value="${esc(SF.clientQ)}" autocomplete="off" style="padding-left:40px">
+      <span style="position:absolute;left:12px;top:11px;width:20px;height:20px;color:var(--muted)">${I.search}</span>
+    </div>
+    <div id="sfClientList">${sfClientListHTML()}</div>`;
   }
 
   /* --- ljubimci --- */
@@ -1469,11 +1502,12 @@ function renderStayForm(){
     <button class="btn btn-primary btn-block" data-act="sf-save" style="margin-top:4px">${edit ? 'Sačuvaj izmjene' : 'Sačuvaj boravak'}</button>
     ${edit ? `<button class="btn btn-danger btn-block" data-act="stay-del" data-id="${SF.id}" style="margin-top:10px">${I.trash} Obriši boravak</button>` : ''}`;
 
+  const picking = !SF.clientId && !SF.newClient;
   openSheet(edit ? 'Boravak' : 'Novi boravak', `
     <div class="fld"><label class="lbl">Vlasnik</label>${clientHTML}</div>
     ${petsHTML}
     ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + priceHTML + noteHTML + actionsHTML : ''}
-  `);
+  `, picking ? { label: 'Dodaj klijenta', act: 'sf-client-new' } : null);
 }
 
 function sfSave(){
@@ -1483,7 +1517,7 @@ function sfSave(){
   if (!clientId){
     const name = (SF.newClient && SF.newClient.name || '').trim();
     if (!name){ toast('Upiši ime klijenta.'); return; }
-    clientObj = { id: uid(), name, phone: (SF.newClient.phone || '').trim(), note: '' };
+    clientObj = { id: uid(), name, phone: (SF.newClient.phone || '').trim(), note: (SF.newClient.note || '').trim() };
     clientId = clientObj.id;
   }
   const petIds = [...SF.petIds];
@@ -1960,7 +1994,7 @@ document.addEventListener('click', (e) => {
         if (pets.length === 1) SF.petIds.add(pets[0].id);
         if (!pets.length) SF.petForm = { name: '', species: 'pas', size: 'mali', sex: null, breed: '' };
       } renderStayForm(); break;
-    case 'sf-client-new': sfSync(); SF.newClient = { name: SF.clientQ.trim(), phone: '' }; SF.petForm = SF.petForm || { name: '', species: 'pas', size: 'mali', sex: null, breed: '' }; renderStayForm(); break;
+    case 'sf-client-new': sfSync(); SF.newClient = { name: SF.clientQ.trim(), phone: '', note: '' }; SF.petForm = SF.petForm || { name: '', species: 'pas', size: 'mali', sex: null, breed: '' }; renderStayForm(); break;
     case 'sf-client-clear': sfSync(); SF.clientId = null; SF.newClient = null; SF.petIds = new Set(); SF.newPets = []; renderStayForm(); break;
     case 'sf-pet-toggle': sfSync(); SF.petIds.has(id) ? SF.petIds.delete(id) : SF.petIds.add(id); renderStayForm(); break;
     case 'sf-newpet-del': sfSync(); SF.newPets.splice(Number(id), 1); renderStayForm(); break;
@@ -2038,8 +2072,8 @@ document.addEventListener('click', (e) => {
 document.addEventListener('input', (e) => {
   if (e.target.id === 'klSearch'){ KL_Q = e.target.value; const l = $('#klList'); if (l) l.innerHTML = klListHTML(); }
   if (e.target.id === 'sfClientQ' && SF){
-    SF.clientQ = e.target.value; renderStayForm();
-    requestAnimationFrame(() => { const i = $('#sfClientQ'); if (i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); } });
+    SF.clientQ = e.target.value;
+    const l = $('#sfClientList'); if (l) l.innerHTML = sfClientListHTML();
   }
 });
 document.addEventListener('change', (e) => {
