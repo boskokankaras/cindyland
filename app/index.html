@@ -26,7 +26,7 @@
   --shadow-pop:0 10px 34px rgba(43,35,32,.18);
   --radius:18px;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 html{background:var(--bg)}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
@@ -145,9 +145,16 @@ p{text-wrap:pretty}
 .iconbtn svg{width:19px;height:19px}
 
 /* ===== segmenti / čipovi ===== */
-.seg{display:flex;background:var(--bg);border-radius:13px;padding:4px;gap:4px}
-.seg-btn{flex:1;padding:9px 8px;border-radius:10px;font-weight:650;font-size:14px;color:var(--muted);text-align:center;transition:all .15s}
-.seg-btn.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(43,35,32,.10)}
+.seg{display:flex;background:var(--bg);border-radius:13px;padding:4px;gap:4px;position:relative;isolation:isolate}
+.seg::before{
+  content:'';position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 6px);
+  border-radius:10px;background:var(--card);box-shadow:0 2px 8px rgba(43,35,32,.12);
+  transition:transform .24s cubic-bezier(.32,.72,.24,1),opacity .15s;z-index:0;
+}
+.seg:has(.seg-btn:nth-child(2).active)::before{transform:translateX(calc(100% + 4px))}
+.seg:not(:has(.seg-btn.active))::before{opacity:0}
+.seg-btn{flex:1;padding:9px 8px;border-radius:10px;font-weight:650;font-size:14px;color:var(--muted);text-align:center;transition:color .2s;position:relative;z-index:1}
+.seg-btn.active{color:var(--text)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{
   border:1.5px solid var(--line);border-radius:99px;padding:8px 14px;font-size:14px;font-weight:600;
@@ -285,6 +292,27 @@ p{text-wrap:pretty}
 .paid-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:11px 14px}
 .paid-row .pr-lbl{font-weight:650;font-size:15px}
 
+/* ===== početna — pregled ===== */
+.grp-tile{background:var(--bg);border-radius:14px;padding:11px 12px;text-align:left;transition:transform .12s;display:block;width:100%}
+.grp-tile:active{transform:scale(.95)}
+.gt-head{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.gt-head svg{width:15px;height:15px;flex-shrink:0}
+.gt-num{font-size:21px;font-weight:800;margin-top:4px}
+.gt-num small{font-size:12px;color:var(--muted);font-weight:600}
+.gt-bar{display:block;height:5px;border-radius:99px;background:var(--line);margin-top:7px;overflow:hidden}
+.gt-fill{display:block;height:100%;border-radius:99px;transition:width .4s ease}
+.gt-free{font-size:11.5px;color:var(--muted);margin-top:5px}
+.inout{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.io-tile{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:13px;padding:11px 13px;font-weight:650;font-size:14px}
+.io-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.io-ico svg{width:15px;height:15px}
+.io-num{font-size:19px;font-weight:800;margin-left:auto}
+.b-danger{background:var(--danger-soft);color:var(--danger)}
+.row-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.pet-photo{width:68px;height:68px;border-radius:16px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.pet-photo img{width:100%;height:100%;object-fit:cover}
+.pet-photo svg{width:30px;height:30px}
+
 /* ===== zarada ===== */
 .big-amount{font-size:38px;font-weight:850;letter-spacing:-.02em}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
@@ -399,6 +427,24 @@ p{text-wrap:pretty}
 <div id="modalHost"></div>
 <div class="toast" id="toast"></div>
 
+<datalist id="dlPas">
+<option>Maltezer</option><option>Bišon</option><option>Pudla</option><option>Patuljasta pudla</option>
+<option>Francuski buldog</option><option>Engleski buldog</option><option>Mops</option><option>Čivava</option>
+<option>Jorkširski terijer</option><option>Ši-cu</option><option>Pekinezer</option><option>Papilon</option>
+<option>Jack Russell terijer</option><option>Patuljasti šnaucer</option><option>Šnaucer</option><option>Westie</option>
+<option>Koker španijel</option><option>Kavalir</option><option>Bigl</option><option>Jazavčar</option>
+<option>Špic</option><option>Pomeranac</option><option>Bostonski terijer</option><option>Korgi</option>
+<option>Labrador</option><option>Zlatni retriver</option><option>Njemački ovčar</option><option>Malinoa</option>
+<option>Haski</option><option>Samojed</option><option>Akita</option><option>Staford</option><option>Amstaf</option>
+<option>Rotvajler</option><option>Doberman</option><option>Bokser</option><option>Kane korso</option>
+<option>Alabaj</option><option>Vučjak</option><option>Mješanac</option>
+</datalist>
+<datalist id="dlMacka">
+<option>Domaća</option><option>Persijska</option><option>Sijamska</option><option>Britanska kratkodlaka</option>
+<option>Maine Coon</option><option>Ragdoll</option><option>Ruska plava</option><option>Bengalska</option>
+<option>Sfinks</option><option>Mješanka</option>
+</datalist>
+
 <script src="config.js"></script>
 <script src="supabase.js"></script>
 <script>
@@ -408,7 +454,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.2';
+const APP_VERSION = 'v1.0.3';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -423,6 +469,7 @@ const I = {
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.2 12a7.2 7.2 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.1-1.2L14.3 3h-4l-.4 2.7a7.4 7.4 0 0 0-2.1 1.2l-2.3-1-2 3.4 2 1.5a7.2 7.2 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1c.6.5 1.4.9 2.1 1.2l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 2.1-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>',
   phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l1.5 4.5L8 10a12 12 0 0 0 6 6l1.5-2.5L20 15v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
   in: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>',
   chevL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>',
   chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg>',
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6 15.5 12l-6 6"/></svg>',
@@ -563,10 +610,15 @@ function stayAmount(st){ return st.price != null ? st.price : stayEstimate(st); 
 function groupAvatar(st){
   const pets = petsOfStay(st);
   const b = boxById(st.boxId);
+  const withPhoto = pets.find(p => p.photo);
   const isCat = pets.length ? pets.every(p => p.species === 'macka') : (b && b.group === 'm');
   const isBig = pets.length ? pets.some(p => p.species === 'pas' && p.size === 'veliki') : (b && b.group === 'vb');
   const cls = isCat ? 'av-m' : (isBig ? 'av-vb' : 'av-mb');
-  return `<div class="row-av ${cls}">${isCat ? I.cat : I.dog}</div>`;
+  return `<div class="row-av ${cls}">${withPhoto ? `<img src="${esc(withPhoto.photo)}" alt="" loading="lazy">` : (isCat ? I.cat : I.dog)}</div>`;
+}
+function petAvatar(p){
+  const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
+  return `<div class="row-av ${cls}">${p.photo ? `<img src="${esc(p.photo)}" alt="" loading="lazy">` : (p.species === 'macka' ? I.cat : I.dog)}</div>`;
 }
 function boxBadge(st){
   const b = boxById(st.boxId);
@@ -631,11 +683,12 @@ function vDanas(){
   const departures = all.filter(st => st.to === t);
   const staying = all.filter(st => st.from !== t && st.to !== t);
 
-  const freeByGroup = ['mb', 'vb', 'm'].map(g => {
+  const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
     const occ = new Set(all.map(st => st.boxId).filter(id => { const b = boxById(id); return b && b.group === g; }));
-    return { g, free: act.filter(b => !occ.has(b.id)).length, total: act.length };
+    return { g, used: occ.size, total: act.length };
   });
+  const petCount = all.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
 
   const tmr = addDays(t, 1);
   const tmrIn = D.stays.filter(st => st.from === tmr).length;
@@ -646,11 +699,21 @@ function vDanas(){
   html += backupBannerHTML();
 
   html += `<div class="card">
-    <div style="display:flex;align-items:baseline;justify-content:space-between">
-      <div><span class="big-amount num">${all.length}</span> <span style="color:var(--muted);font-weight:600">u pansionu</span></div>
+    <div style="display:flex;align-items:baseline;gap:9px">
+      <span class="big-amount num">${petCount}</span>
+      <span style="color:var(--muted);font-weight:600">u pansionu danas</span>
     </div>
     <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr">
-      ${freeByGroup.map(f => `<div class="stat"><div class="s-val num" style="color:var(--${f.g})">${f.free}<span style="font-size:13px;color:var(--muted)">/${f.total}</span></div><div class="s-lbl">${GROUPS[f.g]} — slobodno</div></div>`).join('')}
+      ${groups.map(f => `<button class="grp-tile" data-act="group-open" data-id="${f.g}">
+        <span class="gt-head" style="color:var(--${f.g})">${f.g === 'm' ? I.cat : I.dog}${GROUPS_1[f.g]}</span>
+        <div class="gt-num num">${f.used}<small> / ${f.total}</small></div>
+        <span class="gt-bar"><i class="gt-fill" style="width:${f.total ? Math.round(f.used / f.total * 100) : 0}%;background:var(--${f.g})"></i></span>
+        <div class="gt-free">${f.total - f.used ? 'slobodno još ' + (f.total - f.used) : 'sve puno'}</div>
+      </button>`).join('')}
+    </div>
+    <div class="inout">
+      <div class="io-tile"><span class="io-ico" style="background:var(--ok-soft);color:var(--ok)">${I.in}</span>Dolaze danas<span class="io-num num">${arrivals.length}</span></div>
+      <div class="io-tile"><span class="io-ico" style="background:var(--mb-soft);color:var(--mb)">${I.out}</span>Odlaze danas<span class="io-num num">${departures.length}</span></div>
     </div>
     ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:10px">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
   </div>`;
@@ -804,6 +867,27 @@ function calGridHTML(){
     <p class="hint" style="margin-top:10px">Klik na zauzeto polje otvara boravak, na prazno — nova rezervacija za taj boks i dan.</p>`;
 }
 
+function groupSheet(g){
+  const t = todayISO();
+  const inGroup = staysOnDate(t).filter(st => { const b = boxById(st.boxId); return b && b.group === g; })
+    .sort((a, b) => (boxById(a.boxId).sort || 0) - (boxById(b.boxId).sort || 0));
+  const occupied = new Set(inGroup.map(st => st.boxId));
+  const freeBoxes = sortedBoxes().filter(b => b.active && b.group === g && !occupied.has(b.id));
+  let html = '';
+  if (inGroup.length){
+    html += `<div class="card">${inGroup.map(st => stayRowHTML(st, st.to === t ? 'out' : (st.from === t ? 'in' : undefined))).join('')}</div>`;
+  } else {
+    html += `<div class="card"><div class="empty">${g === 'm' ? I.cat : I.dog}Danas nema nikoga u ovoj grupi.</div></div>`;
+  }
+  if (freeBoxes.length){
+    html += `<div class="sec-title">Slobodno danas <span class="cnt num">${freeBoxes.length}</span></div>
+    <div class="card"><div class="chips">${freeBoxes.map(b =>
+      `<button class="chip" data-act="grid-new" data-date="${t}" data-box="${b.id}">${esc(b.name)}</button>`).join('')}</div>
+    <p class="hint" style="margin-top:10px">Klik na boks — nova rezervacija od danas.</p></div>`;
+  }
+  openSheet(GROUPS[g] + ' — danas', html);
+}
+
 function daySheet(iso){
   const stays = staysOnDate(iso);
   const arrivals = stays.filter(st => st.from === iso);
@@ -857,7 +941,7 @@ function klListHTML(){
     return `<div class="row tappable" data-act="client-open" data-id="${c.id}">
       <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
       <div class="row-main">
-        <div class="row-name">${esc(c.name)}</div>
+        <div class="row-name">${esc(c.name)}${c.blacklist ? ' <span class="badge b-danger" style="vertical-align:1px">crna lista</span>' : ''}</div>
         <div class="row-meta">${esc(petStr || 'bez ljubimaca')}${c.phone ? ' · ' + esc(c.phone) : ''}</div>
       </div>
       <div class="row-side">${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="chev" style="width:18px;height:18px">${I.chev}</span></div>
@@ -875,21 +959,23 @@ function clientSheet(cid){
   const stays = D.stays.filter(st => st.clientId === cid).sort((a, b) => b.from.localeCompare(a.from));
   const totalPaid = stays.filter(st => st.paid).reduce((s, st) => s + (st.price || 0), 0);
 
-  let html = `<div class="card">
+  let html = '';
+  if (c.blacklist) html += `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger)">${I.warn}<span><b>Crna lista</b> — ranije loše iskustvo sa ovim klijentom ili ljubimcem.</span></div>`;
+  html += `<div class="card">
     ${c.phone ? `<a class="row tappable" href="tel:${esc(c.phone)}" style="text-decoration:none;color:inherit">
       <div class="row-av av-p">${I.phone}</div>
       <div class="row-main"><div class="row-name num">${esc(c.phone)}</div><div class="row-meta">pozovi</div></div>
     </a>` : ''}
     ${c.note ? `<p class="hint" style="margin:8px 2px">${esc(c.note)}</p>` : ''}
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn btn-ghost btn-sm" data-act="client-edit" data-id="${c.id}">${I.edit} Izmijeni</button>
-      <button class="btn btn-danger btn-sm" data-act="client-del" data-id="${c.id}">${I.trash} Obriši</button>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn btn-ghost" style="flex:1" data-act="client-edit" data-id="${c.id}">${I.edit} Izmijeni podatke</button>
+      <button class="btn btn-danger" data-act="client-del" data-id="${c.id}">${I.trash}</button>
     </div>
   </div>`;
 
   html += `<div class="sec-title">Ljubimci <span class="cnt num">${pets.length}</span></div><div class="card">`;
   html += pets.map(p => `<div class="row tappable" data-act="pet-edit" data-id="${p.id}">
-      <div class="row-av ${p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb')}">${p.species === 'macka' ? I.cat : I.dog}</div>
+      ${petAvatar(p)}
       <div class="row-main"><div class="row-name">${esc(petLabel(p))}</div><div class="row-meta">${esc(petMeta(p))}${p.note ? ' · ' + esc(p.note) : ''}</div></div>
       <span class="chev" style="width:18px;height:18px">${I.chev}</span>
     </div>`).join('');
@@ -1280,7 +1366,7 @@ function petMiniFormHTML(pf, idPrefix){
       <button class="seg-btn ${pf.sex === 'muzjak' ? 'active' : ''}" data-act="sf-pf-sex" data-id="muzjak">Mužjak</button>
       <button class="seg-btn ${pf.sex === 'zenka' ? 'active' : ''}" data-act="sf-pf-sex" data-id="zenka">Ženka</button>
     </div></div>
-    <div class="fld"><input type="text" id="${idPrefix}Breed" placeholder="Rasa (opciono)" value="${esc(pf.breed)}"></div>
+    <div class="fld"><input type="text" id="${idPrefix}Breed" list="${pf.species === 'macka' ? 'dlMacka' : 'dlPas'}" placeholder="Rasa (opciono)" value="${esc(pf.breed)}"></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost btn-sm" style="flex:1" data-act="sf-pf-cancel">Otkaži</button>
       <button class="btn btn-primary btn-sm" style="flex:1" data-act="sf-pf-add">Dodaj</button>
@@ -1299,10 +1385,11 @@ function renderStayForm(){
       <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
       <div class="row-main"><div class="row-name">${esc(c.name)}</div>${c.phone ? `<div class="row-meta num">${esc(c.phone)}</div>` : ''}</div>
       ${edit ? '' : `<button class="btn btn-ghost btn-sm" data-act="sf-client-clear">Promijeni</button>`}
-    </div>`;
+    </div>
+    ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> — ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
   } else if (SF.newClient){
     clientHTML = `<div class="mini-form" style="margin-top:0">
-      <div class="lbl" style="display:flex;justify-content:space-between">Novi klijent <button style="color:var(--primary);font-weight:700" data-act="sf-client-clear">nazad na pretragu</button></div>
+      <div class="lbl" style="display:flex;justify-content:space-between">Novi vlasnik <button style="color:var(--primary);font-weight:700" data-act="sf-client-clear">nazad na pretragu</button></div>
       <div class="fld"><input type="text" id="sfNcName" placeholder="Ime i prezime *" value="${esc(SF.newClient.name)}"></div>
       <div class="fld" style="margin-bottom:0"><input type="tel" id="sfNcPhone" placeholder="Telefon (opciono)" value="${esc(SF.newClient.phone)}"></div>
     </div>`;
@@ -1315,7 +1402,7 @@ function renderStayForm(){
         ${matches.map(c => `<div class="pick-item" data-act="sf-client-pick" data-id="${c.id}">
           <span><b>${esc(c.name)}</b> <span class="pi-meta">${esc(petsOfClient(c.id).map(petLabel).join(', '))}</span></span>${I.chev}
         </div>`).join('')}
-        <div class="pick-item" data-act="sf-client-new" style="color:var(--primary);font-weight:700">${I.plus} Novi klijent${SF.clientQ.trim() ? ': „' + esc(SF.clientQ.trim()) + '"' : ''}</div>
+        <div class="pick-item" data-act="sf-client-new" style="color:var(--primary);font-weight:700">${I.plus} Novi vlasnik${SF.clientQ.trim() ? ': „' + esc(SF.clientQ.trim()) + '"' : ''}</div>
       </div>`;
   }
 
@@ -1369,23 +1456,21 @@ function renderStayForm(){
   const est = estimateFor(estPets, SF.type, from, to);
   const days = SF.type === 'dnevni' ? 1 : (validRange ? diffDays(from, to) + 1 : 0);
   const priceHTML = `
-    ${est ? `<div class="estimate"><span>Predračun: <b class="num">${money(est)}</b> <span class="sum-note">(${days} dan${days === 1 ? '' : 'a'} × ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'})</span></span>
-      <button class="btn btn-ghost btn-sm" data-act="sf-price-est">Upiši</button></div>` : ''}
     <div class="form-grid2" style="align-items:end">
       <div class="fld" style="margin-bottom:0"><label class="lbl">Cijena (€)</label><input type="text" inputmode="decimal" id="sfPrice" placeholder="${est || ''}" value="${esc(SF.price)}"></div>
       <div class="paid-row"><span class="pr-lbl">Naplaćeno</span><button class="switch ${SF.paid ? 'on' : ''}" data-act="sf-paid" aria-label="Naplaćeno"></button></div>
-    </div>`;
+    </div>
+    ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'} × ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}`;
 
   const noteHTML = `<div class="fld" style="margin-top:14px"><label class="lbl">Napomena</label>
     <textarea id="sfNote" placeholder="npr. preuzimanje popodne, nosi svoju hranu, terapija…">${esc(SF.note)}</textarea></div>`;
 
   const actionsHTML = `
     <button class="btn btn-primary btn-block" data-act="sf-save" style="margin-top:4px">${edit ? 'Sačuvaj izmjene' : 'Sačuvaj boravak'}</button>
-    ${edit && !SF.paid ? `<button class="btn btn-ok btn-block" data-act="charge" data-id="${SF.id}" style="margin-top:10px">${I.check} Naplati</button>` : ''}
     ${edit ? `<button class="btn btn-danger btn-block" data-act="stay-del" data-id="${SF.id}" style="margin-top:10px">${I.trash} Obriši boravak</button>` : ''}`;
 
   openSheet(edit ? 'Boravak' : 'Novi boravak', `
-    <div class="fld"><label class="lbl">Klijent</label>${clientHTML}</div>
+    <div class="fld"><label class="lbl">Vlasnik</label>${clientHTML}</div>
     ${petsHTML}
     ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + priceHTML + noteHTML + actionsHTML : ''}
   `);
@@ -1457,18 +1542,24 @@ function clientFormSheet(cid){
       <div class="fld"><label class="lbl">Ime i prezime *</label><input type="text" id="cfName" value="${esc(c ? c.name : '')}"></div>
       <div class="fld"><label class="lbl">Telefon</label><input type="tel" id="cfPhone" value="${esc(c ? c.phone : '')}"></div>
       <div class="fld"><label class="lbl">Napomena</label><textarea id="cfNote" placeholder="npr. komšija, dovodi uvijek dva psa…">${esc(c ? c.note : '')}</textarea></div>
+      <div class="paid-row" style="margin-bottom:14px">
+        <span class="pr-lbl" style="color:var(--danger)">Crna lista</span>
+        <button class="switch ${c && c.blacklist ? 'on' : ''}" id="cfBlack" data-act="cf-black" aria-label="Crna lista"></button>
+      </div>
+      <p class="hint" style="margin:-8px 2px 14px">Uključi ako je bilo lošeg iskustva — upozorenje će stajati na klijentu i pri pravljenju boravka.</p>
       <button class="btn btn-primary btn-block" data-act="cf-save" data-id="${cid || ''}">Sačuvaj</button>
     </div>`);
 }
 function cfSave(cid){
   const name = $('#cfName').value.trim();
   if (!name){ toast('Ime je obavezno.'); return; }
+  const black = $('#cfBlack').classList.contains('on');
   let c;
   if (cid){
     c = clientById(cid);
-    c.name = name; c.phone = $('#cfPhone').value.trim(); c.note = $('#cfNote').value.trim();
+    c.name = name; c.phone = $('#cfPhone').value.trim(); c.note = $('#cfNote').value.trim(); c.blacklist = black;
   } else {
-    c = { id: uid(), name, phone: $('#cfPhone').value.trim(), note: $('#cfNote').value.trim() };
+    c = { id: uid(), name, phone: $('#cfPhone').value.trim(), note: $('#cfNote').value.trim(), blacklist: black };
     D.clients.push(c);
   }
   dbSave('clients', c);
@@ -1504,8 +1595,16 @@ function petFormSheet(petId, clientId){
         <button class="seg-btn ${sex === 'muzjak' ? 'active' : ''}" data-act="pf-seg" data-seg="sex" data-id="muzjak">Mužjak</button>
         <button class="seg-btn ${sex === 'zenka' ? 'active' : ''}" data-act="pf-seg" data-seg="sex" data-id="zenka">Ženka</button>
       </div></div>
-      <div class="fld"><label class="lbl">Rasa</label><input type="text" id="pfBreed" value="${esc(p ? p.breed : '')}"></div>
+      <div class="fld"><label class="lbl">Rasa</label><input type="text" id="pfBreed" list="${species === 'macka' ? 'dlMacka' : 'dlPas'}" placeholder="izaberi ili upiši" value="${esc(p ? p.breed : '')}"></div>
       <div class="fld"><label class="lbl">Napomena</label><textarea id="pfNote" placeholder="npr. star, na terapiji, ne slaže se sa drugim psima…">${esc(p ? p.note : '')}</textarea></div>
+      ${p && sb ? `<div class="fld"><label class="lbl">Slika</label>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="pet-photo ${p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb')}" id="pfPhotoBox">${p.photo ? `<img src="${esc(p.photo)}" alt="">` : (p.species === 'macka' ? I.cat : I.dog)}</div>
+          <button class="btn btn-ghost btn-sm" data-act="pet-photo-pick">${p.photo ? 'Promijeni sliku' : I.plus + ' Dodaj sliku'}</button>
+          <input type="file" id="petPhotoFile" accept="image/*" data-pet="${p.id}" style="display:none">
+        </div>
+      </div>` : ''}
+      ${!p && sb ? '<p class="hint" style="margin:-6px 2px 14px">Sliku možeš dodati čim sačuvaš ljubimca.</p>' : ''}
       <button class="btn btn-primary btn-block" data-act="pf-save" data-id="${petId || ''}" data-client="${clientId || (p ? p.clientId : '')}">Sačuvaj</button>
       ${p ? `<button class="btn btn-danger btn-block" data-act="pet-del" data-id="${p.id}" style="margin-top:10px">${I.trash} Obriši ljubimca</button>` : ''}
     </div>`);
@@ -1541,6 +1640,39 @@ function petDelete(petId){
 }
 </script>
 <script>
+/* ============ SLIKA LJUBIMCA ============ */
+async function uploadPetPhoto(petId, file){
+  const p = petById(petId); if (!p || !sb) return;
+  toast('Slika se šalje…');
+  try {
+    let bmp;
+    try { bmp = await createImageBitmap(file); }
+    catch (e){
+      bmp = await new Promise((res, rej) => {
+        const im = new Image();
+        im.onload = () => res(im); im.onerror = rej;
+        im.src = URL.createObjectURL(file);
+      });
+    }
+    const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+    const scale = Math.min(1, 700 / Math.max(w, h));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(w * scale); cv.height = Math.round(h * scale);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.84));
+    if (!blob) throw new Error('konverzija');
+    const path = 'pets/' + petId + '.jpg';
+    const { error } = await sb.storage.from('slike').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
+    if (error) throw error;
+    p.photo = CFG.url + '/storage/v1/object/public/slike/' + path + '?v=' + Date.now();
+    await dbSave('pets', p);
+    petFormSheet(petId, null); render();
+    toast('Slika sačuvana.');
+  } catch (e){
+    toast('Slika nije poslata — pokušaj drugu ili provjeri internet.');
+  }
+}
+
 /* ============ REZERVNA KOPIJA ============ */
 function backupExport(){
   D.lastBackup = new Date().toISOString();
@@ -1583,14 +1715,14 @@ function importConfirm(){
 <script>
 /* ============ SUPABASE sloj (baza na serveru) ============ */
 const DB_MAP = {
-  clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '' }),
-  pets: r => ({ id: r.id, client_id: r.clientId, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '' }),
+  clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
+  pets: r => ({ id: r.id, client_id: r.clientId, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
   stays: r => ({ id: r.id, client_id: r.clientId, pet_ids: r.petIds || [], type: r.type, from_date: r.from, to_date: r.to, box_id: r.boxId, price: r.price, paid: !!r.paid, paid_at: r.paidAt, note: r.note || '', created_at: r.createdAt || new Date().toISOString() }),
   boxes: r => ({ id: r.id, name: r.name, grp: r.group, active: !!r.active, sort: r.sort || 0 }),
 };
 const DB_UNMAP = {
-  clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '' }),
-  pets: r => ({ id: r.id, clientId: r.client_id, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '' }),
+  clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
+  pets: r => ({ id: r.id, clientId: r.client_id, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
   stays: r => ({ id: r.id, clientId: r.client_id, petIds: r.pet_ids || [], type: r.type, from: r.from_date, to: r.to_date, boxId: r.box_id, price: r.price == null ? null : Number(r.price), paid: !!r.paid, paidAt: r.paid_at, note: r.note || '', createdAt: r.created_at }),
   boxes: r => ({ id: r.id, name: r.name, group: r.grp, active: !!r.active, sort: r.sort || 0 }),
 };
@@ -1810,6 +1942,7 @@ document.addEventListener('click', (e) => {
     case 'cal-today': CAL_YM = todayISO().slice(0, 7); render(); break;
     case 'cal-view': CAL_VIEW = id; localStorage.setItem('cindyland-calview', id); render(); break;
     case 'day-open': daySheet(id); break;
+    case 'group-open': groupSheet(id); break;
     case 'zar-nav': ZAR_YM = ymShift(ZAR_YM, Number(id)); render(); break;
     case 'unpaid-open': unpaidSheet(); break;
     case 'kl-all': KL_ALL = true; { const l = $('#klList'); if (l) l.innerHTML = klListHTML(); } break;
@@ -1843,10 +1976,6 @@ document.addEventListener('click', (e) => {
     case 'sf-type': sfSync(); SF.type = id; if (id === 'dnevni' && SF.from) SF.to = SF.from; renderStayForm(); break;
     case 'dr-nav': sfSync(); SF.calCur = ymShift(SF.calCur, Number(id)); renderStayForm(); break;
     case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
-    case 'sf-price-est': sfSync(); {
-        const est = estimateFor(sfDraftPets(), SF.type, SF.from, SF.type === 'dnevni' ? SF.from : SF.to);
-        SF.price = est ? String(est) : ''; renderStayForm();
-      } break;
     case 'sf-paid': sfSync(); SF.paid = !SF.paid; renderStayForm(); break;
     case 'sf-save': sfSave(); break;
     /* klijenti */
@@ -1865,10 +1994,12 @@ document.addEventListener('click', (e) => {
         t.classList.add('active');
         if (t.dataset.seg === 'species'){
           const w = $('#pfSizeWrap'); if (w) w.style.display = id === 'macka' ? 'none' : '';
+          const b = $('#pfBreed'); if (b) b.setAttribute('list', id === 'macka' ? 'dlMacka' : 'dlPas');
         }
       } break;
     case 'pf-save': pfSave(id || null, t.dataset.client || null); break;
     case 'cf-save': cfSave(id || null); break;
+    case 'cf-black': t.classList.toggle('on'); break;
     /* podešavanja */
     case 'prices-open': pricesSheet(); break;
     case 'prices-save': {
@@ -1887,6 +2018,7 @@ document.addEventListener('click', (e) => {
         D.boxes.push(b); dbSave('boxes', b); boxesSheet(); toast('Dodato.');
       } break;
     case 'install-help': installHelpSheet(); break;
+    case 'pet-photo-pick': { const f = $('#petPhotoFile'); if (f) f.click(); } break;
     /* backup */
     case 'backup-export': backupExport(); break;
     case 'backup-import': $('#importFile').click(); break;
@@ -1913,6 +2045,7 @@ document.addEventListener('input', (e) => {
 document.addEventListener('change', (e) => {
   if (e.target.id === 'sfBox' && SF){ SF.boxId = e.target.value; sfSync(); renderStayForm(); }
   if (e.target.id === 'importFile' && e.target.files[0]){ backupImport(e.target.files[0]); e.target.value = ''; }
+  if (e.target.id === 'petPhotoFile' && e.target.files[0]){ uploadPetPhoto(e.target.dataset.pet, e.target.files[0]); e.target.value = ''; }
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && (e.target.id === 'loginPass' || e.target.id === 'loginEmail')) doLogin();
