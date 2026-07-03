@@ -1,29 +1,38 @@
 <meta charset="utf-8">
 <!-- CINDYLAND — šablon mejla za "Reset Password" (Supabase → Authentication → Email Templates).
-     {{ .ConfirmationURL }} = Supabase link. Logo se vuče sa https://cindyland.netlify.app/logo.png -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF6F1;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;">
+     Isti dizajn kao Office Hub šablon; {{ .ConfirmationURL }} = Supabase link. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;">
   <tr>
-    <td align="center" style="padding:34px 18px;">
-      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:480px;max-width:100%;background:#ffffff;border-radius:18px;">
+    <td align="left" style="padding:26px 30px;">
+      <table role="presentation" align="left" width="520" cellpadding="0" cellspacing="0" style="width:520px;max-width:100%;margin:0;">
         <tr>
-          <td align="center" style="padding:30px 30px 6px;">
-            <img src="https://cindyland.netlify.app/logo.png" width="170" alt="Cindyland" style="display:block;border:0;width:170px;height:auto;">
+          <td style="padding-bottom:20px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="width:40px;"><img src="https://cindyland.netlify.app/icon-192.png" width="40" height="40" alt="Cindyland" style="display:block;border:0;border-radius:9px;"></td>
+                <td style="padding-left:10px;font-size:16px;font-weight:700;color:#2B2320;">Cindyland</td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
-          <td style="padding:14px 34px 30px;">
-            <div style="font-size:20px;font-weight:700;color:#2B2320;margin:0 0 12px;text-align:center;">Zaboravljena šifra?</div>
-            <div style="font-size:15px;line-height:1.6;color:#6f655e;margin:0 0 24px;text-align:center;">Stigao nam je zahtjev za promjenu šifre na tvom Cindyland nalogu. Klikni dugme ispod da postaviš novu šifru.</div>
-            <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="margin:0 auto;">
-              <tr><td style="border-radius:12px;background:#E0523A;">
-                <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">Postavi novu šifru</a>
+          <td style="border-top:1px solid #EFE7DF;padding:24px 0;">
+            <div style="font-size:20px;font-weight:700;color:#2B2320;margin:0 0 12px;">Zaboravljena šifra?</div>
+            <div style="font-size:15px;line-height:1.6;color:#6f655e;margin:0 0 22px;">Stigao nam je zahtjev za promjenu šifre na tvom Cindyland nalogu. Klikni dugme ispod da postaviš novu šifru.</div>
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr><td style="border-radius:9px;background:#E0523A;">
+                <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:13px 26px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">Postavi novu šifru</a>
               </td></tr>
             </table>
-            <div style="font-size:13px;line-height:1.55;color:#9a8f87;margin:24px 0 0;text-align:center;">Ako nisi tražio/la promjenu, slobodno ignoriši ovaj mejl — tvoja šifra ostaje ista.<br>Link vrijedi 1 sat.</div>
+            <div style="font-size:13px;line-height:1.5;color:#9a8f87;margin:22px 0 0;">Ako ti nisi tražio/la promjenu, slobodno ignoriši ovaj mejl — tvoja šifra ostaje ista. Link vrijedi 1 sat.</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="border-top:1px solid #EFE7DF;padding-top:16px;font-size:12px;color:#9a8f87;">
+            Cindyland · pansion za pse i mačke
           </td>
         </tr>
       </table>
-      <div style="font-size:12px;color:#9a8f87;padding-top:16px;">Cindyland · pansion za pse i mačke</div>
     </td>
   </tr>
 </table>
