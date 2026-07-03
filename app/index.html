@@ -242,10 +242,11 @@ p{text-wrap:pretty}
 .sheet{
   position:fixed;left:50%;transform:translate(-50%,105%);bottom:0;z-index:61;
   width:min(640px,100%);height:96dvh;background:var(--bg);
-  border-radius:22px 22px 0 0;transition:transform .26s cubic-bezier(.32,.72,.24,1);
+  border-radius:22px 22px 0 0;transition:transform .26s cubic-bezier(.32,.72,.24,1),visibility 0s .3s;
   display:flex;flex-direction:column;
+  visibility:hidden;pointer-events:none;
 }
-.sheet.open{transform:translate(-50%,0)}
+.sheet.open{transform:translate(-50%,0);visibility:visible;pointer-events:auto;transition:transform .26s cubic-bezier(.32,.72,.24,1)}
 .sheet-handle{width:40px;height:4.5px;border-radius:99px;background:var(--line);margin:10px auto 2px;flex-shrink:0}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 6px;flex-shrink:0}
 .sheet-title{font-size:20px;font-weight:800}
@@ -352,9 +353,9 @@ p{text-wrap:pretty}
   .sheet{
     top:50%;left:50%;bottom:auto;height:auto;max-height:92dvh;width:660px;
     border-radius:22px;opacity:0;transform:translate(-50%,-46%) scale(.97);
-    transition:transform .22s cubic-bezier(.32,.72,.24,1),opacity .18s;box-shadow:var(--shadow-pop);
+    transition:transform .22s cubic-bezier(.32,.72,.24,1),opacity .18s,visibility 0s .25s;box-shadow:var(--shadow-pop);
   }
-  .sheet.open{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .sheet.open{opacity:1;transform:translate(-50%,-50%) scale(1);transition:transform .22s cubic-bezier(.32,.72,.24,1),opacity .18s}
   .sheet-handle{display:none}
 }
 </style>
@@ -407,7 +408,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.1';
+const APP_VERSION = 'v1.0.2';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
