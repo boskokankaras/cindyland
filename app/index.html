@@ -298,15 +298,14 @@ p{text-wrap:pretty}
 .hero-num{font-size:42px;font-weight:850;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
 .hero-num small{font-size:15px;font-weight:600;color:var(--muted);letter-spacing:0;margin-left:2px}
 .hero-paw{width:46px;height:46px;color:var(--primary-soft);flex-shrink:0}
-.hero-rings{display:flex;justify-content:space-between;gap:6px;margin-top:14px}
-.ring-tile{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 2px 7px;border-radius:16px;transition:transform .12s,background .15s}
-.ring-tile:active{transform:scale(.94);background:var(--bg)}
-.ring-wrap{position:relative;width:76px;height:76px}
-.ring-wrap svg{width:100%;height:100%;display:block}
-.ring-num{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;padding-top:26px;font-weight:800;font-size:18px;line-height:1}
-.ring-num small{font-size:10.5px;font-weight:650;color:var(--muted)}
-.ring-lbl{font-size:13px;font-weight:750;margin-top:5px}
-.ring-free{font-size:11px;color:var(--muted)}
+.grow{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line);width:100%;text-align:left;transition:opacity .12s}
+.grow:last-child{border-bottom:none;padding-bottom:5px}
+.grow:active{opacity:.55}
+.grow-ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.grow-ico svg{width:28px;height:28px}
+.grow-name{flex:1;font-size:16.5px;font-weight:750;min-width:0}
+.grow-num{font-size:28px;font-weight:850;white-space:nowrap}
+.grow-num small{font-size:15px;color:var(--muted);font-weight:650}
 .empty-line{color:var(--muted);font-size:14px;text-align:center;padding:7px 2px}
 .b-danger{background:var(--danger-soft);color:var(--danger)}
 .row-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
@@ -455,7 +454,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.4';
+const APP_VERSION = 'v1.0.5';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -621,16 +620,6 @@ function petAvatar(p){
   const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
   return `<div class="row-av ${cls}">${p.photo ? `<img src="${esc(p.photo)}" alt="" loading="lazy">` : (p.species === 'macka' ? I.cat : I.dog)}</div>`;
 }
-function ringSVG(used, total, color){
-  const r = 27, c = 2 * Math.PI * r;
-  const frac = total ? Math.min(1, used / total) : 0;
-  return `<svg viewBox="0 0 76 76" aria-hidden="true">
-    <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--line)" stroke-width="7.5"/>
-    ${frac > 0 ? `<circle cx="38" cy="38" r="${r}" fill="none" stroke="${color}" stroke-width="7.5"
-      stroke-linecap="round" stroke-dasharray="${(frac * c).toFixed(1)} ${c.toFixed(1)}"
-      transform="rotate(-90 38 38)"/>` : ''}
-  </svg>`;
-}
 function boxBadge(st){
   const b = boxById(st.boxId);
   if (!b) return '';
@@ -718,11 +707,11 @@ function vDanas(){
       </div>
       <span class="hero-paw">${I.paw}</span>
     </div>
-    <div class="hero-rings">
-      ${groups.map(f => `<button class="ring-tile" data-act="group-open" data-id="${f.g}">
-        <span class="ring-wrap">${ringSVG(f.used, f.total, `var(--${f.g})`)}<span class="ring-num num">${f.used}<small>/${f.total}</small></span></span>
-        <span class="ring-lbl" style="color:var(--${f.g})">${GROUPS_1[f.g]}</span>
-        <span class="ring-free">${f.total - f.used > 0 ? 'slobodno: ' + (f.total - f.used) : 'popunjeno'}</span>
+    <div style="margin-top:6px">
+      ${groups.map(f => `<button class="grow" data-act="group-open" data-id="${f.g}">
+        <span class="grow-ico" style="background:var(--${f.g}-soft);color:var(--${f.g})">${f.g === 'm' ? I.cat : I.dog}</span>
+        <span class="grow-name">${GROUPS[f.g]}</span>
+        <span class="grow-num num" style="color:var(--${f.g})">${f.used}<small> /${f.total}</small></span>
       </button>`).join('')}
     </div>
     ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:8px;text-align:center">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
