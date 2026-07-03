@@ -54,6 +54,9 @@ p{text-wrap:pretty}
 /* ===== okvir ===== */
 #app{max-width:640px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom));display:none}
 .topbar{padding:calc(14px + env(safe-area-inset-top)) 2px 10px}
+.brand-top{text-align:center;padding-top:2px}
+.brand-top img{width:min(258px,64%);height:auto;display:block;margin:0 auto}
+.brand-date{color:var(--muted);font-size:14.5px;font-weight:600;margin-top:2px}
 .topbar-title{font-size:28px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
 .topbar-title .paw{width:30px;height:30px;flex-shrink:0}
 .topbar-sub{color:var(--muted);font-size:14px;margin-top:2px}
@@ -409,9 +412,7 @@ p{text-wrap:pretty}
 <body>
 <div id="login">
   <div class="login-card">
-    <div class="paw" id="loginPaw"></div>
-    <h1>Cindyland</h1>
-    <p class="sub">Pansion za pse i mačke</p>
+    <img src="logo.png" alt="Cindyland" style="width:min(280px,76%);height:auto;margin:0 auto 20px;display:block">
     <div class="login-err" id="loginErr"></div>
     <div class="fld"><label class="lbl">Email</label><input type="email" id="loginEmail" autocomplete="username" inputmode="email"></div>
     <div class="fld"><label class="lbl">Šifra</label><input type="password" id="loginPass" autocomplete="current-password"></div>
@@ -473,7 +474,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.0.8';
+const APP_VERSION = 'v1.0.9';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -676,11 +677,15 @@ function render(){
   $('#fab').style.display = (TAB === 'danas' || TAB === 'kalendar' || TAB === 'klijenti') ? 'flex' : 'none';
 }
 function renderTopbar(){
-  const titles = { danas: 'Cindyland', kalendar: 'Kalendar', klijenti: 'Klijenti', zarada: 'Zarada', jos: 'Podešavanja' };
-  let sub = '';
-  if (TAB === 'danas') sub = `<div class="topbar-sub" style="text-transform:capitalize">${DOWS[dowIdx(todayISO())]}, ${fmtDY(todayISO())}</div>`;
-  const paw = TAB === 'danas' ? `<span class="paw" style="color:var(--primary)">${I.paw}</span>` : '';
-  $('#topbar').innerHTML = `<h1 class="topbar-title">${paw}${titles[TAB]}</h1>${sub}`;
+  const titles = { kalendar: 'Kalendar', klijenti: 'Klijenti', zarada: 'Zarada', jos: 'Podešavanja' };
+  if (TAB === 'danas'){
+    $('#topbar').innerHTML = `<div class="brand-top">
+      <img src="logo.png" alt="Cindyland" width="640" height="466">
+      <div class="brand-date" style="text-transform:capitalize">${DOWS[dowIdx(todayISO())]}, ${fmtDY(todayISO())}</div>
+    </div>`;
+    return;
+  }
+  $('#topbar').innerHTML = `<h1 class="topbar-title">${titles[TAB]}</h1>`;
 }
 function renderTabbar(){
   $('#tabbar').innerHTML = `
@@ -2259,7 +2264,6 @@ setInterval(autoCheckUpdate, 30 * 60 * 1000);
 
 /* pokretanje */
 (async function boot(){
-  $('#loginPaw').innerHTML = I.paw;
   initPWA();
   if (!sb){
     await maybeSeedDemo();

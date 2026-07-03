@@ -1,7 +1,7 @@
 // Cindyland service worker.
 // VERZIJA: mora se podići na SVAKOM deployu (zajedno sa APP_VERSION u index.html) —
 // promjena ovog fajla je ono što browseru signalizira da postoji nova verzija.
-const CACHE = 'cindyland-v1.0.8';
+const CACHE = 'cindyland-v1.0.9';
 
 const ASSETS = [
   './',
@@ -12,6 +12,7 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './icon-512-maskable.png',
+  './logo.png',
   './apple-touch-icon.png',
 ];
 
