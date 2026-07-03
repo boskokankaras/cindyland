@@ -485,7 +485,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.1.0';
+const APP_VERSION = 'v1.1.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -680,6 +680,7 @@ const TABS = [
 function setTab(t){ if (TAB !== t){ KL_ALL = false; } TAB = t; render(); window.scrollTo(0, 0); }
 
 function render(){
+  if (!APP_SHOWN) return; // dok je prijava/nova šifra na ekranu, ne diraj UI aplikacije
   renderTopbar();
   renderTabbar();
   const v = $('#view');
