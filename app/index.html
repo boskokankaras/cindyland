@@ -2,7 +2,7 @@
 <html lang="sr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#FAF6F1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -26,7 +26,7 @@
   --shadow-pop:0 10px 34px rgba(43,35,32,.18);
   --radius:18px;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:pan-x pan-y}
 html{background:var(--bg)}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
@@ -205,8 +205,8 @@ p{text-wrap:pretty}
 
 /* ===== grid boksova (Excel stil) ===== */
 .bgrid-wrap{
-  overflow:auto;max-height:calc(100dvh - 330px);min-height:300px;border-radius:var(--radius);
-  background:var(--card);box-shadow:var(--shadow);overscroll-behavior:contain;
+  overflow:auto;max-height:calc(100dvh - 290px);min-height:300px;border-radius:var(--radius);
+  background:var(--card);box-shadow:var(--shadow);overscroll-behavior:contain;touch-action:pan-x pan-y;
 }
 .bgrid{border-collapse:separate;border-spacing:0;font-size:11.5px;min-width:100%}
 .bgrid th,.bgrid td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0}
@@ -325,7 +325,7 @@ p{text-wrap:pretty}
 .paid-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:11px 14px}
 .paid-row .pr-lbl{font-weight:650;font-size:15px}
 
-/* ===== početna — pregled ===== */
+/* ===== početna - pregled ===== */
 .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .hero-lbl{font-size:12.5px;font-weight:750;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 .hero-num{font-size:42px;font-weight:850;letter-spacing:-.02em;line-height:1.1;margin-top:2px}
@@ -354,19 +354,30 @@ p{text-wrap:pretty}
 .stat .s-lbl{font-size:12px;color:var(--muted);margin-top:1px}
 
 /* ===== podešavanja ===== */
-.set-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
-.set-row:last-child{border-bottom:none}
-.set-row svg{width:21px;height:21px;color:var(--muted);flex-shrink:0}
+.set-row{display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.set-row:first-child{padding-top:4px}
+.set-row:last-child{border-bottom:none;padding-bottom:4px}
+.set-row:active .sr-ico{transform:scale(.9)}
+.sr-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s}
+.sr-ico svg{width:20px;height:20px}
 .set-row .sr-main{flex:1;min-width:0}
-.set-row .sr-name{font-weight:650;font-size:15px}
-.set-row .sr-meta{color:var(--muted);font-size:12.5px;margin-top:1px}
+.set-row .sr-name{display:block;font-weight:650;font-size:15px}
+.set-row .sr-name.sr-danger{color:var(--danger)}
+.set-row .sr-meta{display:block;color:var(--muted);font-size:12.5px;margin-top:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set-row .chev{width:18px;height:18px;color:var(--line);flex-shrink:0}
 .chev{color:var(--line)}
-.pf-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 16px;margin-bottom:14px}
-.pf-av{width:60px;height:60px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;flex-shrink:0}
-.pf-name{font-size:18px;font-weight:800}
-.pf-mail{color:var(--muted);font-size:13.5px;margin-top:1px}
+.pf-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:15px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 18px;margin-bottom:14px}
+.pf-av{width:62px;height:62px;border-radius:50%;background:linear-gradient(140deg,var(--primary),var(--primary-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:23px;flex-shrink:0;box-shadow:0 0 0 4px var(--primary-soft)}
+.pf-name{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.pf-mail{color:var(--muted);font-size:13px;margin-top:2px}
+.pf-info{position:relative;min-width:0}
+.pf-info .pf-mail{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-paw{position:absolute;right:-16px;bottom:-22px;width:100px;height:100px;color:var(--primary-soft);transform:rotate(-14deg);pointer-events:none}
+.pf-paw svg{width:100%;height:100%}
+.pf-foot{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:12.5px;margin-top:22px;opacity:.8}
+.pf-foot svg{width:15px;height:15px;color:var(--primary);opacity:.75}
 @keyframes spin{to{transform:rotate(360deg)}}
-.checking svg{animation:spin .8s linear infinite}
+.checking .sr-ico svg{animation:spin .8s linear infinite}
 .ver-box{border-radius:14px;padding:13px 15px;font-size:14.5px;font-weight:650;display:none;margin-bottom:12px;align-items:center;gap:10px}
 .ver-box.show{display:flex;animation:ver-in .45s cubic-bezier(.16,1,.3,1)}
 @keyframes ver-in{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
@@ -417,7 +428,7 @@ p{text-wrap:pretty}
   #view > *:not(.bgrid-wrap){max-width:780px}
   .cal-grid{max-width:660px}
   .cal-cell{aspect-ratio:auto;height:78px}
-  .bgrid-wrap{max-height:calc(100dvh - 275px)}
+  .bgrid-wrap{max-height:calc(100dvh - 240px)}
   .sheet{
     top:50%;left:50%;bottom:auto;height:auto;max-height:92dvh;width:660px;
     border-radius:22px;opacity:0;transform:translate(-50%,-46%) scale(.97);
@@ -481,11 +492,11 @@ p{text-wrap:pretty}
 <script>
 'use strict';
 /* ================================================================
-   Cindyland — evidencija pansiona za pse i mačke
+   Cindyland - evidencija pansiona za pse i mačke
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.1.1';
+const APP_VERSION = 'v1.2.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -507,6 +518,7 @@ const I = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 7"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5M12 17.5v.1"/></svg>',
+  ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>',
   edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 5.5 4 4L8 20H4v-4z"/><path d="m12.5 7.5 4 4"/></svg>',
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15.5 15.5 4.5 4.5"/></svg>',
@@ -540,7 +552,6 @@ function defaultData(){
     clients: [], pets: [], stays: [],
     boxes: defaultBoxes(),
     prices: { mali: 12, veliki: 15, macka: 10, dnevni: 10 },
-    lastBackup: null, backupSnoozedAt: null,
   };
 }
 let D = loadLocal();
@@ -629,6 +640,7 @@ function stayStatus(st){
   return 'in';
 }
 function stayDays(st){ return st.type === 'dnevni' ? 1 : diffDays(st.from, st.to) + 1; }
+function plural(n, a, b, c){ return n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c); }
 function petRate(p, type){
   if (type === 'dnevni') return D.prices.dnevni;
   if (p.species === 'macka') return D.prices.macka;
@@ -673,7 +685,7 @@ const TABS = [
   { id: 'danas', lbl: 'Danas', ico: I.home },
   { id: 'kalendar', lbl: 'Kalendar', ico: I.cal },
   { id: 'klijenti', lbl: 'Klijenti', ico: I.people },
-  { id: 'zarada', lbl: 'Zarada', ico: I.euro },
+  { id: 'zarada', lbl: 'Finansije', ico: I.euro },
   { id: 'jos', lbl: 'Profil', ico: I.gear },
 ];
 
@@ -692,7 +704,7 @@ function render(){
   $('#fab').style.display = (TAB === 'danas' || TAB === 'kalendar' || TAB === 'klijenti') ? 'flex' : 'none';
 }
 function renderTopbar(){
-  const titles = { kalendar: 'Kalendar', klijenti: 'Klijenti', zarada: 'Zarada', jos: 'Profil' };
+  const titles = { kalendar: 'Kalendar', klijenti: 'Klijenti', zarada: 'Finansije', jos: 'Profil' };
   if (TAB === 'danas'){
     $('#topbar').innerHTML = `<div class="brand-top">
       <img src="logo.png" alt="Cindyland" width="560" height="380">
@@ -734,10 +746,8 @@ function vDanas(){
   const tmrOut = D.stays.filter(st => st.to === tmr).length;
 
   let html = '';
-  if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom — prikazujem posljednje poznato stanje.</span></div>`;
-  html += backupBannerHTML();
+  if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom - prikazujem posljednje poznato stanje.</span></div>`;
 
-  const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c);
   html += `<div class="card">
     <div class="hero-top">
       <div>
@@ -777,18 +787,15 @@ function vDanas(){
 
 function stayRowHTML(st, mode){
   const c = clientById(st.clientId);
-  const amount = stayAmount(st);
   let side = '';
   if (mode === 'out'){
-    side = st.paid
-      ? `<span class="badge b-ok">${I.check} naplaćeno</span><span class="amount num">${money(st.price)}</span>`
-      : `<span class="badge b-mb">${I.out} danas</span><button class="btn btn-primary btn-sm" data-act="charge" data-id="${st.id}">Naplati ${money(amount)}</button>`;
+    side = st.paid ? `<span class="badge b-ok">${I.check} naplaćeno</span>` : '';
   } else if (mode === 'in'){
-    side = `<span class="badge b-ok">${I.in} danas</span>`;
+    side = '';
   } else {
     side = `<span class="badge b-line num">do ${fmtD(st.to)}</span>`;
   }
-  const meta = [c ? c.name : '', st.type === 'dnevni' ? 'dnevno čuvanje' : fmtD(st.from) + ' – ' + fmtD(st.to)].filter(Boolean).join(' · ');
+  const meta = [c ? c.name : '', st.type === 'dnevni' ? 'dnevno čuvanje' : fmtD(st.from) + ' - ' + fmtD(st.to)].filter(Boolean).join(' · ');
   return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
     ${groupAvatar(st)}
     <div class="row-main">
@@ -797,15 +804,6 @@ function stayRowHTML(st, mode){
     </div>
     <div class="row-side">${side}</div>
   </div>`;
-}
-
-function backupBannerHTML(){
-  if (!D.stays.length && !D.clients.length) return '';
-  const last = D.lastBackup ? diffDays(D.lastBackup.slice(0, 10), todayISO()) : 999;
-  const snoozed = D.backupSnoozedAt ? diffDays(D.backupSnoozedAt.slice(0, 10), todayISO()) < 7 : false;
-  if (sb || last < 14 || snoozed) return '';
-  return `<button class="banner ban-warn" data-act="backup-banner" style="width:100%;text-align:left">${I.warn}
-    <span style="flex:1">Odavno nije urađena rezervna kopija podataka — klikni ovdje.</span></button>`;
 }
 
 /* ============ KALENDAR ============ */
@@ -902,8 +900,7 @@ function calGridHTML(){
     }
     rows += '</tr>';
   }
-  return `<div class="bgrid-wrap"><table class="bgrid"><thead>${grpRow}${boxRow}</thead><tbody>${rows}</tbody></table></div>
-    <p class="hint" style="margin-top:10px">Klik na zauzeto polje otvara boravak, na prazno — nova rezervacija za taj boks i dan.</p>`;
+  return `<div class="bgrid-wrap"><table class="bgrid"><thead>${grpRow}${boxRow}</thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function groupSheet(g){
@@ -922,9 +919,9 @@ function groupSheet(g){
     html += `<div class="sec-title">Slobodno danas <span class="cnt num">${freeBoxes.length}</span></div>
     <div class="card"><div class="chips">${freeBoxes.map(b =>
       `<button class="chip" data-act="grid-new" data-date="${t}" data-box="${b.id}">${esc(b.name)}</button>`).join('')}</div>
-    <p class="hint" style="margin-top:10px">Klik na boks — nova rezervacija od danas.</p></div>`;
+    <p class="hint" style="margin-top:10px">Klik na boks - nova rezervacija od danas.</p></div>`;
   }
-  openSheet(GROUPS[g] + ' — danas', html);
+  openSheet(GROUPS[g] + ' - danas', html);
 }
 
 function daySheet(iso){
@@ -945,9 +942,9 @@ function daySheet(iso){
     html += `<div class="sec-title">Slobodni boksevi <span class="cnt num">${freeBoxes.length}</span></div>
     <div class="card"><div class="chips">${freeBoxes.map(b =>
       `<button class="chip" data-act="grid-new" data-date="${iso}" data-box="${b.id}"><span class="badge b-${b.group}" style="padding:1px 7px">${esc(GROUPS_1[b.group])}</span>${esc(b.name)}</button>`).join('')}</div>
-    <p class="hint" style="margin-top:10px">Klik na boks — nova rezervacija od ovog dana.</p></div>`;
+    <p class="hint" style="margin-top:10px">Klik na boks - nova rezervacija od ovog dana.</p></div>`;
   }
-  html += `<button class="btn btn-primary btn-block" data-act="stay-new" data-date="${iso}" style="margin-top:6px">${I.plus} Novi boravak — ${fmtD(iso)}</button>`;
+  html += `<button class="btn btn-primary btn-block" data-act="stay-new" data-date="${iso}" style="margin-top:6px">${I.plus} Novi boravak - ${fmtD(iso)}</button>`;
   openSheet(fmtDW(iso), html);
 }
 
@@ -999,7 +996,7 @@ function clientSheet(cid){
   const totalPaid = stays.filter(st => st.paid).reduce((s, st) => s + (st.price || 0), 0);
 
   let html = '';
-  if (c.blacklist) html += `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger)">${I.warn}<span><b>Crna lista</b> — ranije loše iskustvo sa ovim klijentom ili ljubimcem.</span></div>`;
+  if (c.blacklist) html += `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger)">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom ili ljubimcem.</span></div>`;
   html += `<div class="card">
     ${c.phone ? `<a class="row tappable" href="tel:${esc(c.phone)}" style="text-decoration:none;color:inherit">
       <div class="row-av av-p">${I.phone}</div>
@@ -1030,7 +1027,7 @@ function clientSheet(cid){
       return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
         <div class="row-main">
           <div class="row-name">${esc(stayLabel(st))}</div>
-          <div class="row-meta num">${fmtDY(st.from)}${st.from !== st.to ? ' – ' + fmtDY(st.to) : ''} ${boxBadge(st)}</div>
+          <div class="row-meta num">${fmtDY(st.from)}${st.from !== st.to ? ' - ' + fmtDY(st.to) : ''} ${boxBadge(st)}</div>
         </div><div class="row-side">${badge}</div></div>`;
     }).join('');
     if (stays.length > 15) html += `<p class="hint">…i još ${stays.length - 15} starijih.</p>`;
@@ -1062,7 +1059,7 @@ function vZarada(){
 
   html += `<div class="card" style="text-align:center;padding:22px 16px">
     <div class="big-amount num" style="color:var(--ok)">${money(total)}</div>
-    <div style="color:var(--muted);font-weight:600;margin-top:2px">naplaćeno — ${monthLabel(ZAR_YM)}</div>
+    <div style="color:var(--muted);font-weight:600;margin-top:2px">naplaćeno · ${monthLabel(ZAR_YM)}</div>
     <div class="stat-grid">
       <div class="stat"><div class="s-val num">${paidStays.length}</div><div class="s-lbl">naplaćenih boravaka</div></div>
       <div class="stat"><div class="s-val num">${money(yearTotal)}</div><div class="s-lbl">ukupno u ${year}.</div></div>
@@ -1071,7 +1068,7 @@ function vZarada(){
 
   if (unpaid.length){
     html += `<button class="banner ban-warn" data-act="unpaid-open" style="width:100%;text-align:left">${I.warn}
-      <span style="flex:1">Nenaplaćeno: <b>${unpaid.length}</b> završen${unpaid.length === 1 ? '' : 'ih'} borav${unpaid.length === 1 ? 'ak' : 'aka'} (~${money(unpaidSum)}) — klikni za pregled.</span></button>`;
+      <span style="flex:1">Nenaplaćeno: <b>${unpaid.length}</b> završen${unpaid.length === 1 ? '' : 'ih'} borav${unpaid.length === 1 ? 'ak' : 'aka'} (~${money(unpaidSum)}) - klikni za pregled.</span></button>`;
   }
 
   html += `<div class="sec-title">Naplate</div><div class="card">`;
@@ -1082,7 +1079,7 @@ function vZarada(){
         ${groupAvatar(st)}
         <div class="row-main">
           <div class="row-name">${esc(stayLabel(st))}</div>
-          <div class="row-meta num">${esc(c ? c.name + ' · ' : '')}${fmtD(st.from)} – ${fmtD(st.to)}</div>
+          <div class="row-meta num">${esc(c ? c.name + ' · ' : '')}${fmtD(st.from)} - ${fmtD(st.to)}</div>
         </div>
         <span class="amount num" style="color:var(--ok)">${money(st.price)}</span>
       </div>`;
@@ -1101,92 +1098,112 @@ function unpaidSheet(){
       ${groupAvatar(st)}
       <div class="row-main" data-act="stay-edit" data-id="${st.id}" style="cursor:pointer">
         <div class="row-name">${esc(stayLabel(st))}</div>
-        <div class="row-meta num">${esc(c ? c.name + ' · ' : '')}${fmtD(st.from)} – ${fmtD(st.to)}</div>
+        <div class="row-meta num">${esc(c ? c.name + ' · ' : '')}${fmtD(st.from)} - ${fmtD(st.to)}</div>
       </div>
-      <button class="btn btn-primary btn-sm" data-act="charge" data-id="${st.id}">Naplati ${money(stayAmount(st))}</button>
+      <button class="btn btn-primary btn-sm" data-act="charge" data-id="${st.id}">Naplati ${money(chargeDue(st))}</button>
     </div>`;
   }).join('');
   html += '</div><p class="hint">Ako neki boravak nije za naplatu, otvori ga i obriši, ili upiši cijenu 0 i naplati.</p>';
   openSheet('Nenaplaćeni boravci', html);
 }
 
-/* ============ PODEŠAVANJA ============ */
+/* ============ PROFIL ============ */
 function vJos(){
   const boxCount = D.boxes.filter(b => b.active).length;
-  const backupStr = D.lastBackup ? fmtDY(D.lastBackup.slice(0, 10)) : 'nikad';
+  const blCount = D.clients.filter(c => c.blacklist).length;
   const email = (sb && sb._cindyEmail) || '';
   const name = (sb && sb._cindyName) || (email ? email.split('@')[0] : 'Probni režim');
   const initials = name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
+  const p = D.prices;
   return `
   <div class="pf-card">
     <div class="pf-av">${esc(initials)}</div>
-    <div>
+    <div class="pf-info">
       <div class="pf-name">${esc(name)}</div>
       ${email ? `<div class="pf-mail">${esc(email)}</div>` : ''}
     </div>
+    <span class="pf-paw">${I.paw}</span>
   </div>
   <div id="updBox" class="ver-box ver-update ${PWA.needRefresh ? 'show' : ''}">${I.refresh}
     <span>Nova verzija je spremna.</span>
     <button class="btn btn-primary btn-sm" data-act="upd-apply">Osvježi i ažuriraj</button>
   </div>
   <div id="verOk" class="ver-box ver-ok">${I.check}<span>Već imaš posljednju verziju.</span></div>
-  ${sb ? `<div class="card" style="padding-top:4px;padding-bottom:4px">
+
+  <div class="sec-title">Pansion</div>
+  <div class="card">
+    <button class="set-row" data-act="prices-open">
+      <span class="sr-ico" style="background:var(--ok-soft);color:var(--ok)">${I.euro}</span>
+      <span class="sr-main"><span class="sr-name">Cjenovnik</span>
+      <span class="sr-meta num">na dan: ${p.mali} · ${p.veliki} · ${p.macka} · ${p.dnevni} €</span></span>
+      <span class="chev">${I.chev}</span>
+    </button>
+    <button class="set-row" data-act="boxes-open">
+      <span class="sr-ico" style="background:var(--vb-soft);color:var(--vb)">${I.box}</span>
+      <span class="sr-main"><span class="sr-name">Boksevi i mjesta</span>
+      <span class="sr-meta num">${boxCount} aktivnih</span></span>
+      <span class="chev">${I.chev}</span>
+    </button>
+    <button class="set-row" data-act="bl-open">
+      <span class="sr-ico" style="background:var(--danger-soft);color:var(--danger)">${I.ban}</span>
+      <span class="sr-main"><span class="sr-name">Crna lista</span>
+      <span class="sr-meta">${blCount ? blCount + ' ' + plural(blCount, 'klijent', 'klijenta', 'klijenata') : 'prazna'}</span></span>
+      <span class="chev">${I.chev}</span>
+    </button>
+  </div>
+
+  ${sb ? `<div class="sec-title">Nalog</div>
+  <div class="card">
     <button class="set-row" data-act="pw-open">
-      ${I.key}<span class="sr-main"><span class="sr-name">Promijeni šifru</span>
-      <span class="sr-meta">za prijavu u aplikaciju</span></span>
+      <span class="sr-ico" style="background:var(--m-soft);color:var(--m)">${I.key}</span>
+      <span class="sr-main"><span class="sr-name">Promijeni šifru</span></span>
+      <span class="chev">${I.chev}</span>
+    </button>
+    <button class="set-row" data-act="logout">
+      <span class="sr-ico" style="background:var(--danger-soft);color:var(--danger)">${I.logout}</span>
+      <span class="sr-main"><span class="sr-name sr-danger">Odjavi se</span>
+      <span class="sr-meta">${esc(email)}</span></span>
       <span class="chev">${I.chev}</span>
     </button>
   </div>` : ''}
 
-  <div class="card">
-    <button class="set-row" data-act="prices-open">
-      ${I.euro}<span class="sr-main"><span class="sr-name">Cjenovnik</span>
-      <span class="sr-meta num">mali ${money(D.prices.mali)} · veliki ${money(D.prices.veliki)} · mačka ${money(D.prices.macka)} · dnevno ${money(D.prices.dnevni)} — po danu</span></span>
-      <span class="chev">${I.chev}</span>
-    </button>
-    <button class="set-row" data-act="boxes-open">
-      ${I.box}<span class="sr-main"><span class="sr-name">Boksevi i mjesta</span>
-      <span class="sr-meta num">${boxCount} aktivnih</span></span>
-      <span class="chev">${I.chev}</span>
-    </button>
-  </div>
-
-  <div class="sec-title">Rezervna kopija</div>
-  <div class="card">
-    <button class="set-row" data-act="backup-export">
-      ${I.download}<span class="sr-main"><span class="sr-name">Sačuvaj kopiju podataka</span>
-      <span class="sr-meta">posljednja: ${backupStr}</span></span>
-      <span class="chev">${I.chev}</span>
-    </button>
-    ${sb ? '' : `<button class="set-row" data-act="backup-import">
-      ${I.upload}<span class="sr-main"><span class="sr-name">Vrati iz kopije</span>
-      <span class="sr-meta">učitaj ranije sačuvan fajl</span></span>
-      <span class="chev">${I.chev}</span>
-    </button>`}
-    <input type="file" id="importFile" accept=".json,application/json" style="display:none">
-  </div>
-  ${sb ? '<p class="hint">Podaci se čuvaju na serveru i dijele između vas dvoje. Kopija je dodatna sigurnost — povremeno je sačuvaj.</p>'
-       : '<p class="hint">Podaci žive samo na ovom telefonu. Povremeno sačuvaj kopiju (fajl) na sigurno mjesto.</p>'}
-
   <div class="sec-title">Aplikacija</div>
   <div class="card">
     <button class="set-row" data-act="upd-check" id="updCheckBtn">
-      ${I.refresh}<span class="sr-main"><span class="sr-name">Provjeri ažuriranje</span>
-      <span class="sr-meta">verzija ${APP_VERSION}</span></span>
+      <span class="sr-ico" style="background:var(--primary-soft);color:var(--primary)">${I.refresh}</span>
+      <span class="sr-main"><span class="sr-name">Provjeri ažuriranje</span>
+      <span class="sr-meta num">verzija ${APP_VERSION}</span></span>
       <span class="chev">${I.chev}</span>
     </button>
     <button class="set-row" data-act="install-help">
-      ${I.info}<span class="sr-main"><span class="sr-name">Kako da instaliram aplikaciju?</span>
-      <span class="sr-meta">dodavanje na početni ekran</span></span>
+      <span class="sr-ico" style="background:var(--mb-soft);color:var(--mb)">${I.phone}</span>
+      <span class="sr-main"><span class="sr-name">Kako da instaliram aplikaciju?</span></span>
       <span class="chev">${I.chev}</span>
     </button>
-    ${sb ? `<button class="set-row" data-act="logout">
-      ${I.logout}<span class="sr-main"><span class="sr-name">Odjavi se</span>
-      <span class="sr-meta">${esc(email)}</span></span>
-      <span class="chev">${I.chev}</span>
-    </button>` : ''}
   </div>
-  <p class="hint" style="text-align:center;opacity:.7;margin-top:18px">Cindyland ${APP_VERSION} — pansion za pse i mačke</p>`;
+  <div class="pf-foot">${I.paw}<span>Cindyland ${APP_VERSION} · pansion za pse i mačke</span></div>`;
+}
+
+function blSheet(){
+  const bl = D.clients.filter(c => c.blacklist).sort((a, b) => a.name.localeCompare(b.name, 'sr'));
+  let html = '';
+  if (bl.length){
+    html = '<div class="card">' + bl.map(c => {
+      const pets = petsOfClient(c.id).map(petLabel).join(', ');
+      const meta = [pets, c.phone].filter(Boolean).join(' · ');
+      return `<div class="row tappable" data-act="client-open" data-id="${c.id}">
+        <div class="row-av av-p" style="background:var(--danger-soft);color:var(--danger)">${esc((c.name || '?')[0].toUpperCase())}</div>
+        <div class="row-main">
+          <div class="row-name">${esc(c.name)}</div>
+          ${meta ? `<div class="row-meta">${esc(meta)}</div>` : ''}
+        </div>
+        <span class="chev" style="width:18px;height:18px">${I.chev}</span>
+      </div>`;
+    }).join('') + '</div>';
+  } else {
+    html = `<div class="card"><div class="empty">${I.ban}Niko nije na crnoj listi.</div></div>`;
+  }
+  openSheet('Crna lista', html);
 }
 
 function pricesSheet(){
@@ -1199,7 +1216,6 @@ function pricesSheet(){
         <div class="fld"><label class="lbl">Mačka</label><input type="text" inputmode="decimal" id="prMacka" value="${p.macka}"></div>
         <div class="fld"><label class="lbl">Dnevno čuvanje</label><input type="text" inputmode="decimal" id="prDnevni" value="${p.dnevni}"></div>
       </div>
-      <p class="hint">Cijene su u eurima, po danu — koriste se za automatski predračun. Na svakom boravku cijenu možeš ručno promijeniti.</p>
       <button class="btn btn-primary btn-block" data-act="prices-save" style="margin-top:8px">Sačuvaj</button>
     </div>`);
 }
@@ -1226,8 +1242,7 @@ function boxesSheet(){
       </select>
     </div>
     <button class="btn btn-primary btn-block btn-sm" data-act="box-add" style="margin-top:10px">${I.plus} Dodaj</button>
-  </div>
-  <p class="hint">Isključeno mjesto se ne nudi za nove boravke, a stari boravci ostaju sačuvani i vide se u kalendaru.</p>`;
+  </div>`;
   openSheet('Boksevi i mjesta', html);
 }
 
@@ -1237,15 +1252,14 @@ function pwSheet(){
       <div class="fld"><label class="lbl">Nova šifra</label>${pwFieldHTML('chPass1', 'najmanje 6 znakova', 'new-password')}</div>
       <div class="fld"><label class="lbl">Ponovi novu šifru</label>${pwFieldHTML('chPass2', '', 'new-password')}</div>
       <button class="btn btn-primary btn-block" data-act="pw-save">Sačuvaj šifru</button>
-    </div>
-    <p class="hint">Nova šifra važi odmah, za sva sljedeća prijavljivanja.</p>`);
+    </div>`);
 }
 async function pwSave(){
   const p1 = $('#chPass1').value, p2 = $('#chPass2').value;
   if (p1.length < 6){ toast('Šifra mora imati bar 6 znakova.'); return; }
   if (p1 !== p2){ toast('Šifre se ne poklapaju.'); return; }
   const { error } = await sb.auth.updateUser({ password: p1 });
-  if (error){ toast('Nije uspjelo — provjeri internet pa pokušaj ponovo.'); return; }
+  if (error){ toast('Nije uspjelo - provjeri internet pa pokušaj ponovo.'); return; }
   closeSheet();
   toast('Šifra je promijenjena.');
 }
@@ -1258,7 +1272,7 @@ function installHelpSheet(){
       <p style="font-weight:700;margin-bottom:6px">Android (Chrome)</p>
       <p class="hint" style="margin:0">Otvori u Chrome-u → meni sa tri tačke → <b>Dodaj na početni ekran</b> (ili „Instaliraj aplikaciju").</p>
     </div>
-    <p class="hint">Poslije toga radi kao prava aplikacija, a kad objavimo novu verziju — sama će te obavijestiti.</p>`);
+    <p class="hint">Poslije toga radi kao prava aplikacija, a kad objavimo novu verziju - sama će te obavijestiti.</p>`);
 }
 </script>
 <script>
@@ -1305,14 +1319,33 @@ function confirmModal(title, text, act, id, btnLabel, danger){
 }
 
 /* ============ NAPLATA ============ */
+function chargeDue(st){ return Math.max(0, (stayAmount(st) || 0) - (st.deposit || 0)); }
+
+function chargeStart(stayId){
+  const st = D.stays.find(s => s.id === stayId); if (!st) return;
+  if (st.to !== todayISO()){
+    const n = (st.petIds || []).length;
+    showModal(`<div class="modal-title">Naplata</div>
+      <div class="modal-text"><b>${esc(stayLabel(st))}</b> danas ne napušta${n > 1 ? 'ju' : ''} pansion. Da li želite da nastavite sa naplatom?</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-act="modal-close">Ne</button>
+        <button class="btn btn-primary" data-act="charge-force" data-id="${st.id}">Da</button>
+      </div>`);
+    return;
+  }
+  chargeModal(stayId);
+}
+
 function chargeModal(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   const amount = stayAmount(st);
+  const dep = st.deposit || 0;
+  const due = chargeDue(st);
   const days = stayDays(st);
   showModal(`<div class="modal-title">Naplata</div>
-    <div class="modal-text">${esc(stayLabel(st))} · ${days} dan${days === 1 ? '' : 'a'} (${fmtD(st.from)} – ${fmtD(st.to)})</div>
-    <div class="fld"><label class="lbl">Iznos (€)</label>
-      <input type="text" inputmode="decimal" id="chargeAmount" value="${amount || ''}" style="font-size:22px;font-weight:800;text-align:center">
+    <div class="modal-text">${esc(stayLabel(st))} · ${days} dan${days === 1 ? '' : 'a'} (${fmtD(st.from)} - ${fmtD(st.to)})${dep ? `<br>Cijena ${money(amount || 0)} · depozit ${money(dep)}` : ''}</div>
+    <div class="fld"><label class="lbl">${dep ? 'Za naplatu (€)' : 'Iznos (€)'}</label>
+      <input type="text" inputmode="decimal" id="chargeAmount" value="${(dep ? due : amount) || ''}" style="font-size:22px;font-weight:800;text-align:center">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
@@ -1324,10 +1357,11 @@ function chargeConfirm(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   const val = parseMoney($('#chargeAmount').value);
   if (val == null){ toast('Upiši iznos.'); return; }
-  st.price = val; st.paid = true; st.paidAt = todayISO();
+  const dep = st.deposit || 0;
+  st.price = dep + val; st.paid = true; st.paidAt = todayISO();
   dbSave('stays', st);
   closeModal(); if (sheetOpen) closeSheet(); render();
-  toast('Naplaćeno ' + money(val));
+  toast('Naplaćeno ' + money(val) + (dep ? ' (ukupno ' + money(st.price) + ' sa depozitom)' : ''));
 }
 </script>
 <script>
@@ -1343,6 +1377,7 @@ function openStayForm(opts){
       petIds: new Set(st.petIds || []), newPets: [], petForm: null,
       type: st.type, from: st.from, to: st.to, calCur: st.from.slice(0, 7),
       boxId: st.boxId || '', price: st.price != null ? String(st.price) : '',
+      deposit: st.deposit != null ? String(st.deposit) : '',
       paid: !!st.paid, paidAt: st.paidAt || null, note: st.note || '',
     };
   } else {
@@ -1351,7 +1386,7 @@ function openStayForm(opts){
       id: null, clientId: opts.clientId || null, clientQ: '', newClient: null,
       petIds: new Set(), newPets: [], petForm: null,
       type: 'pansion', from, to: '', calCur: (from || todayISO()).slice(0, 7),
-      boxId: opts.boxId || '', price: '', paid: false, paidAt: null, note: '',
+      boxId: opts.boxId || '', price: '', deposit: '', paid: false, paidAt: null, note: '',
     };
     if (SF.clientId){
       const pets = petsOfClient(SF.clientId);
@@ -1366,6 +1401,7 @@ function sfSync(){
   if (!SF) return;
   const g = id => document.getElementById(id);
   if (g('sfPrice')) SF.price = g('sfPrice').value;
+  if (g('sfDeposit')) SF.deposit = g('sfDeposit').value;
   if (g('sfNote')) SF.note = g('sfNote').value;
   if (g('sfBox')) SF.boxId = g('sfBox').value;
   if (SF.newClient){
@@ -1381,7 +1417,7 @@ function sfDraftPets(){
   return [...SF.petIds].map(petById).filter(Boolean).concat(SF.newPets);
 }
 
-/* birač termina — jedan kalendar, klik od pa do (kao K-Sport) */
+/* birač termina - jedan kalendar, klik od pa do (kao K-Sport) */
 function drCalHTML(){
   const [cy, cm] = SF.calCur.split('-').map(Number);
   const od = SF.from || '';
@@ -1408,9 +1444,9 @@ function drCalHTML(){
     foot = od ? `Dan: <strong>${fmtDY(od)}</strong>` : 'Izaberi dan';
   } else if (od && doo){
     const n = diffDays(od, doo) + 1;
-    foot = `Trajanje: <strong>${n} ${n === 1 ? 'dan' : 'dana'}</strong> · ${fmtDY(od)} – ${fmtDY(doo)}`;
+    foot = `Trajanje: <strong>${n} ${n === 1 ? 'dan' : 'dana'}</strong> · ${fmtDY(od)} - ${fmtDY(doo)}`;
   } else if (od){
-    foot = `Dolazak: <strong>${fmtDY(od)}</strong> — sad izaberi dan odlaska`;
+    foot = `Dolazak: <strong>${fmtDY(od)}</strong> - sad izaberi dan odlaska`;
   } else {
     foot = 'Izaberi datum dolaska i odlaska';
   }
@@ -1484,7 +1520,7 @@ function sfClientListHTML(){
       petsOfClient(c.id).some(p => (p.name || '').toLowerCase().includes(q)));
   }
   if (!list.length){
-    return `<div class="card"><p class="empty-line">Nema rezultata${SF.clientQ.trim() ? ' za „' + esc(SF.clientQ.trim()) + '"' : ''} — dodaj novog klijenta dugmetom ispod.</p></div>`;
+    return `<div class="card"><p class="empty-line">Nema rezultata${SF.clientQ.trim() ? ' za „' + esc(SF.clientQ.trim()) + '"' : ''} - dodaj novog klijenta dugmetom ispod.</p></div>`;
   }
   return '<div class="card">' + list.map(c => {
     const pets = petsOfClient(c.id).map(petLabel).join(', ');
@@ -1511,7 +1547,7 @@ function renderStayForm(){
       <div class="row-main"><div class="row-name">${esc(c.name)}</div>${c.phone ? `<div class="row-meta num">${esc(c.phone)}</div>` : ''}</div>
       <button class="iconbtn" data-act="sf-client-pop" data-id="${c.id}" aria-label="Izmijeni klijenta">${I.edit}</button>
     </div>
-    ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> — ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
+    ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
   } else if (SF.newClient){
     const drafts = SF.newPets.map((p, i) => ppHTML(p, 'sf-newpet-del', { id: i, del: true })).join('');
     openSheet('Novi klijent', `
@@ -1525,7 +1561,7 @@ function renderStayForm(){
       <div class="fld"><label class="lbl">Ljubimci</label>
         <div class="pet-pick">${drafts}${SF.petForm ? '' : ppAddHTML('sf-pet-form', '', 'Dodaj')}</div>
         ${SF.petForm ? petMiniFormHTML(SF.petForm, 'sfPf') : ''}
-        ${SF.petForm ? '<p class="hint">Sliku ljubimca dodaješ čim sačuvaš klijenta — klikom na njegov krug.</p>' : ''}
+        ${SF.petForm ? '<p class="hint">Sliku ljubimca dodaješ čim sačuvaš klijenta - klikom na njegov krug.</p>' : ''}
       </div>
       <button class="btn btn-primary btn-block" data-act="sf-save-client" style="margin-top:10px">Sačuvaj klijenta</button>
     `);
@@ -1560,7 +1596,7 @@ function renderStayForm(){
   /* --- boks (padajući meni) --- */
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
   const validRange = from && to && to >= from;
-  let boxOpts = '<option value="">— izaberi boks —</option>';
+  let boxOpts = '<option value="">- izaberi boks -</option>';
   for (const g of ['mb', 'vb', 'm']){
     const items = sortedBoxes().filter(b => b.group === g && (b.active || b.id === SF.boxId));
     if (!items.length) continue;
@@ -1569,7 +1605,7 @@ function renderStayForm(){
       const conflicts = validRange ? boxStays(b.id, from, to, SF.id) : [];
       const busy = conflicts.length > 0;
       const who = busy ? stayLabel(conflicts[0]) : '';
-      return `<option value="${b.id}" ${SF.boxId === b.id ? 'selected' : ''}>${esc(b.name)}${busy ? ' — zauzet (' + esc(who.length > 18 ? who.slice(0, 17) + '…' : who) + ')' : ''}</option>`;
+      return `<option value="${b.id}" ${SF.boxId === b.id ? 'selected' : ''}>${esc(b.name)}${busy ? ' - zauzet (' + esc(who.length > 18 ? who.slice(0, 17) + '…' : who) + ')' : ''}</option>`;
     }).join('');
     boxOpts += '</optgroup>';
   }
@@ -1579,21 +1615,33 @@ function renderStayForm(){
     ${selBusy ? `<div class="banner ban-warn" style="margin-top:10px;margin-bottom:0">${I.warn}<span>Pažnja: izabrani boks je već zauzet u ovom terminu.</span></div>` : ''}
   </div>`;
 
-  /* --- cijena + naplata --- */
+  /* --- napomena, pa depozit + cijena + naplata --- */
+  const noteHTML = `<div class="fld"><label class="lbl">Napomena</label>
+    <textarea id="sfNote" placeholder="npr. preuzimanje popodne, nosi svoju hranu, terapija…">${esc(SF.note)}</textarea></div>`;
+
   const estPets = sfDraftPets();
   const est = estimateFor(estPets, SF.type, from, to);
   const days = SF.type === 'dnevni' ? 1 : (validRange ? diffDays(from, to) + 1 : 0);
   const priceHTML = `
-    <div class="form-grid2" style="align-items:end">
-      <div class="fld" style="margin-bottom:0"><label class="lbl">Cijena (€)</label><input type="text" inputmode="decimal" id="sfPrice" placeholder="${est || ''}" value="${esc(SF.price)}"></div>
-      <div class="paid-row"><span class="pr-lbl">Naplaćeno</span><button class="switch ${SF.paid ? 'on' : ''}" data-act="sf-paid" aria-label="Naplaćeno"></button></div>
-    </div>
-    ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'} × ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}`;
+    <div class="fld"><label class="lbl">Depozit (€)</label>
+      <input type="text" inputmode="decimal" id="sfDeposit" value="${esc(SF.deposit)}"></div>
+    <div class="fld"><label class="lbl">Cijena (€)</label>
+      <input type="text" inputmode="decimal" id="sfPrice" placeholder="${est || ''}" value="${esc(SF.price)}">
+      ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'} × ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}
+    </div>`;
 
-  const noteHTML = `<div class="fld" style="margin-top:14px"><label class="lbl">Napomena</label>
-    <textarea id="sfNote" placeholder="npr. preuzimanje popodne, nosi svoju hranu, terapija…">${esc(SF.note)}</textarea></div>`;
+  let chargeHTML = '';
+  if (edit){
+    chargeHTML = SF.paid
+      ? `<div class="paid-row" style="margin-bottom:10px">
+          <span class="pr-lbl" style="color:var(--ok)">${I.check} Naplaćeno${SF.paidAt ? ' · ' + fmtD(SF.paidAt) : ''}</span>
+          <button class="btn btn-ghost btn-sm" data-act="sf-unpay">Poništi</button>
+        </div>`
+      : `<button class="btn btn-ok btn-block" data-act="sf-charge" style="margin-top:4px;margin-bottom:10px">${I.euro} Naplati</button>`;
+  }
 
   const actionsHTML = `
+    ${chargeHTML}
     <button class="btn btn-primary btn-block" data-act="sf-save" style="margin-top:4px">${edit ? 'Sačuvaj izmjene' : 'Sačuvaj boravak'}</button>
     ${edit ? `<button class="btn btn-danger btn-block" data-act="stay-del" data-id="${SF.id}" style="margin-top:10px">${I.trash} Obriši boravak</button>` : ''}`;
 
@@ -1601,7 +1649,7 @@ function renderStayForm(){
   openSheet(edit ? 'Boravak' : 'Novi boravak', `
     <div class="fld"><label class="lbl">Vlasnik</label>${clientHTML}</div>
     ${petsHTML}
-    ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + priceHTML + noteHTML + actionsHTML : ''}
+    ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + noteHTML + priceHTML + actionsHTML : ''}
   `, picking ? { label: 'Dodaj klijenta', act: 'sf-client-new' } : null);
 }
 
@@ -1625,38 +1673,63 @@ function sfSaveClient(){
   toast('Klijent sačuvan.');
 }
 
-function sfSave(){
+function sfPersist(){
+  if (!SF) return null;
   sfSync();
   const clientId = SF.clientId;
-  if (!clientId){ toast('Izaberi klijenta.'); return; }
+  if (!clientId){ toast('Izaberi klijenta.'); return null; }
   const petIds = [...SF.petIds];
-  if (!petIds.length){ toast('Izaberi bar jednog ljubimca.'); return; }
+  if (!petIds.length){ toast('Izaberi bar jednog ljubimca.'); return null; }
   const from = SF.from;
   const to = SF.type === 'dnevni' ? SF.from : SF.to;
-  if (!from){ toast('Izaberi datum dolaska.'); return; }
-  if (!to){ toast('Izaberi datum odlaska u kalendaru.'); return; }
-  if (to < from){ toast('Odlazak ne može biti prije dolaska.'); return; }
-  if (!SF.boxId){ toast('Izaberi mjesto (boks).'); return; }
+  if (!from){ toast('Izaberi datum dolaska.'); return null; }
+  if (!to){ toast('Izaberi datum odlaska u kalendaru.'); return null; }
+  if (to < from){ toast('Odlazak ne može biti prije dolaska.'); return null; }
+  if (!SF.boxId){ toast('Izaberi mjesto (boks).'); return null; }
   const price = parseMoney(SF.price);
+  const deposit = parseMoney(SF.deposit);
 
   if (SF.id){
     const st = D.stays.find(s => s.id === SF.id);
-    Object.assign(st, { petIds, type: SF.type, from, to, boxId: SF.boxId, price, paid: SF.paid, note: SF.note.trim() });
+    Object.assign(st, { petIds, type: SF.type, from, to, boxId: SF.boxId, price, deposit, paid: SF.paid, note: SF.note.trim() });
     if (SF.paid && !st.paidAt) st.paidAt = todayISO();
     if (!SF.paid) st.paidAt = null;
     dbSave('stays', st);
-    toast('Boravak sačuvan.');
-  } else {
-    const st = {
-      id: uid(), clientId, petIds, type: SF.type, from, to,
-      boxId: SF.boxId, price, paid: SF.paid, paidAt: SF.paid ? todayISO() : null,
-      note: SF.note.trim(), createdAt: new Date().toISOString(),
-    };
-    D.stays.push(st);
-    dbSave('stays', st);
-    toast('Boravak dodat.');
+    return st;
   }
+  const st = {
+    id: uid(), clientId, petIds, type: SF.type, from, to,
+    boxId: SF.boxId, price, deposit, paid: SF.paid, paidAt: SF.paid ? todayISO() : null,
+    note: SF.note.trim(), createdAt: new Date().toISOString(),
+  };
+  D.stays.push(st);
+  dbSave('stays', st);
+  return st;
+}
+
+function sfSave(){
+  const edit = !!SF.id;
+  const st = sfPersist(); if (!st) return;
   closeSheet(); render();
+  toast(edit ? 'Boravak sačuvan.' : 'Boravak dodat.');
+}
+
+/* veliko Naplati na dnu boravka: prvo tiho sačuva izmjene iz forme, pa naplata */
+function sfCharge(){
+  const st = sfPersist(); if (!st) return;
+  render();
+  chargeStart(st.id);
+}
+
+function sfUnpay(){
+  if (!SF) return;
+  sfSync();
+  const st = D.stays.find(s => s.id === SF.id); if (!st) return;
+  st.paid = false; st.paidAt = null;
+  SF.paid = false; SF.paidAt = null;
+  dbSave('stays', st);
+  render(); renderStayForm();
+  toast('Naplata poništena.');
 }
 
 function stayDelete(id){
@@ -1707,7 +1780,7 @@ function cePetFormHTML(pf){
       <button class="btn btn-ghost btn-sm" data-act="pet-photo-pick">${p.photo ? 'Promijeni sliku' : I.plus + ' Dodaj sliku'}</button>
       <input type="file" id="petPhotoFile" accept="image/*" data-pet="${p.id}" style="display:none">
     </div></div>` : ''}
-    ${!p && sb ? '<p class="hint" style="margin:-6px 2px 10px">Sliku dodaješ čim sačuvaš ljubimca — klikom na njegov krug.</p>' : ''}
+    ${!p && sb ? '<p class="hint" style="margin:-6px 2px 10px">Sliku dodaješ čim sačuvaš ljubimca - klikom na njegov krug.</p>' : ''}
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost btn-sm" style="flex:1" data-act="ce-pf-cancel">Otkaži</button>
       <button class="btn btn-primary btn-sm" style="flex:1" data-act="ce-pf-save">${pf.id ? 'Sačuvaj' : 'Dodaj'}</button>
@@ -1781,7 +1854,7 @@ function clientFormSheet(cid){
         <span class="pr-lbl" style="color:var(--danger)">Crna lista</span>
         <button class="switch ${c && c.blacklist ? 'on' : ''}" id="cfBlack" data-act="cf-black" aria-label="Crna lista"></button>
       </div>
-      <p class="hint" style="margin:-8px 2px 14px">Uključi ako je bilo lošeg iskustva — upozorenje će stajati na klijentu i pri pravljenju boravka.</p>
+      <p class="hint" style="margin:-8px 2px 14px">Uključi ako je bilo lošeg iskustva - upozorenje će stajati na klijentu i pri pravljenju boravka.</p>
       <button class="btn btn-primary btn-block" data-act="cf-save" data-id="${cid || ''}">Sačuvaj</button>
     </div>`);
 }
@@ -1905,61 +1978,24 @@ async function uploadPetPhoto(petId, file){
     render();
     toast('Slika sačuvana.');
   } catch (e){
-    toast('Slika nije poslata — pokušaj drugu ili provjeri internet.');
+    toast('Slika nije poslata - pokušaj drugu ili provjeri internet.');
   }
 }
 
 /* ============ REZERVNA KOPIJA ============ */
-function backupExport(){
-  D.lastBackup = new Date().toISOString();
-  save();
-  const blob = new Blob([JSON.stringify(D, null, 1)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cindyland-kopija-' + todayISO() + '.json';
-  document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
-  render();
-  toast('Kopija je sačuvana kao fajl.');
-}
-function backupImport(file){
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const d = JSON.parse(reader.result);
-      if (!d || !Array.isArray(d.stays) || !Array.isArray(d.clients)) throw new Error('bad');
-      showModal(`<div class="modal-title">Vrati iz kopije?</div>
-        <div class="modal-text">Fajl sadrži: ${d.clients.length} klijenata, ${d.pets ? d.pets.length : 0} ljubimaca, ${d.stays.length} boravaka.<br><br><b>Ovo će zamijeniti sve trenutne podatke u aplikaciji.</b></div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
-          <button class="btn btn-primary" data-act="import-confirm">Vrati podatke</button>
-        </div>`);
-      backupImport._pending = d;
-    } catch (e){ toast('Fajl nije prepoznat kao Cindyland kopija.'); }
-  };
-  reader.readAsText(file);
-}
-function importConfirm(){
-  const d = backupImport._pending; if (!d) return;
-  const def = defaultData();
-  for (const k of Object.keys(def)) if (d[k] === undefined) d[k] = def[k];
-  d.stays.forEach(st => { if (!st.boxId && Array.isArray(st.boxIds)) st.boxId = st.boxIds[0] || null; });
-  D = d; save(); closeModal(); render();
-  toast('Podaci su vraćeni iz kopije.');
-}
 </script>
 <script>
 /* ============ SUPABASE sloj (baza na serveru) ============ */
 const DB_MAP = {
   clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
   pets: r => ({ id: r.id, client_id: r.clientId, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
-  stays: r => ({ id: r.id, client_id: r.clientId, pet_ids: r.petIds || [], type: r.type, from_date: r.from, to_date: r.to, box_id: r.boxId, price: r.price, paid: !!r.paid, paid_at: r.paidAt, note: r.note || '', created_at: r.createdAt || new Date().toISOString() }),
+  stays: r => ({ id: r.id, client_id: r.clientId, pet_ids: r.petIds || [], type: r.type, from_date: r.from, to_date: r.to, box_id: r.boxId, price: r.price, deposit: r.deposit == null ? null : r.deposit, paid: !!r.paid, paid_at: r.paidAt, note: r.note || '', created_at: r.createdAt || new Date().toISOString() }),
   boxes: r => ({ id: r.id, name: r.name, grp: r.group, active: !!r.active, sort: r.sort || 0 }),
 };
 const DB_UNMAP = {
   clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
   pets: r => ({ id: r.id, clientId: r.client_id, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
-  stays: r => ({ id: r.id, clientId: r.client_id, petIds: r.pet_ids || [], type: r.type, from: r.from_date, to: r.to_date, boxId: r.box_id, price: r.price == null ? null : Number(r.price), paid: !!r.paid, paidAt: r.paid_at, note: r.note || '', createdAt: r.created_at }),
+  stays: r => ({ id: r.id, clientId: r.client_id, petIds: r.pet_ids || [], type: r.type, from: r.from_date, to: r.to_date, boxId: r.box_id, price: r.price == null ? null : Number(r.price), deposit: r.deposit == null ? null : Number(r.deposit), paid: !!r.paid, paidAt: r.paid_at, note: r.note || '', createdAt: r.created_at }),
   boxes: r => ({ id: r.id, name: r.name, group: r.grp, active: !!r.active, sort: r.sort || 0 }),
 };
 
@@ -1970,7 +2006,7 @@ async function dbSave(table, obj){
     const row = DB_MAP[table] ? DB_MAP[table](obj) : obj;
     const { error } = await sb.from(table).upsert(row);
     if (error) throw error;
-  } catch (e){ toast('Nije sačuvano na server — provjeri internet.'); }
+  } catch (e){ toast('Nije sačuvano na server - provjeri internet.'); }
 }
 async function dbKill(table, id){
   save();
@@ -1978,7 +2014,7 @@ async function dbKill(table, id){
   try {
     const { error } = await sb.from(table).delete().eq('id', id);
     if (error) throw error;
-  } catch (e){ toast('Brisanje nije stiglo na server — provjeri internet.'); }
+  } catch (e){ toast('Brisanje nije stiglo na server - provjeri internet.'); }
 }
 async function dbSavePrices(){
   save();
@@ -1986,11 +2022,11 @@ async function dbSavePrices(){
   try {
     const { error } = await sb.from('settings').upsert({ key: 'prices', value: D.prices });
     if (error) throw error;
-  } catch (e){ toast('Nije sačuvano na server — provjeri internet.'); }
+  } catch (e){ toast('Nije sačuvano na server - provjeri internet.'); }
 }
 
 let loadTimer = null;
-/* Supabase vraća najviše 1000 redova po upitu — čitaj u serijama dok ne stigne sve */
+/* Supabase vraća najviše 1000 redova po upitu - čitaj u serijama dok ne stigne sve */
 async function fetchAll(table){
   const out = [];
   const CH = 1000;
@@ -2051,7 +2087,7 @@ function renderLogin(){
   let html = '';
   if (LOGIN_MODE === 'forgot'){
     html = `${lg}<h1>Zaboravljena šifra</h1>
-      <p class="sub">Ukucaj svoj email — poslaćemo ti link da postaviš novu šifru.</p>
+      <p class="sub">Ukucaj svoj email - poslaćemo ti link da postaviš novu šifru.</p>
       <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" inputmode="email">
       <div class="error-msg" id="loginErr"></div>
       <button class="btn btn-primary btn-block" id="loginBtn" data-act="send-reset">Pošalji link</button>
@@ -2103,7 +2139,7 @@ async function doLogin(){
     if (error) throw error;
   } catch (e){
     err.textContent = e && e.message === 'Invalid login credentials'
-      ? 'Pogrešan email ili šifra.' : 'Greška pri prijavi — pokušaj ponovo.';
+      ? 'Pogrešan email ili šifra.' : 'Greška pri prijavi - pokušaj ponovo.';
   }
   btn.disabled = false; btn.textContent = 'Prijavi se';
 }
@@ -2115,7 +2151,7 @@ async function sendReset(){
   btn.disabled = true; btn.textContent = 'Šaljem…';
   const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
   btn.disabled = false; btn.textContent = 'Pošalji link';
-  if (error){ err.textContent = 'Greška pri slanju — pokušaj ponovo.'; return; }
+  if (error){ err.textContent = 'Greška pri slanju - pokušaj ponovo.'; return; }
   LOGIN_MODE_EMAIL = email;
   LOGIN_MODE = 'sent'; renderLogin();
 }
@@ -2128,7 +2164,7 @@ async function saveNewPass(){
   btn.disabled = true; btn.textContent = 'Čuvam…';
   const { error } = await sb.auth.updateUser({ password: p1 });
   btn.disabled = false; btn.textContent = 'Sačuvaj šifru';
-  if (error){ err.textContent = 'Nije uspjelo — pokušaj ponovo.'; return; }
+  if (error){ err.textContent = 'Nije uspjelo - pokušaj ponovo.'; return; }
   toast('Šifra je promijenjena.');
   LOGIN_MODE = 'login';
   const { data: { session } } = await sb.auth.getSession();
@@ -2159,7 +2195,7 @@ function applySeed(seed){
   (seed.adhocBoxes || []).forEach(b => D.boxes.push({ id: b.id, name: b.name, group: b.group, active: false, sort: s++ }));
   D.clients = seed.clients.map(c => ({ id: c.id, name: c.name, phone: c.phone || '', note: c.note || '' }));
   D.pets = seed.pets.map(p => ({ id: p.id, clientId: p.clientId, name: p.name, species: p.species, size: p.size, sex: p.sex || null, breed: p.breed || '', note: p.note || '' }));
-  D.stays = seed.stays.map(st => ({ id: st.id, clientId: st.clientId, petIds: st.petIds, type: st.type, from: st.from, to: st.to, boxId: st.boxId, price: st.price, paid: !!st.paid, paidAt: st.paidAt, note: st.note || '', createdAt: null }));
+  D.stays = seed.stays.map(st => ({ id: st.id, clientId: st.clientId, petIds: st.petIds, type: st.type, from: st.from, to: st.to, boxId: st.boxId, price: st.price, deposit: st.deposit != null ? st.deposit : null, paid: !!st.paid, paidAt: st.paidAt, note: st.note || '', createdAt: null }));
   save();
 }
 </script>
@@ -2177,7 +2213,7 @@ function flagNeedRefresh(){
 function trackInstalling(sw){
   if (!sw) return;
   // "hadController" = stranicu je pri učitavanju već kontrolisala starija verzija,
-  // pa je svaki novi worker UPDATE (a ne prva instalacija — tada nema obavještenja).
+  // pa je svaki novi worker UPDATE (a ne prva instalacija - tada nema obavještenja).
   const ready = () => (sw.state === 'installed' || sw.state === 'activated') && PWA.hadController;
   if (ready()){ flagNeedRefresh(); return; }
   sw.addEventListener('statechange', () => { if (ready()) flagNeedRefresh(); });
@@ -2276,7 +2312,8 @@ document.addEventListener('click', (e) => {
     case 'stay-edit': openStayForm({ stayId: id }); break;
     case 'stay-del': confirmModal('Obrisati boravak?', 'Ovo se ne može poništiti.', 'stay-del-yes', id, 'Obriši', true); break;
     case 'stay-del-yes': stayDelete(id); break;
-    case 'charge': chargeModal(id); break;
+    case 'charge': chargeStart(id); break;
+    case 'charge-force': closeModal(); chargeModal(id); break;
     case 'charge-confirm': chargeConfirm(id); break;
     /* forma boravka */
     case 'sf-client-pick': sfSync(); SF.clientId = id; SF.newClient = null; SF.petIds = new Set(); {
@@ -2311,8 +2348,9 @@ document.addEventListener('click', (e) => {
     case 'sf-type': sfSync(); SF.type = id; if (id === 'dnevni' && SF.from) SF.to = SF.from; renderStayForm(); break;
     case 'dr-nav': sfSync(); SF.calCur = ymShift(SF.calCur, Number(id)); renderStayForm(); break;
     case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
-    case 'sf-paid': sfSync(); SF.paid = !SF.paid; renderStayForm(); break;
     case 'sf-save': sfSave(); break;
+    case 'sf-charge': sfCharge(); break;
+    case 'sf-unpay': sfUnpay(); break;
     /* klijenti */
     case 'client-open': clientSheet(id); break;
     case 'client-edit': clientFormSheet(id); break;
@@ -2344,6 +2382,7 @@ document.addEventListener('click', (e) => {
         D.prices = np; dbSavePrices(); closeSheet(); render(); toast('Cjenovnik sačuvan.');
       } break;
     case 'boxes-open': boxesSheet(); break;
+    case 'bl-open': blSheet(); break;
     case 'box-toggle': { const b = boxById(id); b.active = !b.active; dbSave('boxes', b); boxesSheet(); } break;
     case 'box-add': {
         const name = $('#newBoxName').value.trim();
@@ -2354,11 +2393,6 @@ document.addEventListener('click', (e) => {
       } break;
     case 'install-help': installHelpSheet(); break;
     case 'pet-photo-pick': { const f = $('#petPhotoFile'); if (f) f.click(); } break;
-    /* backup */
-    case 'backup-export': backupExport(); break;
-    case 'backup-import': $('#importFile').click(); break;
-    case 'import-confirm': importConfirm(); break;
-    case 'backup-banner': setTab('jos'); break;
     /* update */
     case 'upd-apply': applyUpdate(); break;
     case 'upd-check': checkForUpdate(); break;
@@ -2380,7 +2414,6 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => {
   if (e.target.id === 'sfBox' && SF){ SF.boxId = e.target.value; sfSync(); renderStayForm(); }
-  if (e.target.id === 'importFile' && e.target.files[0]){ backupImport(e.target.files[0]); e.target.value = ''; }
   if (e.target.id === 'petPhotoFile' && e.target.files[0]){ uploadPetPhoto(e.target.dataset.pet, e.target.files[0]); e.target.value = ''; }
 });
 document.addEventListener('keydown', (e) => {
@@ -2390,7 +2423,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.target.id === 'npPass2') saveNewPass();
 });
 
-/* kad prođe ponoć (ili se app otvori u novom danu) — „Danas" se sam prebaci na novi dan */
+/* kad prođe ponoć (ili se app otvori u novom danu) - „Danas" se sam prebaci na novi dan */
 let LAST_DAY = todayISO();
 function dayTick(){
   if (todayISO() === LAST_DAY) return;

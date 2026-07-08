@@ -46,3 +46,15 @@ npx netlify deploy --prod --dir app        # objava (site se veže uz `netlify l
 - Nalozi (kreirani direktno u `auth.users`+`auth.identities` SQL-om, prijava testirana): Vesna `vmitrovic1989@gmail.com` / `Vesna2026`, Novica `nolje.mne@gmail.com` / `Novica2026`. Novi nalog/promjena šifre: Supabase dashboard ili SQL recept iz sesije 2.7.
 - **PostgREST vraća max 1000 redova po upitu** — `loadAll()` čita u serijama (`fetchAll` sa `.range()`); ne vraćati na obični `select('*')`.
 - Na svakom sljedećem deployu: bump `APP_VERSION` + `CACHE` (korisnici dobiju „Nova verzija je spremna").
+
+## Naplata i depozit (od v1.2.0)
+
+- `stays.deposit` (numeric, null = bez depozita) — upisuje se pri rezervaciji, **ulazi u cijenu**: modal naplate predlaže `cijena - depozit`, a po potvrdi se u `price` upiše ukupno (`depozit + naplaćeno`); Zarada tako ostaje tačna. Migracija: `sql/migracija_depozit.sql` (na živoj bazi IZVRŠITI PRIJE deploya v1.2.0 — app šalje `deposit` u upsert).
+- Naplata ide iz forme boravka (veliko zeleno „Naplati" na dnu; naplaćen boravak ima red „Naplaćeno · datum" + „Poništi"). U listama Danas nema dugmadi ni pilula — klik na red otvara boravak. „Naplati" prije dana odlaska (st.to ≠ danas) prvo pita „X danas ne napušta pansion…" (Ne/Da).
+- Zum aplikacije blokiran (viewport `maximum-scale=1` + `touch-action:pan-x pan-y` na `*`) — zbog fiksnih zaglavlja u tabeli Boksevi (sticky datumi lijevo + boksevi gore, skroluje se samo sadržaj).
+
+## Predaja aplikacije — NE ZABORAVITI
+
+- Vesna i Novica i dalje pune stari Excel. Na dan predaje se PITAJU šta žele sa istorijom, pa jedno od dva:
+  - **Žele istoriju:** Boško daje svježi `CINDYLAND.xlsx` → regenerisati seed (`parse_excel.py`) i dopuniti bazu.
+  - **Neće istoriju (čist start):** PRVO puna rezervna kopija baze (da se istorija može vratiti ako se predomisle), pa obrisati završene boravke prije dana predaje. Preporuka: klijente + ljubimce + crnu listu ZADRŽATI (imenik s telefonima vrijedi i bez istorije); aktivni boravci (ko je trenutno u pansionu) i rezervacije se NE diraju. Zarada tada kreće od nule.
