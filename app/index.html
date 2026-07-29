@@ -496,7 +496,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.2.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1535,6 +1535,55 @@ function sfClientListHTML(){
   }).join('') + '</div>';
 }
 
+/* popunjenost kapaciteta za izabrani termin: dani bez ijednog slobodnog boksa */
+function sfRelevantGroups(){
+  const pets = sfDraftPets();
+  const g = new Set();
+  for (const p of pets){ if (p.species === 'macka') g.add('m'); else { g.add('mb'); g.add('vb'); } }
+  if (!g.size){ g.add('mb'); g.add('vb'); g.add('m'); }
+  return g;
+}
+function sfFullDays(){
+  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
+  if (!from || !to || to < from || diffDays(from, to) > 120) return [];
+  const groups = sfRelevantGroups();
+  const boxes = D.boxes.filter(b => b.active && groups.has(b.group));
+  if (!boxes.length) return [];
+  const rel = D.stays.filter(st => st.id !== SF.id && st.boxId && overlap(st, from, to));
+  const full = [];
+  for (let iso = from; iso <= to; iso = addDays(iso, 1)){
+    const busy = new Set();
+    for (const st of rel) if (stayCovers(st, iso)) busy.add(st.boxId);
+    if (!boxes.some(b => !busy.has(b.id))) full.push(iso);
+  }
+  return full;
+}
+function fullDaysLabel(days){
+  const out = [];
+  for (const d of days){
+    const last = out[out.length - 1];
+    if (last && addDays(last.to, 1) === d) last.to = d;
+    else out.push({ from: d, to: d });
+  }
+  return out.map(r => r.from === r.to ? fmtD(r.from) : fmtD(r.from) + ' - ' + fmtD(r.to)).join(', ');
+}
+function sfPetsSuffix(){
+  const pets = sfDraftPets();
+  const dog = pets.some(p => p.species !== 'macka'), cat = pets.some(p => p.species === 'macka');
+  return cat && !dog ? ' za mačke' : (dog && !cat ? ' za pse' : '');
+}
+/* popup poslije kompletiranog izbora termina */
+function sfCapacityWarn(){
+  if (!SF) return;
+  const to = SF.type === 'dnevni' ? SF.from : SF.to;
+  if (!SF.from || !to) return;
+  const days = sfFullDays();
+  if (!days.length) return;
+  showModal(`<div class="modal-title">Kapaciteti popunjeni</div>
+    <div class="modal-text">Nema slobodnih mjesta${sfPetsSuffix()}: <b class="num">${fullDaysLabel(days)}</b></div>
+    <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">U redu</button></div>`);
+}
+
 function renderStayForm(){
   const edit = !!SF.id;
 
@@ -1586,12 +1635,15 @@ function renderStayForm(){
   }
 
   /* --- vrsta + termin --- */
+  const fullDays = sfFullDays();
   const datesHTML = `
     <div class="fld"><label class="lbl">Vrsta boravka</label><div class="seg">
       <button class="seg-btn ${SF.type === 'pansion' ? 'active' : ''}" data-act="sf-type" data-id="pansion">Pansion (noćenje)</button>
       <button class="seg-btn ${SF.type === 'dnevni' ? 'active' : ''}" data-act="sf-type" data-id="dnevni">Dnevno čuvanje</button>
     </div></div>
-    <div class="fld"><label class="lbl">Termin</label>${drCalHTML()}</div>`;
+    <div class="fld"><label class="lbl">Termin</label>${drCalHTML()}
+      ${fullDays.length ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:10px 0 0">${I.warn}<span><b>Popunjeno${sfPetsSuffix()}</b>: <span class="num">${fullDaysLabel(fullDays)}</span></span></div>` : ''}
+    </div>`;
 
   /* --- boks (padajući meni) --- */
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
@@ -2347,7 +2399,7 @@ document.addEventListener('click', (e) => {
       } break;
     case 'sf-type': sfSync(); SF.type = id; if (id === 'dnevni' && SF.from) SF.to = SF.from; renderStayForm(); break;
     case 'dr-nav': sfSync(); SF.calCur = ymShift(SF.calCur, Number(id)); renderStayForm(); break;
-    case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
+    case 'dr-pick': sfSync(); drPick(id); renderStayForm(); sfCapacityWarn(); break;
     case 'sf-save': sfSave(); break;
     case 'sf-charge': sfCharge(); break;
     case 'sf-unpay': sfUnpay(); break;
