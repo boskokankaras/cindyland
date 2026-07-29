@@ -5012,91 +5012,199 @@
   },
   {
    "id": "c836",
-   "name": "Maja Nikolic bison",
+   "name": "Timea Oscar",
    "phone": "",
    "note": ""
   },
   {
    "id": "c837",
-   "name": "Vucjak test",
+   "name": "Maja Nikolic bison",
    "phone": "",
    "note": ""
   },
   {
    "id": "c838",
-   "name": "Goran doberman",
+   "name": "Dusan Vucjak test",
    "phone": "",
    "note": ""
   },
   {
    "id": "c839",
-   "name": "Tetiana",
+   "name": "Goran doberman",
    "phone": "",
    "note": ""
   },
   {
    "id": "c840",
-   "name": "Marija Djurisic",
+   "name": "Tetiana",
    "phone": "",
    "note": ""
   },
   {
    "id": "c841",
-   "name": "Sanja Redzepagic",
+   "name": "Marija Djurisic",
    "phone": "",
    "note": ""
   },
   {
    "id": "c842",
-   "name": "Kristina jaza",
+   "name": "Sanja Redzepagic",
    "phone": "",
    "note": ""
   },
   {
    "id": "c843",
-   "name": "Lidija Pejovic",
+   "name": "Kristina jaza",
    "phone": "",
    "note": ""
   },
   {
    "id": "c844",
-   "name": "Pr depozit",
+   "name": "Lidija Pejovic",
    "phone": "",
    "note": ""
   },
   {
    "id": "c845",
-   "name": "Stasa",
+   "name": "Nemanja ast",
    "phone": "",
    "note": ""
   },
   {
    "id": "c846",
-   "name": "Munja jaza",
+   "name": "Lab test",
    "phone": "",
    "note": ""
   },
   {
    "id": "c847",
-   "name": "Pr avans",
+   "name": "Munja jaza",
    "phone": "",
    "note": ""
   },
   {
    "id": "c848",
-   "name": "Andrea Ferrezuelo",
+   "name": "Zeljko snaucer",
    "phone": "",
    "note": ""
   },
   {
    "id": "c849",
-   "name": "Milovan Papic fr",
+   "name": "Natalija NS pudla",
    "phone": "",
    "note": ""
   },
   {
    "id": "c850",
+   "name": "Rada Grbovic",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c851",
+   "name": "Nina Ivanovic",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c852",
+   "name": "Tatjana Zugic",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c853",
+   "name": "Hadzera ast",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c854",
+   "name": "Ljiljana XL bully",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c855",
+   "name": "Smilja pudla",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c856",
+   "name": "Dragan ast",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c857",
+   "name": "Andrea Ferrezuelo",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c858",
+   "name": "Sergei Mandrika",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c859",
+   "name": "Toni kavalir",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c860",
+   "name": "Smilja",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c861",
+   "name": "Milovan Papic fr",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c862",
+   "name": "Bojana mjesanka",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c863",
+   "name": "Dora Zuri",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c864",
+   "name": "Milos teretana",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c865",
+   "name": "Dragana maltezer",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c866",
    "name": "Natasa Srijemac",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c867",
+   "name": "Tanja Pejovic",
+   "phone": "",
+   "note": ""
+  },
+  {
+   "id": "c868",
+   "name": "Andrew yorkie",
    "phone": "",
    "note": ""
   }
@@ -12847,7 +12955,7 @@
    "clientId": "c771",
    "name": "Tamara beagle",
    "species": "pas",
-   "size": "veliki",
+   "size": "mali",
    "sex": null,
    "breed": "",
    "note": ""
@@ -13505,6 +13613,16 @@
   {
    "id": "p841",
    "clientId": "c836",
+   "name": "Timea Oscar",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p842",
+   "clientId": "c837",
    "name": "Maja Nikolic bison",
    "species": "pas",
    "size": "mali",
@@ -13513,19 +13631,9 @@
    "note": ""
   },
   {
-   "id": "p842",
-   "clientId": "c837",
-   "name": "Vucjak test",
-   "species": "pas",
-   "size": "veliki",
-   "sex": null,
-   "breed": "",
-   "note": ""
-  },
-  {
    "id": "p843",
    "clientId": "c838",
-   "name": "Goran doberman",
+   "name": "Dusan Vucjak test",
    "species": "pas",
    "size": "veliki",
    "sex": null,
@@ -13535,6 +13643,16 @@
   {
    "id": "p844",
    "clientId": "c839",
+   "name": "Goran doberman",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p845",
+   "clientId": "c840",
    "name": "Tetiana",
    "species": "macka",
    "size": null,
@@ -13543,8 +13661,8 @@
    "note": ""
   },
   {
-   "id": "p845",
-   "clientId": "c840",
+   "id": "p846",
+   "clientId": "c841",
    "name": "Marija Djurisic",
    "species": "pas",
    "size": "veliki",
@@ -13553,8 +13671,8 @@
    "note": ""
   },
   {
-   "id": "p846",
-   "clientId": "c841",
+   "id": "p847",
+   "clientId": "c842",
    "name": "Sanja Redzepagic",
    "species": "macka",
    "size": null,
@@ -13563,19 +13681,9 @@
    "note": ""
   },
   {
-   "id": "p847",
-   "clientId": "c842",
-   "name": "Kristina jaza",
-   "species": "pas",
-   "size": "mali",
-   "sex": null,
-   "breed": "",
-   "note": ""
-  },
-  {
    "id": "p848",
    "clientId": "c843",
-   "name": "Lidija Pejovic",
+   "name": "Kristina jaza",
    "species": "pas",
    "size": "mali",
    "sex": null,
@@ -13585,7 +13693,7 @@
   {
    "id": "p849",
    "clientId": "c844",
-   "name": "Pr depozit",
+   "name": "Lidija Pejovic",
    "species": "pas",
    "size": "mali",
    "sex": null,
@@ -13595,9 +13703,9 @@
   {
    "id": "p850",
    "clientId": "c845",
-   "name": "Stasa",
+   "name": "Nemanja ast",
    "species": "pas",
-   "size": "mali",
+   "size": "veliki",
    "sex": null,
    "breed": "",
    "note": ""
@@ -13605,9 +13713,9 @@
   {
    "id": "p851",
    "clientId": "c846",
-   "name": "Munja jaza",
+   "name": "Lab test",
    "species": "pas",
-   "size": "mali",
+   "size": "veliki",
    "sex": null,
    "breed": "",
    "note": ""
@@ -13615,7 +13723,7 @@
   {
    "id": "p852",
    "clientId": "c847",
-   "name": "Pr avans",
+   "name": "Munja jaza",
    "species": "pas",
    "size": "mali",
    "sex": null,
@@ -13625,9 +13733,9 @@
   {
    "id": "p853",
    "clientId": "c848",
-   "name": "Andrea Ferrezuelo",
-   "species": "macka",
-   "size": null,
+   "name": "Zeljko snaucer",
+   "species": "pas",
+   "size": "mali",
    "sex": null,
    "breed": "",
    "note": ""
@@ -13635,7 +13743,7 @@
   {
    "id": "p854",
    "clientId": "c849",
-   "name": "Milovan Papic fr",
+   "name": "Natalija NS pudla",
    "species": "pas",
    "size": "mali",
    "sex": null,
@@ -13645,7 +13753,187 @@
   {
    "id": "p855",
    "clientId": "c850",
+   "name": "Rada Grbovic",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p856",
+   "clientId": "c851",
+   "name": "Nina Ivanovic",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p857",
+   "clientId": "c852",
+   "name": "Tatjana Zugic",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p858",
+   "clientId": "c853",
+   "name": "Hadzera ast",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p859",
+   "clientId": "c854",
+   "name": "Ljiljana XL bully",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p860",
+   "clientId": "c855",
+   "name": "Smilja pudla",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p861",
+   "clientId": "c856",
+   "name": "Dragan ast",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p862",
+   "clientId": "c857",
+   "name": "Andrea Ferrezuelo",
+   "species": "macka",
+   "size": null,
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p863",
+   "clientId": "c858",
+   "name": "Sergei Mandrika",
+   "species": "macka",
+   "size": null,
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p864",
+   "clientId": "c859",
+   "name": "Toni kavalir",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p865",
+   "clientId": "c860",
+   "name": "Smilja",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p866",
+   "clientId": "c861",
+   "name": "Milovan Papic fr",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p867",
+   "clientId": "c862",
+   "name": "Bojana mjesanka",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p868",
+   "clientId": "c863",
+   "name": "Dora Zuri",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p869",
+   "clientId": "c864",
+   "name": "Milos teretana",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p870",
+   "clientId": "c865",
+   "name": "Dragana maltezer",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p871",
+   "clientId": "c866",
    "name": "Natasa Srijemac",
+   "species": "pas",
+   "size": "mali",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p872",
+   "clientId": "c867",
+   "name": "Tanja Pejovic",
+   "species": "pas",
+   "size": "veliki",
+   "sex": null,
+   "breed": "",
+   "note": ""
+  },
+  {
+   "id": "p873",
+   "clientId": "c868",
+   "name": "Andrew yorkie",
    "species": "pas",
    "size": "mali",
    "sex": null,
@@ -21312,7 +21600,7 @@
    ],
    "type": "pansion",
    "from": "2025-02-01",
-   "to": "2026-08-31",
+   "to": "2026-09-30",
    "boxId": "kot1",
    "price": null,
    "paid": false,
@@ -31422,7 +31710,7 @@
    ],
    "type": "pansion",
    "from": "2026-03-01",
-   "to": "2026-08-31",
+   "to": "2026-09-30",
    "boxId": "mb13",
    "price": null,
    "paid": false,
@@ -31677,7 +31965,7 @@
    ],
    "type": "pansion",
    "from": "2026-03-10",
-   "to": "2026-08-31",
+   "to": "2026-09-30",
    "boxId": "kot2",
    "price": null,
    "paid": false,
@@ -33612,7 +33900,7 @@
    ],
    "type": "pansion",
    "from": "2026-06-01",
-   "to": "2026-07-15",
+   "to": "2026-07-31",
    "boxId": "mb3",
    "price": null,
    "paid": false,
@@ -33884,9 +34172,9 @@
    "from": "2026-06-12",
    "to": "2026-07-06",
    "boxId": "vb1",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 288.0,
+   "paid": true,
+   "paidAt": "2026-07-06",
    "note": ""
   },
   {
@@ -34077,11 +34365,11 @@
    ],
    "type": "pansion",
    "from": "2026-06-18",
-   "to": "2026-07-22",
+   "to": "2026-07-19",
    "boxId": "vb2",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 372.0,
+   "paid": true,
+   "paidAt": "2026-07-19",
    "note": ""
   },
   {
@@ -34289,9 +34577,9 @@
    "from": "2026-06-25",
    "to": "2026-07-02",
    "boxId": "m3",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 90.0,
+   "paid": true,
+   "paidAt": "2026-07-02",
    "note": ""
   },
   {
@@ -34439,9 +34727,9 @@
    "from": "2026-07-01",
    "to": "2026-07-09",
    "boxId": "m5",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 108.0,
+   "paid": true,
+   "paidAt": "2026-07-09",
    "note": ""
   },
   {
@@ -34452,11 +34740,11 @@
    ],
    "type": "pansion",
    "from": "2026-07-01",
-   "to": "2026-07-31",
+   "to": "2026-07-28",
    "boxId": "mb11",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 270.0,
+   "paid": true,
+   "paidAt": "2026-07-28",
    "note": ""
   },
   {
@@ -34484,9 +34772,9 @@
    "from": "2026-07-01",
    "to": "2026-07-08",
    "boxId": "mb4",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 100.0,
+   "paid": true,
+   "paidAt": "2026-07-08",
    "note": ""
   },
   {
@@ -34497,11 +34785,11 @@
    ],
    "type": "pansion",
    "from": "2026-07-01",
-   "to": "2026-07-06",
+   "to": "2026-07-08",
    "boxId": "mb7",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 100.0,
+   "paid": true,
+   "paidAt": "2026-07-08",
    "note": ""
   },
   {
@@ -34514,9 +34802,9 @@
    "from": "2026-07-01",
    "to": "2026-07-05",
    "boxId": "mb8",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 72.0,
+   "paid": true,
+   "paidAt": "2026-07-05",
    "note": ""
   },
   {
@@ -34529,9 +34817,9 @@
    "from": "2026-07-01",
    "to": "2026-07-05",
    "boxId": "mb9",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 40.0,
+   "paid": true,
+   "paidAt": "2026-07-05",
    "note": ""
   },
   {
@@ -34544,9 +34832,9 @@
    "from": "2026-07-01",
    "to": "2026-07-12",
    "boxId": "vb5",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 180.0,
+   "paid": true,
+   "paidAt": "2026-07-12",
    "note": ""
   },
   {
@@ -34559,9 +34847,9 @@
    "from": "2026-07-02",
    "to": "2026-07-10",
    "boxId": "m1",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 96.0,
+   "paid": true,
+   "paidAt": "2026-07-10",
    "note": ""
   },
   {
@@ -34587,11 +34875,11 @@
    ],
    "type": "pansion",
    "from": "2026-07-03",
-   "to": "2026-07-14",
+   "to": "2026-07-17",
    "boxId": "m4",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 140.0,
+   "paid": true,
+   "paidAt": "2026-07-17",
    "note": ""
   },
   {
@@ -34619,13 +34907,28 @@
    "from": "2026-07-03",
    "to": "2026-07-06",
    "boxId": "mb5",
+   "price": 36.0,
+   "paid": true,
+   "paidAt": "2026-07-06",
+   "note": ""
+  },
+  {
+   "id": "s1399",
+   "clientId": "c836",
+   "petIds": [
+    "p841"
+   ],
+   "type": "pansion",
+   "from": "2026-07-03",
+   "to": "2026-07-05",
+   "boxId": "vb7",
    "price": null,
    "paid": false,
    "paidAt": null,
    "note": ""
   },
   {
-   "id": "s1399",
+   "id": "s1400",
    "clientId": "c403",
    "petIds": [
     "p405"
@@ -34640,44 +34943,29 @@
    "note": ""
   },
   {
-   "id": "s1400",
-   "clientId": "c836",
-   "petIds": [
-    "p841"
-   ],
-   "type": "pansion",
-   "from": "2026-07-04",
-   "to": "2026-07-11",
-   "boxId": "mb6",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
    "id": "s1401",
-   "clientId": "c131",
-   "petIds": [
-    "p131"
-   ],
-   "type": "pansion",
-   "from": "2026-07-06",
-   "to": "2026-07-15",
-   "boxId": "mb1",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1402",
    "clientId": "c837",
    "petIds": [
     "p842"
    ],
    "type": "pansion",
-   "from": "2026-07-06",
-   "to": "2026-07-07",
+   "from": "2026-07-04",
+   "to": "2026-07-11",
+   "boxId": "mb6",
+   "price": 84.0,
+   "paid": true,
+   "paidAt": "2026-07-11",
+   "note": ""
+  },
+  {
+   "id": "s1402",
+   "clientId": "c276",
+   "petIds": [
+    "p278"
+   ],
+   "type": "pansion",
+   "from": "2026-07-05",
+   "to": "2026-07-05",
    "boxId": "vb6",
    "price": null,
    "paid": false,
@@ -34686,29 +34974,29 @@
   },
   {
    "id": "s1403",
+   "clientId": "c131",
+   "petIds": [
+    "p131"
+   ],
+   "type": "pansion",
+   "from": "2026-07-06",
+   "to": "2026-07-14",
+   "boxId": "mb1",
+   "price": 100.0,
+   "paid": true,
+   "paidAt": "2026-07-14",
+   "note": ""
+  },
+  {
+   "id": "s1404",
    "clientId": "c838",
    "petIds": [
     "p843"
    ],
    "type": "pansion",
    "from": "2026-07-06",
-   "to": "2026-07-11",
-   "boxId": "vb7",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1404",
-   "clientId": "c586",
-   "petIds": [
-    "p590"
-   ],
-   "type": "pansion",
-   "from": "2026-07-07",
-   "to": "2026-07-31",
-   "boxId": "mb5",
+   "to": "2026-07-06",
+   "boxId": "vb6",
    "price": null,
    "paid": false,
    "paidAt": null,
@@ -34716,14 +35004,14 @@
   },
   {
    "id": "s1405",
-   "clientId": "c664",
+   "clientId": "c839",
    "petIds": [
-    "p668"
+    "p844"
    ],
    "type": "pansion",
-   "from": "2026-07-07",
-   "to": "2026-07-16",
-   "boxId": "vb1",
+   "from": "2026-07-06",
+   "to": "2026-07-10",
+   "boxId": "vb7",
    "price": null,
    "paid": false,
    "paidAt": null,
@@ -34731,32 +35019,32 @@
   },
   {
    "id": "s1406",
-   "clientId": "c839",
+   "clientId": "c586",
    "petIds": [
-    "p844"
+    "p590"
    ],
    "type": "pansion",
-   "from": "2026-07-09",
-   "to": "2026-07-25",
-   "boxId": "m3",
-   "price": 480.0,
-   "paid": true,
-   "paidAt": "2026-07-25",
+   "from": "2026-07-07",
+   "to": "2026-07-27",
+   "boxId": "mb5",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
    "note": ""
   },
   {
    "id": "s1407",
-   "clientId": "c49",
+   "clientId": "c664",
    "petIds": [
-    "p49"
+    "p668"
    ],
    "type": "pansion",
-   "from": "2026-07-09",
+   "from": "2026-07-07",
    "to": "2026-07-15",
-   "boxId": "mb4",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "boxId": "vb1",
+   "price": 120.0,
+   "paid": true,
+   "paidAt": "2026-07-15",
    "note": ""
   },
   {
@@ -34767,22 +35055,52 @@
    ],
    "type": "pansion",
    "from": "2026-07-09",
-   "to": "2026-07-15",
-   "boxId": "vb6",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "to": "2026-07-24",
+   "boxId": "m3",
+   "price": 450.0,
+   "paid": true,
+   "paidAt": "2026-07-24",
    "note": ""
   },
   {
    "id": "s1409",
+   "clientId": "c49",
+   "petIds": [
+    "p49"
+   ],
+   "type": "pansion",
+   "from": "2026-07-09",
+   "to": "2026-07-15",
+   "boxId": "mb4",
+   "price": 72.0,
+   "paid": true,
+   "paidAt": "2026-07-15",
+   "note": ""
+  },
+  {
+   "id": "s1410",
    "clientId": "c841",
    "petIds": [
     "p846"
    ],
    "type": "pansion",
+   "from": "2026-07-09",
+   "to": "2026-07-15",
+   "boxId": "vb6",
+   "price": 90.0,
+   "paid": true,
+   "paidAt": "2026-07-15",
+   "note": ""
+  },
+  {
+   "id": "s1411",
+   "clientId": "c842",
+   "petIds": [
+    "p847"
+   ],
+   "type": "pansion",
    "from": "2026-07-10",
-   "to": "2026-08-31",
+   "to": "2026-07-31",
    "boxId": "m5",
    "price": null,
    "paid": false,
@@ -34790,75 +35108,45 @@
    "note": ""
   },
   {
-   "id": "s1410",
+   "id": "s1412",
    "clientId": "c24",
    "petIds": [
     "p24"
    ],
    "type": "pansion",
    "from": "2026-07-10",
-   "to": "2026-07-15",
+   "to": "2026-07-27",
    "boxId": "mb10",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 100.0,
+   "paid": true,
+   "paidAt": "2026-07-27",
    "note": ""
   },
   {
-   "id": "s1411",
+   "id": "s1413",
    "clientId": "c291",
    "petIds": [
     "p293"
    ],
    "type": "pansion",
    "from": "2026-07-10",
-   "to": "2026-07-15",
+   "to": "2026-07-14",
    "boxId": "mb7",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 80.0,
+   "paid": true,
+   "paidAt": "2026-07-14",
    "note": ""
   },
   {
-   "id": "s1412",
+   "id": "s1414",
    "clientId": "c403",
    "petIds": [
     "p405"
    ],
    "type": "pansion",
    "from": "2026-07-10",
-   "to": "2026-07-14",
+   "to": "2026-07-22",
    "boxId": "mb8",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1413",
-   "clientId": "c842",
-   "petIds": [
-    "p847"
-   ],
-   "type": "pansion",
-   "from": "2026-07-10",
-   "to": "2026-07-13",
-   "boxId": "mb9",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1414",
-   "clientId": "c519",
-   "petIds": [
-    "p522"
-   ],
-   "type": "pansion",
-   "from": "2026-07-11",
-   "to": "2026-07-14",
-   "boxId": "m1",
    "price": null,
    "paid": false,
    "paidAt": null,
@@ -34871,57 +35159,57 @@
     "p848"
    ],
    "type": "pansion",
-   "from": "2026-07-12",
-   "to": "2026-07-16",
-   "boxId": "mb6",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "from": "2026-07-10",
+   "to": "2026-07-15",
+   "boxId": "mb9",
+   "price": 60.0,
+   "paid": true,
+   "paidAt": "2026-07-15",
    "note": ""
   },
   {
    "id": "s1416",
+   "clientId": "c519",
+   "petIds": [
+    "p522"
+   ],
+   "type": "pansion",
+   "from": "2026-07-11",
+   "to": "2026-07-13",
+   "boxId": "m1",
+   "price": 34.0,
+   "paid": true,
+   "paidAt": "2026-07-13",
+   "note": ""
+  },
+  {
+   "id": "s1417",
    "clientId": "c844",
    "petIds": [
     "p849"
    ],
    "type": "pansion",
-   "from": "2026-07-14",
-   "to": "2026-07-14",
-   "boxId": "mb9",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1417",
-   "clientId": "c835",
-   "petIds": [
-    "p840"
-   ],
-   "type": "pansion",
-   "from": "2026-07-15",
+   "from": "2026-07-12",
    "to": "2026-07-17",
-   "boxId": "m1",
-   "price": 140.0,
+   "boxId": "mb6",
+   "price": 60.0,
    "paid": true,
    "paidAt": "2026-07-17",
    "note": ""
   },
   {
    "id": "s1418",
-   "clientId": "c841",
+   "clientId": "c783",
    "petIds": [
-    "p846"
+    "p787"
    ],
    "type": "pansion",
-   "from": "2026-07-15",
-   "to": "2026-08-31",
-   "boxId": "m4",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "from": "2026-07-13",
+   "to": "2026-07-27",
+   "boxId": "vb5",
+   "price": 140.0,
+   "paid": true,
+   "paidAt": "2026-07-27",
    "note": ""
   },
   {
@@ -34931,12 +35219,12 @@
     "p850"
    ],
    "type": "pansion",
-   "from": "2026-07-15",
-   "to": "2026-07-31",
-   "boxId": "mb9",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "from": "2026-07-14",
+   "to": "2026-07-22",
+   "boxId": "vb7",
+   "price": 120.0,
+   "paid": true,
+   "paidAt": "2026-07-22",
    "note": ""
   },
   {
@@ -34944,6 +35232,21 @@
    "clientId": "c846",
    "petIds": [
     "p851"
+   ],
+   "type": "pansion",
+   "from": "2026-07-16",
+   "to": "2026-07-17",
+   "boxId": "vb6",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1421",
+   "clientId": "c847",
+   "petIds": [
+    "p852"
    ],
    "type": "pansion",
    "from": "2026-07-17",
@@ -34955,30 +35258,15 @@
    "note": ""
   },
   {
-   "id": "s1421",
-   "clientId": "c24",
-   "petIds": [
-    "p24"
-   ],
-   "type": "pansion",
-   "from": "2026-07-17",
-   "to": "2026-07-27",
-   "boxId": "mb10",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
    "id": "s1422",
-   "clientId": "c847",
+   "clientId": "c815",
    "petIds": [
-    "p852"
+    "p820"
    ],
    "type": "pansion",
    "from": "2026-07-17",
-   "to": "2026-07-17",
-   "boxId": "mb6",
+   "to": "2026-07-19",
+   "boxId": "mb4",
    "price": null,
    "paid": false,
    "paidAt": null,
@@ -34986,6 +35274,81 @@
   },
   {
    "id": "s1423",
+   "clientId": "c848",
+   "petIds": [
+    "p853"
+   ],
+   "type": "pansion",
+   "from": "2026-07-17",
+   "to": "2026-07-20",
+   "boxId": "mb7",
+   "price": 36.0,
+   "paid": true,
+   "paidAt": "2026-07-20",
+   "note": ""
+  },
+  {
+   "id": "s1424",
+   "clientId": "c849",
+   "petIds": [
+    "p854"
+   ],
+   "type": "pansion",
+   "from": "2026-07-17",
+   "to": "2026-07-31",
+   "boxId": "mb9",
+   "price": 140.0,
+   "paid": true,
+   "paidAt": "2026-07-31",
+   "note": ""
+  },
+  {
+   "id": "s1425",
+   "clientId": "c850",
+   "petIds": [
+    "p855"
+   ],
+   "type": "pansion",
+   "from": "2026-07-18",
+   "to": "2026-07-28",
+   "boxId": "mb6",
+   "price": 100.0,
+   "paid": true,
+   "paidAt": "2026-07-28",
+   "note": ""
+  },
+  {
+   "id": "s1426",
+   "clientId": "c824",
+   "petIds": [
+    "p829"
+   ],
+   "type": "pansion",
+   "from": "2026-07-18",
+   "to": "2026-07-20",
+   "boxId": "vb1",
+   "price": 30.0,
+   "paid": true,
+   "paidAt": "2026-07-20",
+   "note": ""
+  },
+  {
+   "id": "s1427",
+   "clientId": "c851",
+   "petIds": [
+    "p856"
+   ],
+   "type": "pansion",
+   "from": "2026-07-19",
+   "to": "2026-07-20",
+   "boxId": "mb1",
+   "price": 12.0,
+   "paid": true,
+   "paidAt": "2026-07-20",
+   "note": ""
+  },
+  {
+   "id": "s1428",
    "clientId": "c165",
    "petIds": [
     "p165"
@@ -34993,14 +35356,29 @@
    "type": "pansion",
    "from": "2026-07-20",
    "to": "2026-07-31",
-   "boxId": "vb1",
+   "boxId": "vb2",
+   "price": 132.0,
+   "paid": true,
+   "paidAt": "2026-07-31",
+   "note": ""
+  },
+  {
+   "id": "s1429",
+   "clientId": "c852",
+   "petIds": [
+    "p857"
+   ],
+   "type": "pansion",
+   "from": "2026-07-21",
+   "to": "2026-08-01",
+   "boxId": "vb6",
    "price": null,
    "paid": false,
    "paidAt": null,
    "note": ""
   },
   {
-   "id": "s1424",
+   "id": "s1430",
    "clientId": "c722",
    "petIds": [
     "p726"
@@ -35015,7 +35393,7 @@
    "note": ""
   },
   {
-   "id": "s1425",
+   "id": "s1431",
    "clientId": "c768",
    "petIds": [
     "p772"
@@ -35024,50 +35402,20 @@
    "from": "2026-07-23",
    "to": "2026-08-17",
    "boxId": "mb1",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
+   "price": 500.0,
+   "paid": true,
+   "paidAt": "2026-08-17",
    "note": ""
   },
   {
-   "id": "s1426",
-   "clientId": "c848",
+   "id": "s1432",
+   "clientId": "c711",
    "petIds": [
-    "p853"
+    "p715"
    ],
    "type": "pansion",
-   "from": "2026-07-28",
-   "to": "2026-08-12",
-   "boxId": "m1",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1427",
-   "clientId": "c318",
-   "petIds": [
-    "p320"
-   ],
-   "type": "pansion",
-   "from": "2026-08-01",
-   "to": "2026-08-31",
-   "boxId": "mb3",
-   "price": null,
-   "paid": false,
-   "paidAt": null,
-   "note": ""
-  },
-  {
-   "id": "s1428",
-   "clientId": "c586",
-   "petIds": [
-    "p590"
-   ],
-   "type": "pansion",
-   "from": "2026-08-01",
-   "to": "2026-08-31",
+   "from": "2026-07-23",
+   "to": "2026-07-31",
    "boxId": "mb4",
    "price": null,
    "paid": false,
@@ -35075,7 +35423,217 @@
    "note": ""
   },
   {
-   "id": "s1429",
+   "id": "s1433",
+   "clientId": "c853",
+   "petIds": [
+    "p858"
+   ],
+   "type": "pansion",
+   "from": "2026-07-23",
+   "to": "2026-07-26",
+   "boxId": "vb1",
+   "price": 45.0,
+   "paid": true,
+   "paidAt": "2026-07-26",
+   "note": ""
+  },
+  {
+   "id": "s1434",
+   "clientId": "c854",
+   "petIds": [
+    "p859"
+   ],
+   "type": "pansion",
+   "from": "2026-07-23",
+   "to": "2026-07-27",
+   "boxId": "vb7",
+   "price": 60.0,
+   "paid": true,
+   "paidAt": "2026-07-27",
+   "note": ""
+  },
+  {
+   "id": "s1435",
+   "clientId": "c556",
+   "petIds": [
+    "p559"
+   ],
+   "type": "pansion",
+   "from": "2026-07-25",
+   "to": "2026-08-10",
+   "boxId": "mb7",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1436",
+   "clientId": "c855",
+   "petIds": [
+    "p860"
+   ],
+   "type": "pansion",
+   "from": "2026-07-25",
+   "to": "2026-07-31",
+   "boxId": "mb8",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1437",
+   "clientId": "c856",
+   "petIds": [
+    "p861"
+   ],
+   "type": "pansion",
+   "from": "2026-07-27",
+   "to": "2026-08-02",
+   "boxId": "vb1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1438",
+   "clientId": "c857",
+   "petIds": [
+    "p862"
+   ],
+   "type": "pansion",
+   "from": "2026-07-28",
+   "to": "2026-08-10",
+   "boxId": "m1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1439",
+   "clientId": "c858",
+   "petIds": [
+    "p863"
+   ],
+   "type": "pansion",
+   "from": "2026-07-28",
+   "to": "2026-08-09",
+   "boxId": "m3",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1440",
+   "clientId": "c859",
+   "petIds": [
+    "p864"
+   ],
+   "type": "pansion",
+   "from": "2026-07-30",
+   "to": "2026-07-31",
+   "boxId": "mb5",
+   "price": 12.0,
+   "paid": true,
+   "paidAt": "2026-07-31",
+   "note": ""
+  },
+  {
+   "id": "s1441",
+   "clientId": "c440",
+   "petIds": [
+    "p442"
+   ],
+   "type": "pansion",
+   "from": "2026-07-31",
+   "to": "2026-08-12",
+   "boxId": "mb6",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1442",
+   "clientId": "c842",
+   "petIds": [
+    "p847"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-31",
+   "boxId": "m4",
+   "price": 600.0,
+   "paid": true,
+   "paidAt": "2026-08-31",
+   "note": ""
+  },
+  {
+   "id": "s1443",
+   "clientId": "c481",
+   "petIds": [
+    "p484"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-31",
+   "boxId": "mb10",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1444",
+   "clientId": "c403",
+   "petIds": [
+    "p405"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-31",
+   "boxId": "mb11",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1445",
+   "clientId": "c802",
+   "petIds": [
+    "p807"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-31",
+   "boxId": "mb12",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1446",
+   "clientId": "c318",
+   "petIds": [
+    "p320"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-09-14",
+   "boxId": "mb3",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1447",
    "clientId": "c178",
    "petIds": [
     "p178"
@@ -35090,10 +35648,55 @@
    "note": ""
   },
   {
-   "id": "s1430",
-   "clientId": "c849",
+   "id": "s1448",
+   "clientId": "c711",
    "petIds": [
-    "p854"
+    "p715"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-02",
+   "boxId": "mb8",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1449",
+   "clientId": "c860",
+   "petIds": [
+    "p865"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-01",
+   "boxId": "mb9",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1450",
+   "clientId": "c539",
+   "petIds": [
+    "p542"
+   ],
+   "type": "pansion",
+   "from": "2026-08-01",
+   "to": "2026-08-12",
+   "boxId": "vb2",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1451",
+   "clientId": "c861",
+   "petIds": [
+    "p866"
    ],
    "type": "pansion",
    "from": "2026-08-03",
@@ -35105,10 +35708,100 @@
    "note": ""
   },
   {
-   "id": "s1431",
-   "clientId": "c850",
+   "id": "s1452",
+   "clientId": "c862",
    "petIds": [
-    "p855"
+    "p867"
+   ],
+   "type": "pansion",
+   "from": "2026-08-03",
+   "to": "2026-08-08",
+   "boxId": "mb8",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1453",
+   "clientId": "c291",
+   "petIds": [
+    "p293"
+   ],
+   "type": "pansion",
+   "from": "2026-08-03",
+   "to": "2026-08-11",
+   "boxId": "mb9",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1454",
+   "clientId": "c863",
+   "petIds": [
+    "p868"
+   ],
+   "type": "pansion",
+   "from": "2026-08-04",
+   "to": "2026-08-17",
+   "boxId": "mb4",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1455",
+   "clientId": "c298",
+   "petIds": [
+    "p300"
+   ],
+   "type": "pansion",
+   "from": "2026-08-10",
+   "to": "2026-08-18",
+   "boxId": "mb5",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1456",
+   "clientId": "c864",
+   "petIds": [
+    "p869"
+   ],
+   "type": "pansion",
+   "from": "2026-08-10",
+   "to": "2026-08-16",
+   "boxId": "mb8",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1457",
+   "clientId": "c865",
+   "petIds": [
+    "p870"
+   ],
+   "type": "pansion",
+   "from": "2026-08-11",
+   "to": "2026-08-18",
+   "boxId": "mb7",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1458",
+   "clientId": "c866",
+   "petIds": [
+    "p871"
    ],
    "type": "pansion",
    "from": "2026-08-20",
@@ -35120,14 +35813,149 @@
    "note": ""
   },
   {
-   "id": "s1432",
+   "id": "s1459",
+   "clientId": "c861",
+   "petIds": [
+    "p866"
+   ],
+   "type": "pansion",
+   "from": "2026-08-21",
+   "to": "2026-08-25",
+   "boxId": "mb2",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1460",
    "clientId": "c722",
    "petIds": [
     "p726"
    ],
    "type": "pansion",
    "from": "2026-08-22",
+   "to": "2026-09-21",
+   "boxId": "vb4",
+   "price": 330.0,
+   "paid": true,
+   "paidAt": "2026-09-21",
+   "note": ""
+  },
+  {
+   "id": "s1461",
+   "clientId": "c783",
+   "petIds": [
+    "p787"
+   ],
+   "type": "pansion",
+   "from": "2026-08-28",
    "to": "2026-08-31",
+   "boxId": "vb1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1462",
+   "clientId": "c867",
+   "petIds": [
+    "p872"
+   ],
+   "type": "pansion",
+   "from": "2026-09-01",
+   "to": "2026-09-30",
+   "boxId": "vb1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1463",
+   "clientId": "c783",
+   "petIds": [
+    "p787"
+   ],
+   "type": "pansion",
+   "from": "2026-09-01",
+   "to": "2026-09-07",
+   "boxId": "vb2",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1464",
+   "clientId": "c586",
+   "petIds": [
+    "p590"
+   ],
+   "type": "pansion",
+   "from": "2026-09-02",
+   "to": "2026-09-11",
+   "boxId": "mb1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1465",
+   "clientId": "c868",
+   "petIds": [
+    "p873"
+   ],
+   "type": "pansion",
+   "from": "2026-09-11",
+   "to": "2026-09-21",
+   "boxId": "mb2",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1466",
+   "clientId": "c771",
+   "petIds": [
+    "p775"
+   ],
+   "type": "pansion",
+   "from": "2026-09-14",
+   "to": "2026-09-30",
+   "boxId": "mb1",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1467",
+   "clientId": "c650",
+   "petIds": [
+    "p654"
+   ],
+   "type": "pansion",
+   "from": "2026-09-22",
+   "to": "2026-09-22",
+   "boxId": "mb2",
+   "price": null,
+   "paid": false,
+   "paidAt": null,
+   "note": ""
+  },
+  {
+   "id": "s1468",
+   "clientId": "c722",
+   "petIds": [
+    "p726"
+   ],
+   "type": "pansion",
+   "from": "2026-09-22",
+   "to": "2026-09-30",
    "boxId": "vb4",
    "price": null,
    "paid": false,
