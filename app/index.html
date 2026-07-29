@@ -356,7 +356,9 @@ p{text-wrap:pretty}
 .grow:active{opacity:.55}
 .grow-ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .grow-ico svg{width:28px;height:28px}
-.grow-name{flex:1;font-size:16.5px;font-weight:750;min-width:0}
+.grow-main{flex:1;min-width:0}
+.grow-name{display:block;font-size:16.5px;font-weight:750}
+.grow-sub{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:1px}
 .grow-num{font-size:28px;font-weight:850;white-space:nowrap}
 .grow-num small{font-size:15px;color:var(--muted);font-weight:650}
 .empty-line{color:var(--muted);font-size:14px;text-align:center;padding:7px 2px}
@@ -516,7 +518,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.3.0';
+const APP_VERSION = 'v1.4.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -571,7 +573,27 @@ function defaultData(){
     v: 2,
     clients: [], pets: [], stays: [],
     boxes: defaultBoxes(),
-    prices: { mali: 12, veliki: 15, macka: 10, dnevni: 10 },
+    prices: defaultPrices(),
+  };
+}
+function defaultPrices(){
+  return {
+    dnevni: 10,
+    mali:   { dan: 12, dan10: 10, mj: 300, par: 20, par10: 20, parMj: 500 },
+    veliki: { dan: 15, dan10: 12, mj: 350, par: 25, par10: 24, parMj: 650 },
+    macka:  { dan: 12, dan10: 10, mj: 300, par: 20, par10: 20, parMj: 500 },
+  };
+}
+/* stari format cijena (ravni brojevi) -> novi (kategorije sa par/10+/mjesec) */
+function normalizePrices(p){
+  if (!p) return defaultPrices();
+  if (p.mali && typeof p.mali === 'object') return p;
+  const d = defaultPrices();
+  return {
+    dnevni: p.dnevni != null ? p.dnevni : d.dnevni,
+    mali: p.mali != null ? { ...d.mali, dan: p.mali } : d.mali,
+    veliki: p.veliki != null ? { ...d.veliki, dan: p.veliki } : d.veliki,
+    macka: p.macka != null ? { ...d.macka, dan: p.macka } : d.macka,
   };
 }
 let D = loadLocal();
@@ -583,6 +605,7 @@ function loadLocal(){
     if (!d || !Array.isArray(d.stays)) return defaultData();
     const def = defaultData();
     for (const k of Object.keys(def)) if (d[k] === undefined) d[k] = def[k];
+    d.prices = normalizePrices(d.prices);
     d.stays.forEach(st => { if (!st.boxId && Array.isArray(st.boxIds)) st.boxId = st.boxIds[0] || null; });
     return d;
   } catch (e) { return defaultData(); }
@@ -683,15 +706,26 @@ function stayChainEnd(st){
   while (guard++ < 40){ const n = stayNext(cur); if (!n) break; cur = n; }
   return cur.to;
 }
-function petRate(p, type){
-  if (type === 'dnevni') return D.prices.dnevni;
-  if (p.species === 'macka') return D.prices.macka;
-  return p.size === 'veliki' ? D.prices.veliki : D.prices.mali;
+/* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu, 10+ dana i mjesečnom */
+function petCat(p){ return p.species === 'macka' ? 'macka' : (p.size === 'veliki' ? 'veliki' : 'mali'); }
+function catAmount(c, days, pair){
+  if (days >= 30) return (pair ? c.parMj : c.mj) * days / 30;
+  if (days >= 10) return days * (pair ? c.par10 : c.dan10);
+  return days * (pair ? c.par : c.dan);
 }
 function estimateFor(petsArr, type, from, to){
-  const days = type === 'dnevni' ? 1 : (from && to && to >= from ? diffDays(from, to) + 1 : 0);
-  if (!days || !petsArr.length) return 0;
-  return days * petsArr.reduce((s, p) => s + petRate(p, type), 0);
+  if (!petsArr.length) return 0;
+  if (type === 'dnevni') return petsArr.length * D.prices.dnevni;
+  const days = from && to && to >= from ? diffDays(from, to) + 1 : 0;
+  if (!days) return 0;
+  const cnt = { mali: 0, veliki: 0, macka: 0 };
+  petsArr.forEach(p => cnt[petCat(p)]++);
+  let total = 0;
+  for (const k of ['mali', 'veliki', 'macka']){
+    const c = D.prices[k];
+    total += Math.floor(cnt[k] / 2) * catAmount(c, days, true) + (cnt[k] % 2) * catAmount(c, days, false);
+  }
+  return Math.round(total);
 }
 function stayEstimate(st){ return estimateFor(petsOfStay(st), st.type, st.from, st.to); }
 function stayAmount(st){ return st.price != null ? st.price : stayEstimate(st); }
@@ -780,8 +814,10 @@ function vDanas(){
 
   const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
-    const occ = new Set(all.map(st => st.boxId).filter(id => { const b = boxById(id); return b && b.group === g; }));
-    return { g, used: occ.size, total: act.length };
+    const inG = all.filter(st => { const b = boxById(st.boxId); return b && b.group === g; });
+    const occ = new Set(inG.map(st => st.boxId));
+    const petsN = inG.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
+    return { g, used: occ.size, total: act.length, petsN };
   });
   const petCount = all.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
 
@@ -803,8 +839,9 @@ function vDanas(){
     <div style="margin-top:6px">
       ${groups.map(f => `<button class="grow" data-act="group-open" data-id="${f.g}">
         <span class="grow-ico" style="background:var(--${f.g}-soft);color:var(--${f.g})">${f.g === 'm' ? I.cat : I.dog}</span>
-        <span class="grow-name">${GROUPS[f.g]}</span>
-        <span class="grow-num num" style="color:var(--${f.g})">${f.used}<small> /${f.total}</small></span>
+        <span class="grow-main"><span class="grow-name">${GROUPS[f.g]}</span>
+        <span class="grow-sub num">${f.used} od ${f.total} bokseva zauzeto</span></span>
+        <span class="grow-num num" style="color:var(--${f.g})">${f.petsN}<small> ${f.g === 'm' ? plural(f.petsN, 'mačka', 'mačke', 'mačaka') : plural(f.petsN, 'pas', 'psa', 'pasa')}</small></span>
       </button>`).join('')}
     </div>
     ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:8px;text-align:center">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
@@ -1245,7 +1282,7 @@ function vJos(){
     <button class="set-row" data-act="prices-open">
       <span class="sr-ico" style="background:var(--ok-soft);color:var(--ok)">${I.euro}</span>
       <span class="sr-main"><span class="sr-name">Cjenovnik</span>
-      <span class="sr-meta num">na dan: ${p.mali} · ${p.veliki} · ${p.macka} · ${p.dnevni} €</span></span>
+      <span class="sr-meta num">24h: ${p.mali.dan} · ${p.veliki.dan} · ${p.macka.dan} € · dnevno ${p.dnevni} €</span></span>
       <span class="chev">${I.chev}</span>
     </button>
     <button class="set-row" data-act="boxes-open">
@@ -1318,16 +1355,27 @@ function blSheet(){
 
 function pricesSheet(){
   const p = D.prices;
-  openSheet('Cjenovnik (po danu)', `
+  const cat = (key, title, c) => `
+    <div class="sec-title">${title}</div>
     <div class="card">
       <div class="form-grid2">
-        <div class="fld"><label class="lbl">Mali pas</label><input type="text" inputmode="decimal" id="prMali" value="${p.mali}"></div>
-        <div class="fld"><label class="lbl">Veliki pas</label><input type="text" inputmode="decimal" id="prVeliki" value="${p.veliki}"></div>
-        <div class="fld"><label class="lbl">Mačka</label><input type="text" inputmode="decimal" id="prMacka" value="${p.macka}"></div>
-        <div class="fld"><label class="lbl">Dnevno čuvanje</label><input type="text" inputmode="decimal" id="prDnevni" value="${p.dnevni}"></div>
+        <div class="fld"><label class="lbl">Dan (24h)</label><input type="text" inputmode="decimal" id="pr_${key}_dan" value="${c.dan}"></div>
+        <div class="fld"><label class="lbl">Dva u boksu · dan</label><input type="text" inputmode="decimal" id="pr_${key}_par" value="${c.par}"></div>
+        <div class="fld"><label class="lbl">10+ dana · po danu</label><input type="text" inputmode="decimal" id="pr_${key}_dan10" value="${c.dan10}"></div>
+        <div class="fld"><label class="lbl">Dva · 10+ dana</label><input type="text" inputmode="decimal" id="pr_${key}_par10" value="${c.par10}"></div>
+        <div class="fld" style="margin-bottom:2px"><label class="lbl">Mjesec dana</label><input type="text" inputmode="decimal" id="pr_${key}_mj" value="${c.mj}"></div>
+        <div class="fld" style="margin-bottom:2px"><label class="lbl">Dva · mjesec</label><input type="text" inputmode="decimal" id="pr_${key}_parMj" value="${c.parMj}"></div>
       </div>
-      <button class="btn btn-primary btn-block" data-act="prices-save" style="margin-top:8px">Sačuvaj</button>
-    </div>`);
+    </div>`;
+  openSheet('Cjenovnik', `
+    <div class="card">
+      <div class="fld" style="margin-bottom:2px"><label class="lbl">Dnevno čuvanje (08-20h), po ljubimcu</label>
+        <input type="text" inputmode="decimal" id="pr_dnevni" value="${p.dnevni}"></div>
+    </div>
+    ${cat('mali', 'Mali pas', p.mali)}
+    ${cat('veliki', 'Srednji i veliki pas', p.veliki)}
+    ${cat('macka', 'Mačka', p.macka)}
+    <button class="btn btn-primary btn-block" data-act="prices-save" style="margin-top:14px">Sačuvaj</button>`);
 }
 
 function boxesSheet(){
@@ -1789,7 +1837,7 @@ function renderStayForm(){
       <input type="text" inputmode="decimal" id="sfDeposit" value="${esc(SF.deposit)}"></div>
     <div class="fld"><label class="lbl">Cijena (€)</label>
       <input type="text" inputmode="decimal" id="sfPrice" placeholder="${est || ''}" value="${esc(SF.price)}">
-      ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'} × ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}
+      ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'}, ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}
     </div>`;
 
   let chargeHTML = '';
@@ -2211,7 +2259,7 @@ async function loadAll(){
     D.stays = s.map(DB_UNMAP.stays);
     if (b.length) D.boxes = b.map(DB_UNMAP.boxes);
     const pr = st.find(x => x.key === 'prices');
-    if (pr && pr.value) D.prices = pr.value;
+    if (pr && pr.value) D.prices = normalizePrices(pr.value);
     OFFLINE = false;
     save(); render();
   } catch (e){
@@ -2577,8 +2625,10 @@ document.addEventListener('click', (e) => {
     case 'prices-open': pricesSheet(); break;
     case 'prices-save': {
         const g = x => parseMoney($(x).value);
-        const np = { mali: g('#prMali'), veliki: g('#prVeliki'), macka: g('#prMacka'), dnevni: g('#prDnevni') };
-        if (Object.values(np).some(v => v == null)){ toast('Provjeri iznose.'); break; }
+        const cat = k => ({ dan: g('#pr_' + k + '_dan'), par: g('#pr_' + k + '_par'), dan10: g('#pr_' + k + '_dan10'), par10: g('#pr_' + k + '_par10'), mj: g('#pr_' + k + '_mj'), parMj: g('#pr_' + k + '_parMj') });
+        const np = { dnevni: g('#pr_dnevni'), mali: cat('mali'), veliki: cat('veliki'), macka: cat('macka') };
+        const sve = [np.dnevni].concat(['mali', 'veliki', 'macka'].flatMap(k => Object.values(np[k])));
+        if (sve.some(v => v == null)){ toast('Provjeri iznose.'); break; }
         D.prices = np; dbSavePrices(); closeSheet(); render(); toast('Cjenovnik sačuvan.');
       } break;
     case 'boxes-open': boxesSheet(); break;
