@@ -37,6 +37,8 @@ def clean_tokens(t):
         if not w: continue
         wl = strip_dia(w.lower())
         if wl in STOP: continue
+        # tipfeleri od "preuzimanje" (preuyimanje, preuimanje, preuz...) = sluzbena rijec, ne ime
+        if wl.startswith('preu'): continue
         if re.fullmatch(r'\d+(?:[.,]\d+)?', w): continue
         if AGE_RE.fullmatch(w): continue
         out.append(w)
@@ -114,6 +116,28 @@ for si, sname in enumerate(sheets):
                 if bid.startswith('x_'):
                     adhoc_boxes[bid] = {'name': str(v).strip(), 'group': g}
         if cols: headers.append((r, cols))
+
+    # dodatne kolone BEZ naslova poslije zadnje imenovane u bloku
+    # (transporteri u gužvi) -> nastavak numeracije grupe: mb14, mb15...
+    for hi, (hrow, cols) in enumerate(headers):
+        rend = headers[hi + 1][0] if hi + 1 < len(headers) else nrows
+        grp_main = Counter(g for (_b, g) in cols.values()).most_common(1)[0][0]
+        nums = [int(mm.group(1)) for (b, g) in cols.values()
+                if g == grp_main and (mm := re.match(r'^(?:mb|vb|m)(\d+)$', b))]
+        nxt = (max(nums) if nums else 0) + 1
+        lastc = max(cols.keys())
+        for c in range(lastc + 1, min(lastc + 9, ncols)):
+            if c in cols: continue
+            has_data = False
+            for rr in range(hrow + 1, rend):
+                v0 = df.iloc[rr, 0]
+                if pd.isna(v0) or not DATE_RE.match(str(v0).strip()): continue
+                vv = df.iloc[rr, c]
+                if pd.notna(vv) and str(vv).strip() and str(vv).strip().lower() != 'nan':
+                    has_data = True; break
+            if has_data:
+                cols[c] = (grp_main + str(nxt), grp_main)
+                nxt += 1
 
     # blok = od headera do sljedećeg headera
     for hi, (hrow, cols) in enumerate(headers):
