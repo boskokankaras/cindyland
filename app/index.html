@@ -255,6 +255,26 @@ p{text-wrap:pretty}
 .dr-foot{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
 .dr-foot strong{color:var(--primary)}
 
+/* ===== objedinjavanje klijenata ===== */
+.row{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.kl-check{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;color:transparent;transition:all .15s;
+}
+.kl-check svg{width:15px;height:15px}
+.kl-check.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.row.kl-sel{background:var(--primary-soft);border-radius:12px}
+.merge-bar{
+  position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:55;
+  display:flex;gap:10px;animation:ver-in .3s cubic-bezier(.16,1,.3,1);
+}
+.merge-bar .btn{flex:1;box-shadow:var(--shadow-pop)}
+.merge-bar .btn-ghost{background:var(--card)}
+.btn-off{opacity:.45;pointer-events:none}
+@media (min-width:900px){
+  .merge-bar{left:calc(232px + 40px);right:auto;width:calc(min(100vw,232px + 40px + 780px) - 232px - 80px);max-width:780px;bottom:24px}
+}
+
 /* ===== sheet (forma preko ekrana) ===== */
 .sheet-overlay{
   position:fixed;inset:0;background:rgba(30,22,18,.42);z-index:60;
@@ -496,7 +516,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.2.1';
+const APP_VERSION = 'v1.3.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -641,6 +661,28 @@ function stayStatus(st){
 }
 function stayDays(st){ return st.type === 'dnevni' ? 1 : diffDays(st.from, st.to) + 1; }
 function plural(n, a, b, c){ return n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c); }
+
+/* lanac uzastopnih boravaka istog klijenta (stalni gosti: segmenti po mjesecima naplate / promjeni boksa) */
+function petsShared(a, b){
+  const A = a.petIds || [], B = b.petIds || [];
+  if (!A.length || !B.length) return true;
+  return A.some(id => B.includes(id));
+}
+function stayNext(st){
+  const nd = addDays(st.to, 1);
+  return D.stays.find(x => x.id !== st.id && x.clientId === st.clientId && x.to > st.to &&
+    (x.from === nd || x.from === st.to) && petsShared(st, x));
+}
+function stayPrev(st){
+  const pd = addDays(st.from, -1);
+  return D.stays.find(x => x.id !== st.id && x.clientId === st.clientId && x.from < st.from &&
+    (x.to === pd || x.to === st.from) && petsShared(st, x));
+}
+function stayChainEnd(st){
+  let cur = st, guard = 0;
+  while (guard++ < 40){ const n = stayNext(cur); if (!n) break; cur = n; }
+  return cur.to;
+}
 function petRate(p, type){
   if (type === 'dnevni') return D.prices.dnevni;
   if (p.species === 'macka') return D.prices.macka;
@@ -679,6 +721,7 @@ let CAL_YM = todayISO().slice(0, 7);
 let CAL_VIEW = localStorage.getItem('cindyland-calview') || 'mreza';
 let ZAR_YM = todayISO().slice(0, 7);
 let KL_Q = '', KL_ALL = false;
+let KL_MERGE = null; // objedinjavanje klijenata: { baseId, sel: Set }
 let OFFLINE = false;
 
 const TABS = [
@@ -689,7 +732,7 @@ const TABS = [
   { id: 'jos', lbl: 'Profil', ico: I.gear },
 ];
 
-function setTab(t){ if (TAB !== t){ KL_ALL = false; } TAB = t; render(); window.scrollTo(0, 0); }
+function setTab(t){ if (TAB !== t){ KL_ALL = false; KL_MERGE = null; } TAB = t; render(); window.scrollTo(0, 0); }
 
 function render(){
   if (!APP_SHOWN) return; // dok je prijava/nova šifra na ekranu, ne diraj UI aplikacije
@@ -701,7 +744,7 @@ function render(){
   else if (TAB === 'klijenti') v.innerHTML = vKlijenti();
   else if (TAB === 'zarada') v.innerHTML = vZarada();
   else v.innerHTML = vJos();
-  $('#fab').style.display = (TAB === 'danas' || TAB === 'kalendar' || TAB === 'klijenti') ? 'flex' : 'none';
+  $('#fab').style.display = ((TAB === 'danas' || TAB === 'kalendar' || TAB === 'klijenti') && !KL_MERGE) ? 'flex' : 'none';
 }
 function renderTopbar(){
   const titles = { kalendar: 'Kalendar', klijenti: 'Klijenti', zarada: 'Finansije', jos: 'Profil' };
@@ -730,9 +773,10 @@ function renderTabbar(){
 function vDanas(){
   const t = todayISO();
   const all = staysOnDate(t);
-  const arrivals = all.filter(st => st.from === t);
-  const departures = all.filter(st => st.to === t);
-  const staying = all.filter(st => st.from !== t && st.to !== t);
+  /* nastavak niza (novi mjesec/boks istog gosta) nije pravi dolazak ni odlazak */
+  const arrivals = all.filter(st => st.from === t && !stayPrev(st));
+  const departures = all.filter(st => st.to === t && !stayNext(st));
+  const staying = all.filter(st => !arrivals.includes(st) && !departures.includes(st));
 
   const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
@@ -742,8 +786,8 @@ function vDanas(){
   const petCount = all.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
 
   const tmr = addDays(t, 1);
-  const tmrIn = D.stays.filter(st => st.from === tmr).length;
-  const tmrOut = D.stays.filter(st => st.to === tmr).length;
+  const tmrIn = D.stays.filter(st => st.from === tmr && !stayPrev(st)).length;
+  const tmrOut = D.stays.filter(st => st.to === tmr && !stayNext(st)).length;
 
   let html = '';
   if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom - prikazujem posljednje poznato stanje.</span></div>`;
@@ -793,7 +837,7 @@ function stayRowHTML(st, mode){
   } else if (mode === 'in'){
     side = '';
   } else {
-    side = `<span class="badge b-line num">do ${fmtD(st.to)}</span>`;
+    side = `<span class="badge b-line num">do ${fmtD(stayChainEnd(st))}</span>`;
   }
   const meta = [c ? c.name : '', st.type === 'dnevni' ? 'dnevno čuvanje' : fmtD(st.from) + ' - ' + fmtD(st.to)].filter(Boolean).join(' · ');
   return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
@@ -829,8 +873,8 @@ function calMrezaHTML(){
   for (let d = 1; d <= dim; d++){
     const iso = CAL_YM + '-' + pad(d);
     const stays = staysOnDate(iso);
-    const hasIn = stays.some(st => st.from === iso);
-    const hasOut = stays.some(st => st.to === iso);
+    const hasIn = stays.some(st => st.from === iso && !stayPrev(st));
+    const hasOut = stays.some(st => st.to === iso && !stayNext(st));
     cells += `<div class="cal-cell ${iso === t ? 'today' : ''} ${iso < t ? 'past' : ''}" data-act="day-open" data-id="${iso}">
       <span class="cal-num num">${d}</span>
       <span class="cal-cnt num ${stays.length ? '' : 'zero'}">${stays.length}</span>
@@ -911,7 +955,7 @@ function groupSheet(g){
   const freeBoxes = sortedBoxes().filter(b => b.active && b.group === g && !occupied.has(b.id));
   let html = '';
   if (inGroup.length){
-    html += `<div class="card">${inGroup.map(st => stayRowHTML(st, st.to === t ? 'out' : (st.from === t ? 'in' : undefined))).join('')}</div>`;
+    html += `<div class="card">${inGroup.map(st => stayRowHTML(st, st.to === t && !stayNext(st) ? 'out' : (st.from === t && !stayPrev(st) ? 'in' : undefined))).join('')}</div>`;
   } else {
     html += `<div class="card"><div class="empty">${g === 'm' ? I.cat : I.dog}Danas nema nikoga u ovoj grupi.</div></div>`;
   }
@@ -926,8 +970,8 @@ function groupSheet(g){
 
 function daySheet(iso){
   const stays = staysOnDate(iso);
-  const arrivals = stays.filter(st => st.from === iso);
-  const departures = stays.filter(st => st.to === iso);
+  const arrivals = stays.filter(st => st.from === iso && !stayPrev(st));
+  const departures = stays.filter(st => st.to === iso && !stayNext(st));
   const occupied = new Set(stays.map(st => st.boxId));
   const freeBoxes = sortedBoxes().filter(b => b.active && !occupied.has(b.id));
 
@@ -950,15 +994,27 @@ function daySheet(iso){
 
 /* ============ KLIJENTI ============ */
 function vKlijenti(){
-  return `<div class="fld" style="position:relative;margin-bottom:12px">
+  const base = KL_MERGE ? clientById(KL_MERGE.baseId) : null;
+  const mergeHead = base ? `<div class="banner" style="background:var(--primary-soft);color:var(--primary)">${I.people}
+    <span style="flex:1">Objedinjavanje pod <b>${esc(base.name)}</b> - dodirni klijente koji su ista osoba.</span></div>` : '';
+  return `${mergeHead}<div class="fld" style="position:relative;margin-bottom:12px">
     <input type="search" id="klSearch" placeholder="Pretraži klijente i ljubimce…" value="${esc(KL_Q)}" style="padding-left:40px">
     <span style="position:absolute;left:12px;top:11px;width:20px;height:20px;color:var(--muted)">${I.search}</span>
   </div>
-  <div id="klList">${klListHTML()}</div>`;
+  <div id="klList">${klListHTML()}</div>
+  ${KL_MERGE ? mergeBarHTML() : ''}`;
+}
+function mergeBarHTML(){
+  const n = KL_MERGE.sel.size;
+  return `<div class="merge-bar" id="mergeBar">
+    <button class="btn btn-ghost" data-act="kl-merge-cancel">Otkaži</button>
+    <button class="btn btn-primary ${n ? '' : 'btn-off'}" data-act="kl-merge-do">Objedini${n ? ' (' + n + ')' : ''}</button>
+  </div>`;
 }
 function klListHTML(){
   const q = KL_Q.trim().toLowerCase();
   let clients = [...D.clients].sort((a, b) => a.name.localeCompare(b.name, 'sr'));
+  if (KL_MERGE) clients = clients.filter(c => c.id !== KL_MERGE.baseId);
   if (q){
     clients = clients.filter(c =>
       c.name.toLowerCase().includes(q) ||
@@ -974,19 +1030,73 @@ function klListHTML(){
     const pets = petsOfClient(c.id);
     const petStr = pets.map(petLabel).join(', ');
     const n = D.stays.filter(st => st.clientId === c.id).length;
-    return `<div class="row tappable" data-act="client-open" data-id="${c.id}">
+    const sel = KL_MERGE && KL_MERGE.sel.has(c.id);
+    const side = KL_MERGE
+      ? `${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="kl-check ${sel ? 'on' : ''}">${I.check}</span>`
+      : `${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="chev" style="width:18px;height:18px">${I.chev}</span>`;
+    return `<div class="row tappable ${sel ? 'kl-sel' : ''}" data-act="${KL_MERGE ? 'kl-merge-toggle' : 'client-open'}" data-id="${c.id}" ${KL_MERGE ? '' : 'data-lp="client"'}>
       <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
       <div class="row-main">
         <div class="row-name">${esc(c.name)}${c.blacklist ? ' <span class="badge b-danger" style="vertical-align:1px">crna lista</span>' : ''}</div>
         <div class="row-meta">${esc(petStr || 'bez ljubimaca')}${c.phone ? ' · ' + esc(c.phone) : ''}</div>
       </div>
-      <div class="row-side">${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="chev" style="width:18px;height:18px">${I.chev}</span></div>
+      <div class="row-side">${side}</div>
     </div>`;
   }).join('') + '</div>';
   if (!KL_ALL && !q && clients.length > LIMIT){
     html += `<button class="btn btn-ghost btn-block" data-act="kl-all">Prikaži sve (${clients.length})</button>`;
   }
   return html;
+}
+
+/* meni na dugi pritisak (kao poruke u Office Hubu) */
+function clientMenu(cid){
+  const c = clientById(cid); if (!c) return;
+  const pets = petsOfClient(cid).map(petLabel).join(', ');
+  showModal(`<div class="modal-title">${esc(c.name)}</div>
+    ${pets ? `<div class="modal-text" style="margin-bottom:12px">${esc(pets)}</div>` : ''}
+    <button class="btn btn-ghost btn-block" data-act="kl-menu-edit" data-id="${cid}">${I.edit} Izmijeni podatke</button>
+    <button class="btn btn-primary btn-block" data-act="kl-merge-start" data-id="${cid}" style="margin-top:10px">${I.people} Objedini sa drugim</button>
+    <button class="btn btn-ghost btn-block" data-act="modal-close" style="margin-top:10px">Otkaži</button>`);
+}
+
+/* objedinjavanje: ljubimci, boravci i naplate selektovanih prelaze pod baznog klijenta */
+async function mergeClients(baseId, ids){
+  const base = clientById(baseId); if (!base) return false;
+  for (const id of ids){
+    if (id === baseId) continue;
+    const c = clientById(id); if (!c) continue;
+    if (sb){
+      let r = await sb.from('pets').update({ client_id: baseId }).eq('client_id', id);
+      if (r.error) return false;
+      r = await sb.from('stays').update({ client_id: baseId }).eq('client_id', id);
+      if (r.error) return false;
+      r = await sb.from('clients').delete().eq('id', id);
+      if (r.error) return false;
+    }
+    D.pets.forEach(p => { if (p.clientId === id) p.clientId = baseId; });
+    D.stays.forEach(s => { if (s.clientId === id) s.clientId = baseId; });
+    if (!base.phone && c.phone) base.phone = c.phone;
+    if (c.note && c.note !== base.note) base.note = base.note ? base.note + ' · ' + c.note : c.note;
+    if (c.blacklist) base.blacklist = true;
+    D.clients = D.clients.filter(x => x.id !== id);
+  }
+  save();
+  dbSave('clients', base);
+  return true;
+}
+
+async function klMergeDo(){
+  if (!KL_MERGE || !KL_MERGE.sel.size) return;
+  const base = clientById(KL_MERGE.baseId); if (!base) return;
+  const ids = [...KL_MERGE.sel];
+  closeModal();
+  const ok = await mergeClients(KL_MERGE.baseId, ids);
+  if (!ok){ toast('Nije uspjelo - provjeri internet pa pokušaj ponovo.'); render(); return; }
+  KL_MERGE = null;
+  render();
+  toast('Objedinjeno pod: ' + base.name);
+  clientSheet(base.id);
 }
 
 function clientSheet(cid){
@@ -2328,6 +2438,33 @@ async function checkForUpdate(){
 </script>
 <script>
 /* ============ događaji + pokretanje ============ */
+/* dugi pritisak na klijenta u listi -> meni (kao poruke u Office Hubu) */
+let LP = null, LP_FIRED = false;
+document.addEventListener('pointerdown', (e) => {
+  const row = e.target.closest('[data-lp="client"]');
+  if (!row) return;
+  const id = row.dataset.id;
+  LP = { x: e.clientX, y: e.clientY, t: setTimeout(() => {
+    LP = null; LP_FIRED = true;
+    if (navigator.vibrate) navigator.vibrate(12);
+    clientMenu(id);
+  }, 480) };
+});
+document.addEventListener('pointermove', (e) => {
+  if (LP && Math.hypot(e.clientX - LP.x, e.clientY - LP.y) > 12){ clearTimeout(LP.t); LP = null; }
+});
+['pointerup', 'pointercancel'].forEach(ev => document.addEventListener(ev, () => {
+  if (LP){ clearTimeout(LP.t); LP = null; }
+  if (LP_FIRED) setTimeout(() => { LP_FIRED = false; }, 350);
+}));
+document.addEventListener('click', (e) => {
+  if (LP_FIRED){ LP_FIRED = false; e.preventDefault(); e.stopPropagation(); }
+}, true);
+document.addEventListener('contextmenu', (e) => {
+  const row = e.target.closest('[data-lp="client"]');
+  if (row){ e.preventDefault(); clientMenu(row.dataset.id); }
+});
+
 document.addEventListener('click', (e) => {
   const t = e.target.closest('[data-act]');
   if (!t) return;
@@ -2358,6 +2495,17 @@ document.addEventListener('click', (e) => {
     case 'zar-nav': ZAR_YM = ymShift(ZAR_YM, Number(id)); render(); break;
     case 'unpaid-open': unpaidSheet(); break;
     case 'kl-all': KL_ALL = true; { const l = $('#klList'); if (l) l.innerHTML = klListHTML(); } break;
+    /* objedinjavanje klijenata */
+    case 'kl-menu-edit': closeModal(); clientFormSheet(id); break;
+    case 'kl-merge-start': closeModal(); KL_MERGE = { baseId: id, sel: new Set() }; KL_Q = ''; render(); break;
+    case 'kl-merge-toggle': KL_MERGE.sel.has(id) ? KL_MERGE.sel.delete(id) : KL_MERGE.sel.add(id); render(); break;
+    case 'kl-merge-cancel': KL_MERGE = null; render(); break;
+    case 'kl-merge-do': {
+        if (!KL_MERGE || !KL_MERGE.sel.size) break;
+        const base = clientById(KL_MERGE.baseId);
+        confirmModal('Objediniti klijente?', `<b>${KL_MERGE.sel.size}</b> ${plural(KL_MERGE.sel.size, 'klijent prelazi', 'klijenta prelaze', 'klijenata prelazi')} pod <b>${esc(base.name)}</b> - sa svim ljubimcima, boravcima i naplatama. Ovo se ne može poništiti.`, 'kl-merge-yes', '', 'Objedini');
+      } break;
+    case 'kl-merge-yes': klMergeDo(); break;
     /* boravci */
     case 'stay-new': openStayForm({ date: t.dataset.date || null, clientId: t.dataset.client || null }); break;
     case 'grid-new': openStayForm({ date: t.dataset.date, boxId: t.dataset.box }); break;
