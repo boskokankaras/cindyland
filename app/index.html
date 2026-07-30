@@ -614,7 +614,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.7.0';
+const APP_VERSION = 'v1.7.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2579,9 +2579,17 @@ function askCharge(stayId){
       ${prije ? `<br>Već uplaćeno: <b>${money(prije)}</b>` : ''}
       <br>Po cjenovniku: <b class="num">${money(chargeDue(st))}</b></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" data-act="modal-close">Nije naplaćeno</button>
+      <button class="btn btn-ghost" data-act="charge-later" data-id="${st.id}">Nije naplaćeno</button>
       <button class="btn btn-ok" data-act="charge-force" data-id="${st.id}">${I.check} Naplaćeno</button>
     </div>`);
+}
+/* poslije "Nije naplaćeno" - jasno reci gdje ga čeka */
+function chargeLaterInfo(stayId){
+  const st = D.stays.find(s => s.id === stayId); if (!st) return;
+  showModal(`<div class="modal-title">Ostaje za naplatu</div>
+    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao i boks je slobodan.
+      <br><br>Iznos <b class="num">${money(chargeDue(st))}</b> čeka u <b>Finansije → Nenaplaćeno</b>, sa dugmetom Naplati.</div>
+    <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">U redu</button></div>`);
 }
 function stayUnmark(id, field){
   const st = D.stays.find(s => s.id === id); if (!st) return;
@@ -3265,6 +3273,7 @@ document.addEventListener('click', (e) => {
     case 'charge': chargeStart(id); break;
     case 'charge-force': closeModal(); chargeModal(id, true); break;
     case 'charge-stay': closeModal(); chargeModal(id, false); break;
+    case 'charge-later': closeModal(); chargeLaterInfo(id); break;
     case 'charge-confirm': chargeConfirm(id, t.dataset.leave === '1'); break;
     /* štrik dolaska i odlaska */
     case 'stay-arrived': stayMark(id, 'arrived'); break;
