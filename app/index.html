@@ -599,7 +599,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.5.2';
+const APP_VERSION = 'v1.5.3';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -979,7 +979,9 @@ function vDanas(){
   const t = todayISO();
   const all = staysOnDate(t);
   const arrivals = all.filter(st => st.from === t && !stayArrived(st, t));
-  const departures = all.filter(st => st.to === t);
+  /* štriknuti (i naplaćeni) odlasci silaze sa spiska - spisak je podsjetnik šta još treba */
+  const departures = all.filter(st => st.to === t && !stayLeft(st, t));
+  const svihOdlazaka = all.filter(st => st.to === t).length;
   /* u brojčaniku i u pansionu su samo oni koji su STVARNO tu: potvrđen dolazak, bez odlaska */
   const here = all.filter(st => stayHere(st, t));
   const staying = here.filter(st => st.to !== t);
@@ -1030,7 +1032,7 @@ function vDanas(){
   html += `<div class="sec-title">Danas napuštaju <span class="cnt num">${departures.length}</span></div>`;
   html += departures.length
     ? `<div class="card">${departures.map(st => stayRowHTML(st, 'out')).join('')}</div>`
-    : `<div class="card"><p class="empty-line">Danas niko ne napušta pansion.</p></div>`;
+    : `<div class="card"><p class="empty-line">${svihOdlazaka ? 'Svi današnji odlasci su ispraćeni.' : 'Danas niko ne napušta pansion.'}</p></div>`;
   if (staying.length){
     html += `<div class="sec-title">U pansionu <span class="cnt num">${staying.length}</span></div><div class="card">` +
       staying.map(st => stayRowHTML(st)).join('') + '</div>';
@@ -1484,11 +1486,11 @@ function allPayments(){
 }
 function unpaidStays(){
   const t = todayISO();
-  /* završen = prošao datum odlaska ILI je štriknut odlazak */
+  /* završen = štriknut odlazak (odmah, isti dan) ILI prošao datum odlaska */
   return D.stays.filter(st => {
     if (st.paid || chargeDue(st) <= 0) return false;
     const kraj = st.leftAt && st.leftAt < st.to ? st.leftAt : st.to;
-    return kraj < t && kraj >= addDays(t, -45);
+    return (st.leftAt || kraj < t) && kraj >= addDays(t, -45);
   });
 }
 function vZarada(){
@@ -2424,7 +2426,9 @@ function stayMark(id, field){
   dbSave('stays', st);
   render();
   if (SF && SF.id === id) renderStayForm();
-  toast(field === 'arrived' ? stayLabel(st) + ' je u pansionu.' : stayLabel(st) + ' je otišao - boks je slobodan.');
+  if (field === 'arrived'){ toast(stayLabel(st) + ' je u pansionu.'); return; }
+  const duguje = !st.paid && chargeDue(st) > 0;
+  toast(stayLabel(st) + ' je otišao - boks je slobodan.' + (duguje ? ' Naplata čeka u Finansijama.' : ''));
 }
 function stayUnmark(id, field){
   const st = D.stays.find(s => s.id === id); if (!st) return;
