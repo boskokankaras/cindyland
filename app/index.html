@@ -138,6 +138,8 @@ p{text-wrap:pretty}
 .banner{display:flex;align-items:center;gap:10px;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:550;margin-bottom:12px}
 .banner svg{width:19px;height:19px;flex-shrink:0}
 .ban-warn{background:var(--warn-soft);color:var(--warn)}
+.ban-upd{background:var(--primary-soft);color:var(--primary);gap:10px}
+.ban-upd .btn{flex-shrink:0}
 .ban-ok{background:var(--ok-soft);color:var(--ok)}
 
 /* ===== dugmad ===== */
@@ -612,7 +614,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.6.1';
+const APP_VERSION = 'v1.6.2';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1017,6 +1019,10 @@ function vDanas(){
 
   let html = '';
   if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom - prikazujem posljednje poznato stanje.</span></div>`;
+  /* nova verzija se vidi i ovdje, ne samo u Profilu (u Profil rijetko ulaze) */
+  if (PWA.needRefresh) html += `<div class="banner ban-upd">${I.refresh}
+    <span style="flex:1">Nova verzija${PWA.newVer ? ' <b class="num">' + esc(PWA.newVer) + '</b>' : ''} je spremna.</span>
+    <button class="btn btn-primary btn-sm" data-act="upd-apply">Osvježi</button></div>`;
 
   html += `<div class="card">
     <div class="hero-top">
@@ -3040,7 +3046,7 @@ function flagNeedRefresh(ver){
   if (APP_SHOWN) renderTabbar();
   const row = $('#updCheckBtn'); if (row) row.classList.remove('checking');
   const box = $('#updBox'); if (box) box.classList.add('show');
-  if (APP_SHOWN && TAB === 'jos') render();   // da se ispiše broj nove verzije
+  if (APP_SHOWN && (TAB === 'jos' || TAB === 'danas')) render();   // obavještenje na Danas + broj verzije u Profilu
 }
 function trackInstalling(sw){
   if (!sw) return;
