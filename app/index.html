@@ -614,7 +614,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.6.4';
+const APP_VERSION = 'v1.7.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2566,8 +2566,22 @@ function stayMark(id, field){
   render();
   if (SF && SF.id === id) renderStayForm();
   if (field === 'arrived'){ toast(stayLabel(st) + ' je u pansionu.'); return; }
-  const duguje = !st.paid && chargeDue(st) > 0;
-  toast(stayLabel(st) + ' je otišao - boks je slobodan.' + (duguje ? ' Naplata čeka u Finansijama.' : ''));
+  /* odlazak je pravi trenutak za naplatu - pitamo, ne naplaćujemo sami */
+  if (!st.paid && chargeDue(st) > 0){ askCharge(st.id); return; }
+  toast(stayLabel(st) + ' je otišao - boks je slobodan.');
+}
+function askCharge(stayId){
+  const st = D.stays.find(s => s.id === stayId); if (!st) return;
+  const prije = stayPaidSum(st);
+  showModal(`<div class="modal-title">Je li naplaćeno?</div>
+    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao - boks je slobodan.
+      <br>${stayLenLabel(st)} · ${fmtD(st.from)} - ${fmtD(st.to)}
+      ${prije ? `<br>Već uplaćeno: <b>${money(prije)}</b>` : ''}
+      <br>Po cjenovniku: <b class="num">${money(chargeDue(st))}</b></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-act="modal-close">Nije naplaćeno</button>
+      <button class="btn btn-ok" data-act="charge-force" data-id="${st.id}">${I.check} Naplaćeno</button>
+    </div>`);
 }
 function stayUnmark(id, field){
   const st = D.stays.find(s => s.id === id); if (!st) return;
