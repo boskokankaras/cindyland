@@ -344,7 +344,7 @@ p{text-wrap:pretty}
 .plan-full{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:9px;border-top:1px solid var(--line);color:var(--warn);font-size:13px;font-weight:600}
 .plan-full svg{width:16px;height:16px;flex-shrink:0}
 .plan-crveno{color:var(--danger)}
-.plan-kavez{font-size:11.5px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:99px;padding:2px 8px}
+.plan-note{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 .bdg-swap{padding:3px 6px}
 .bdg-swap svg{width:13px;height:13px}
 .modal .dr{margin-top:2px}
@@ -612,7 +612,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.6.0';
+const APP_VERSION = 'v1.6.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2383,12 +2383,13 @@ function autoPlanHTML(from, to){
     const kavez = boxSpare(b);
     return `<div class="plan-row">
       <span class="badge ${kavez ? 'b-warn' : 'b-' + (b.group || 'line')}">${esc(b.name || '?')}</span>${kad}
-      ${kavez ? '<span class="plan-kavez">pravi puni</span>' : ''}
     </div>`;
   }).join('');
+  const imaKaveza = plan.segs.some(s => boxSpare(boxById(s.b) || {}));
   return `<div class="plan">
     <div class="plan-head">${I.swap} Prijedlog rasporeda · <span class="num">${fmtD(from)} - ${fmtD(to)}</span></div>
     ${redovi || '<p class="hint" style="margin:0">Nema nijednog slobodnog mjesta u ovom terminu.</p>'}
+    ${imaKaveza ? `<div class="plan-note">U kavezu je onih dana kad su svi pravi boksevi puni.</div>` : ''}
     ${plan.segs.length ? `<button class="btn btn-primary btn-block btn-sm" data-act="sf-plan-take" style="margin-top:10px">Prihvati raspored</button>` : ''}
   </div>`;
 }
