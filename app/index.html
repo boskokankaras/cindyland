@@ -599,7 +599,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.5.0';
+const APP_VERSION = 'v1.5.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -768,6 +768,14 @@ function stayBoxes(st){
     .filter(s => s.f <= s.t)
     .sort((a, b) => a.f.localeCompare(b.f));
   if (!segs.length) return segs;
+  /* uzastopni periodi ISTOG boksa su jedan period (stalni gost mjesecima u istom boksu) */
+  const spojeni = [];
+  for (const s of segs){
+    const last = spojeni[spojeni.length - 1];
+    if (last && last.b === s.b && addDays(last.t, 1) >= s.f){ if (s.t > last.t) last.t = s.t; }
+    else spojeni.push(s);
+  }
+  segs = spojeni;
   /* period se prekida kad počne sljedeći (bez preklapanja); prazni ispadaju */
   for (let i = 0; i < segs.length - 1; i++){
     const nextF = segs[i + 1].f;
@@ -1034,16 +1042,21 @@ function tickHTML(act, id, label){
   return `<button class="tick ${out ? 'tick-out' : 'tick-in'}" data-act="${act}" data-id="${id}">
     <span class="tick-ico">${out ? I.out : I.in}</span><span class="tick-lbl">${label}</span></button>`;
 }
-function stayRowHTML(st, mode){
+function stayRowHTML(st, mode, iso){
   const c = clientById(st.clientId);
   const t = todayISO();
+  const danas = !iso || iso === t;   // štrik Došao/Otišao samo za današnji dan
   let side = '';
-  if (mode === 'out'){
+  if (mode === 'out' && danas){
     side = stayLeft(st, t)
       ? `<span class="badge b-line">${I.check} otišao</span>${st.paid ? `<span class="badge b-ok">naplaćeno</span>` : ''}`
       : (st.paid ? `<span class="badge b-ok">${I.check} naplaćeno</span>` : '') + tickHTML('stay-left', st.id, 'Otišao');
-  } else if (mode === 'in'){
+  } else if (mode === 'in' && danas){
     side = tickHTML('stay-arrived', st.id, 'Došao');
+  } else if (mode === 'out'){
+    side = st.paid ? `<span class="badge b-ok">${I.check} naplaćeno</span>` : `<span class="badge b-line">odlazak</span>`;
+  } else if (mode === 'in'){
+    side = `<span class="badge b-line">dolazak</span>`;
   } else {
     side = `<span class="badge b-line num">do ${fmtD(st.to)}</span>`;
   }
@@ -1199,10 +1212,10 @@ function daySheet(iso){
 
   let html = '';
   if (!stays.length) html += `<div class="card"><div class="empty">${I.paw}Ovaj dan je prazan.</div></div>`;
-  if (departures.length) html += `<div class="sec-title">Odlaze</div><div class="card">${departures.map(st => stayRowHTML(st, 'out')).join('')}</div>`;
-  if (arrivals.length) html += `<div class="sec-title">Dolaze</div><div class="card">${arrivals.map(st => stayRowHTML(st, 'in')).join('')}</div>`;
+  if (departures.length) html += `<div class="sec-title">Odlaze</div><div class="card">${departures.map(st => stayRowHTML(st, 'out', iso)).join('')}</div>`;
+  if (arrivals.length) html += `<div class="sec-title">Dolaze</div><div class="card">${arrivals.map(st => stayRowHTML(st, 'in', iso)).join('')}</div>`;
   const rest = stays.filter(st => st.from !== iso && st.to !== iso);
-  if (rest.length) html += `<div class="sec-title">U pansionu</div><div class="card">${rest.map(st => stayRowHTML(st)).join('')}</div>`;
+  if (rest.length) html += `<div class="sec-title">U pansionu</div><div class="card">${rest.map(st => stayRowHTML(st, undefined, iso)).join('')}</div>`;
 
   if (freeBoxes.length){
     html += `<div class="sec-title">Slobodni boksevi <span class="cnt num">${freeBoxes.length}</span></div>
