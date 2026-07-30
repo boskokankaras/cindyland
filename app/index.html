@@ -614,7 +614,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.6.3';
+const APP_VERSION = 'v1.6.4';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2505,12 +2505,40 @@ function sfPersist(){
   return st;
 }
 
+/* da li je izabrani boks u tom periodu već nečiji (dva psa u istom boksu = greška u tabeli) */
+function sfBoxConflicts(){
+  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
+  if (!from || !to || to < from) return [];
+  const out = [];
+  sfSegs().forEach(s => {
+    boxStays(s.b, s.f, s.t, SF.id).forEach(st => {
+      const b = boxById(s.b);
+      out.push({ boks: b ? b.name : '?', ko: stayLabel(st),
+        od: s.f > st.from ? s.f : st.from, do: s.t < st.to ? s.t : st.to });
+    });
+  });
+  return out;
+}
 function sfSave(force){
   if (!SF) return;
   sfSync();
-  /* popunjeno = pitanje, ne zabrana; za završene boravke se i ne pita */
+  /* popunjeno i zauzet boks = pitanje, ne zabrana; za završene boravke se i ne pita */
   const zavrsen = SF.id && SF.to && SF.to < todayISO();
-  if (!force && !zavrsen && sfCapacityAsk('sf-save-force')) return;
+  if (!force && !zavrsen){
+    const konf = sfBoxConflicts();
+    if (konf.length){
+      showModal(`<div class="modal-title">Boks je već zauzet</div>
+        <div class="modal-text">${konf.slice(0, 4).map(k => `<b>${esc(k.boks)}</b> drži <b>${esc(k.ko)}</b> <span class="num">${k.od === k.do ? fmtD(k.od) : fmtD(k.od) + ' - ' + fmtD(k.do)}</span>`).join('<br>')}
+        ${konf.length > 4 ? '<br>…' : ''}
+        <br><span class="hint" style="display:block;margin-top:8px">Ako upišeš, dva ljubimca će biti u istom boksu.</span></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" data-act="modal-close">Odustani</button>
+          <button class="btn btn-primary" data-act="sf-save-force">Upiši svejedno</button>
+        </div>`);
+      return;
+    }
+    if (sfCapacityAsk('sf-save-force')) return;
+  }
   const edit = !!SF.id;
   const st = sfPersist(); if (!st) return;
   closeModal(); closeSheet(); render();
@@ -3263,7 +3291,25 @@ document.addEventListener('click', (e) => {
     case 'dr-nav': sfSync(); SF.calCur = ymShift(SF.calCur, Number(id)); renderStayForm(); break;
     case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
     /* mjesto (boks) */
-    case 'sf-box-del': sfSync(); { const segs = sfSegs(); segs.splice(Number(id), 1); SF.boxes = segs; } renderStayForm(); break;
+    /* uklanjanje mjesta pita, jer susjedni period preuzme te dane (tako se nehotice zauzme tuđi boks) */
+    case 'sf-box-del': {
+        sfSync();
+        const segs = sfSegs(), i = Number(id), s = segs[i];
+        if (!s) break;
+        const b = boxById(s.b) || {};
+        const ostali = segs.filter((_, j) => j !== i);
+        /* stvarni ishod: ko poslije uklanjanja pokriva te dane (ili ostaju bez boksa) */
+        const to0 = SF.type === 'dnevni' ? SF.from : SF.to;
+        const poslije = stayBoxes({ boxes: ostali, from: SF.from, to: to0, boxId: null });
+        const pokriva = poslije.find(x => x.f <= s.f && s.f <= x.t);
+        const nb = pokriva ? boxById(pokriva.b) : null;
+        confirmModal('Ukloniti mjesto?',
+          `<b>${esc(b.name || '?')}</b> · <span class="num">${s.f === s.t ? fmtD(s.f) : fmtD(s.f) + ' - ' + fmtD(s.t)}</span><br>` +
+          (nb ? `Te dane preuzima <b>${esc(nb.name)}</b>${poslije.length === 1 ? ' (cijeli boravak)' : ''}.`
+              : (poslije.length ? 'Ti dani ostaju bez boksa.' : 'Boravak ostaje bez boksa.')),
+          'sf-box-del-yes', String(i), 'Ukloni', true);
+      } break;
+    case 'sf-box-del-yes': { const segs = sfSegs(); segs.splice(Number(id), 1); SF.boxes = segs; closeModal(); renderStayForm(); } break;
     case 'sf-plan-take': {
         sfSync();
         const to2 = SF.type === 'dnevni' ? SF.from : SF.to;
