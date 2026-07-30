@@ -325,6 +325,7 @@ p{text-wrap:pretty}
 .bseg-x svg{width:16px;height:16px}
 /* uplate unutar boravka */
 .pay-list{background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:10px}
+.pay-head{font-size:12px;font-weight:750;color:var(--text);margin-bottom:6px}
 .pay-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;padding:3px 0;color:var(--muted)}
 .pay-row b{color:var(--text)}
 .pay-sum{border-top:1px solid var(--line);margin-top:5px;padding-top:7px;color:var(--text);font-weight:650}
@@ -332,6 +333,18 @@ p{text-wrap:pretty}
 .modal-actions.modal-stack{flex-direction:column}
 .mod-list{max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .mv-off{opacity:.25;pointer-events:none}
+/* prijedlog rasporeda bokseva */
+.plan{background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.plan-head{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:750;color:var(--text);margin-bottom:9px}
+.plan-head svg{width:16px;height:16px;color:var(--primary)}
+.plan-row{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:13.5px;color:var(--muted)}
+.plan-row svg{width:15px;height:15px;flex-shrink:0}
+.plan-row.plan-crveno{font-weight:650}
+.plan-row .num{margin-left:auto}
+.plan-full{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:9px;border-top:1px solid var(--line);color:var(--warn);font-size:13px;font-weight:600}
+.plan-full svg{width:16px;height:16px;flex-shrink:0}
+.plan-crveno{color:var(--danger)}
+.plan-kavez{font-size:11.5px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:99px;padding:2px 8px}
 .bdg-swap{padding:3px 6px}
 .bdg-swap svg{width:13px;height:13px}
 .modal .dr{margin-top:2px}
@@ -599,7 +612,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.5.3';
+const APP_VERSION = 'v1.6.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -736,6 +749,9 @@ const petsOfClient = cid => D.pets.filter(p => p.clientId === cid);
 const petsOfStay = st => (st.petIds || []).map(petById).filter(Boolean);
 const sortedBoxes = () => [...D.boxes].sort((a, b) => (a.sort || 0) - (b.sort || 0));
 
+/* pomoćno mjesto (kavez, transporter) naspram pravog boksa - Vesni i Novici je
+   jedino bitno kad se pravi boksevi popune, jer tada sljedeći ide u kavez */
+function boxSpare(b){ return /kavez|transport/i.test((b && b.name) || ''); }
 function boxShort(b){
   return b.name.replace('Boks ', 'B').replace('Kotilica 2', 'Kot 2').replace('Kotilica', 'Kot').replace('Mali kavez', 'M.kav').replace('Kavez', 'Kav');
 }
@@ -1025,16 +1041,18 @@ function vDanas(){
     html += `<div class="card"><div class="empty">${I.paw}Danas nema nikoga u pansionu.<br>Dodaj boravak dugmetom dole desno.</div></div>`;
     return html;
   }
-  html += `<div class="sec-title">Danas dolaze <span class="cnt num">${arrivals.length}</span></div>`;
+  /* svuda se broje LJUBIMCI (dva psa u jednom boksu su dva) da se brojevi slažu sa brojčanikom */
+  const brojLj = arr => arr.reduce((s, st) => s + stayPets(st), 0);
+  html += `<div class="sec-title">Danas dolaze <span class="cnt num">${brojLj(arrivals)}</span></div>`;
   html += arrivals.length
     ? `<div class="card">${arrivals.map(st => stayRowHTML(st, 'in')).join('')}</div>`
     : `<div class="card"><p class="empty-line">${all.some(st => st.from === t) ? 'Svi današnji dolasci su stigli.' : 'Danas niko ne dolazi.'}</p></div>`;
-  html += `<div class="sec-title">Danas napuštaju <span class="cnt num">${departures.length}</span></div>`;
+  html += `<div class="sec-title">Danas napuštaju <span class="cnt num">${brojLj(departures)}</span></div>`;
   html += departures.length
     ? `<div class="card">${departures.map(st => stayRowHTML(st, 'out')).join('')}</div>`
     : `<div class="card"><p class="empty-line">${svihOdlazaka ? 'Svi današnji odlasci su ispraćeni.' : 'Danas niko ne napušta pansion.'}</p></div>`;
   if (staying.length){
-    html += `<div class="sec-title">U pansionu <span class="cnt num">${staying.length}</span></div><div class="card">` +
+    html += `<div class="sec-title">U pansionu <span class="cnt num">${brojLj(staying)}</span></div><div class="card">` +
       staying.map(st => stayRowHTML(st)).join('') + '</div>';
   }
   return html;
@@ -2018,41 +2036,47 @@ function sfClientListHTML(){
 function sfRelevantGroups(){
   const pets = sfDraftPets();
   const g = new Set();
-  for (const p of pets){ if (p.species === 'macka') g.add('m'); else { g.add('mb'); g.add('vb'); } }
+  /* mali pas može i u veliki boks, veliki pas ne može u mali */
+  for (const p of pets){
+    if (p.species === 'macka') g.add('m');
+    else if (p.size === 'veliki') g.add('vb');
+    else { g.add('mb'); g.add('vb'); }
+  }
   if (!g.size){ g.add('mb'); g.add('vb'); g.add('m'); }
   return g;
 }
-/* dani u kojima su SVA mjesta (za vrstu ljubimca) zauzeta - stvarna popunjenost, po danu */
-function sfFullDays(){
+/* popunjenost po danu za izabrani termin:
+   `kavezi` = nema više slobodnog PRAVOG boksa (sljedeći ide u kavez),
+   `puni`   = nema slobodnog baš ničega. */
+function sfLoadDays(){
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
-  if (!from || !to || to < from || diffDays(from, to) > 400) return [];
+  const prazno = { puni: [], kavezi: [] };
+  if (!from || !to || to < from || diffDays(from, to) > 400) return prazno;
   const groups = sfRelevantGroups();
   const boxes = D.boxes.filter(b => b.active && groups.has(b.group));
-  if (!boxes.length) return [];
-  const ours = new Set(boxes.map(b => b.id));
-  const busy = {};   // datum -> Set zauzetih bokseva
-  D.stays.forEach(st => {
-    if (st.id === SF.id || !overlap(st, from, to)) return;
-    stayBoxesLive(st).forEach(seg => {
-      if (!ours.has(seg.b)) return;
-      const a = seg.f > from ? seg.f : from, b = seg.t < to ? seg.t : to;
-      for (let iso = a; iso <= b; iso = addDays(iso, 1)) (busy[iso] = busy[iso] || new Set()).add(seg.b);
-    });
-  });
-  const full = [];
+  if (!boxes.length) return prazno;
+  const pravi = boxes.filter(b => !boxSpare(b));
+  const use = boxUsage(from, to, SF.id);
+  const zauzet = (b, iso) => !!(use[b.id] && use[b.id].days.has(iso));
+  const puni = [], kavezi = [];
   for (let iso = from; iso <= to; iso = addDays(iso, 1)){
-    if ((busy[iso] ? busy[iso].size : 0) >= boxes.length) full.push(iso);
+    if (!boxes.some(b => !zauzet(b, iso))) puni.push(iso);
+    else if (pravi.length && !pravi.some(b => !zauzet(b, iso))) kavezi.push(iso);
   }
-  return full;
+  return { puni, kavezi };
 }
-function fullDaysLabel(days){
+function sfFullDays(){ return sfLoadDays().puni; }
+function dayRanges(days){
   const out = [];
   for (const d of days){
     const last = out[out.length - 1];
     if (last && addDays(last.to, 1) === d) last.to = d;
     else out.push({ from: d, to: d });
   }
-  return out.map(r => r.from === r.to ? fmtD(r.from) : fmtD(r.from) + ' - ' + fmtD(r.to)).join(', ');
+  return out;
+}
+function fullDaysLabel(days){
+  return dayRanges(days).map(r => r.from === r.to ? fmtD(r.from) : fmtD(r.from) + ' - ' + fmtD(r.to)).join(', ');
 }
 function sfPetsSuffix(){
   const pets = sfDraftPets();
@@ -2132,14 +2156,16 @@ function renderStayForm(){
   }
 
   /* --- vrsta + termin --- */
-  const fullDays = sfFullDays();
+  const load = sfLoadDays();
+  const fullDays = load.puni;
   const datesHTML = `
     <div class="fld"><label class="lbl">Vrsta boravka</label><div class="seg">
       <button class="seg-btn ${SF.type === 'pansion' ? 'active' : ''}" data-act="sf-type" data-id="pansion">Pansion (noćenje)</button>
       <button class="seg-btn ${SF.type === 'dnevni' ? 'active' : ''}" data-act="sf-type" data-id="dnevni">Dnevno čuvanje</button>
     </div></div>
     <div class="fld"><label class="lbl">Termin</label>${drCalHTML()}
-      ${fullDays.length ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:10px 0 0">${I.warn}<span><b>Popunjeno${sfPetsSuffix()}</b>: <span class="num">${fullDaysLabel(fullDays)}</span></span></div>` : ''}
+      ${load.kavezi.length ? `<div class="banner ban-warn" style="margin:10px 0 0">${I.warn}<span><b>Pravi boksevi su puni</b>: <span class="num">${fullDaysLabel(load.kavezi)}</span> - tada ide u kavez.</span></div>` : ''}
+      ${fullDays.length ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:10px 0 0">${I.warn}<span><b>Sve je popunjeno${sfPetsSuffix()}</b>: <span class="num">${fullDaysLabel(fullDays)}</span></span></div>` : ''}
     </div>`;
 
   /* --- mjesto (boks): boravak može mijenjati boks usput, i može stajati bez boksa --- */
@@ -2150,6 +2176,7 @@ function renderStayForm(){
   if (!segs.length){
     boxHTML = `<div class="fld"><label class="lbl">Mjesto (boks)</label>
       <select id="sfBox">${boxOptionsHTML(from, to, '')}</select>
+      ${validRange ? autoPlanHTML(from, to) : ''}
       <p class="hint" style="margin-top:6px">Ako još ne znaš gdje ide, ostavi prazno - upisaćeš kasnije.</p>
     </div>`;
   } else {
@@ -2195,8 +2222,13 @@ function renderStayForm(){
     if (st0.leftAt) rows.push(`<div class="paid-row"><span class="pr-lbl" style="color:var(--muted)">${I.check} Otišao · ${fmtD(st0.leftAt)}</span>
       <button class="btn btn-ghost btn-sm" data-act="sf-undo-left">Poništi</button></div>`);
     if (pays.length > 1 || (pays.length && !SF.paid)){
-      rows.push(`<div class="pay-list">${pays.map(p => `<div class="pay-row"><span class="num">${fmtDY(p.d)}</span><b class="num">${money(p.a)}</b></div>`).join('')}
-        <div class="pay-row pay-sum"><span>ukupno uplaćeno</span><b class="num">${money(stayPaidSum(st0))}</b></div></div>`);
+      const ostatak = chargeDue(st0);
+      rows.push(`<div class="pay-list">
+        <div class="pay-head">Uplate na ovaj boravak</div>
+        ${pays.map(p => `<div class="pay-row"><span class="num">${fmtDY(p.d)}</span><b class="num">${money(p.a)}</b></div>`).join('')}
+        <div class="pay-row pay-sum"><span>uplaćeno do sada</span><b class="num">${money(stayPaidSum(st0))}</b></div>
+        ${SF.paid ? '' : `<div class="pay-row pay-sum"><span>ostaje za naplatu</span><b class="num" style="color:var(--primary)">${money(ostatak)}</b></div>`}
+      </div>`);
     }
     if (rows.length) stateHTML = `<div class="fld">${rows.join('')}</div>`;
   }
@@ -2245,18 +2277,15 @@ function boxOptionsHTML(from, to, selected){
     if (!items.length) continue;
     out += `<optgroup label="${GROUPS[g]}">`;
     out += items.map(b => {
+      /* kratko i jasno: ili je slobodan cijelo vrijeme (bez dodatka), ili zauzet,
+         ili slobodan do nekog dana - bez brojanja dana koje ih je zbunjivalo */
       let suffix = '';
       const inf = use[b.id];
       if (valid && inf){
         const free = total - inf.days.size;
-        if (free <= 0){
-          const who = inf.who.length > 16 ? inf.who.slice(0, 15) + '…' : inf.who;
-          suffix = ' - zauzet (' + who + ')';
-        } else if (inf.first > from){
-          suffix = ' - slobodan do ' + fmtD(addDays(inf.first, -1));
-        } else {
-          suffix = ' - slobodan ' + free + ' od ' + total + ' dana';
-        }
+        if (free <= 0) suffix = ' - zauzet';
+        else if (inf.first > from) suffix = ' - slobodan do ' + fmtD(addDays(inf.first, -1));
+        else suffix = ' - djelimično slobodan';
       }
       return `<option value="${b.id}" ${selected === b.id ? 'selected' : ''}>${esc(b.name + suffix)}</option>`;
     }).join('');
@@ -2288,6 +2317,80 @@ function clientHistoryModal(cid){
     <div class="mod-list">${rows || '<div class="empty">Nema ranijih boravaka.</div>'}</div>
     ${stays.length > 12 ? `<p class="hint">…i još ${stays.length - 12} starijih.</p>` : ''}
     <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">Zatvori</button></div>`, true);
+}
+
+/* SAM RASPOREDI: složi mjesta za cijeli termin sa najmanje selidbi.
+   PRVO pravi boksevi, kavez/transporter tek kad pravih nema - to je jedino što im je bitno. */
+function autoBoxPlan(from, to, exceptId){
+  if (!from || !to || to < from || diffDays(from, to) > 400) return null;
+  const groups = sfRelevantGroups();
+  const boxes = sortedBoxes().filter(b => b.active && groups.has(b.group));
+  if (!boxes.length) return null;
+  const use = boxUsage(from, to, exceptId);
+  const dani = [];
+  for (let iso = from; iso <= to; iso = addDays(iso, 1)) dani.push(iso);
+  /* za svako mjesto: koliko dana zaredom je slobodno počev od svakog dana */
+  const runs = {};
+  for (const b of boxes){
+    const arr = new Array(dani.length).fill(0);
+    const busy = use[b.id] ? use[b.id].days : null;
+    for (let i = dani.length - 1; i >= 0; i--){
+      arr[i] = (busy && busy.has(dani[i])) ? 0 : 1 + (i + 1 < dani.length ? arr[i + 1] : 0);
+    }
+    runs[b.id] = arr;
+  }
+  const pravi = boxes.filter(b => !boxSpare(b)), kavezi = boxes.filter(boxSpare);
+  /* koliko dana zaredom (počev od svakog dana) NIJEDAN pravi boks nije slobodan -
+     toliko i najviše toliko ostaje u kavezu, pa nazad u pravi boks */
+  const bezPravog = new Array(dani.length).fill(0);
+  for (let i = dani.length - 1; i >= 0; i--){
+    const ima = pravi.some(b => runs[b.id][i] > 0);
+    bezPravog[i] = ima ? 0 : 1 + (i + 1 < dani.length ? bezPravog[i + 1] : 0);
+  }
+  const segs = [], full = [];
+  let i = 0;
+  while (i < dani.length){
+    let best = null, bestRun = 0;
+    for (const grupa of [pravi, kavezi]){
+      for (const b of grupa){ if (runs[b.id][i] > bestRun){ bestRun = runs[b.id][i]; best = b; } }
+      if (best){
+        if (grupa === kavezi) bestRun = Math.max(1, Math.min(bestRun, bezPravog[i]));
+        break;   // pravi boks ima prednost nad kavezom
+      }
+    }
+    if (!best){ full.push(dani[i]); i++; continue; }
+    const last = segs[segs.length - 1];
+    if (last && last.b === best.id && addDays(last.t, 1) === dani[i]) last.t = dani[i + bestRun - 1];
+    else segs.push({ b: best.id, f: dani[i], t: dani[i + bestRun - 1] });
+    i += bestRun;
+  }
+  return { segs, full };
+}
+function autoPlanHTML(from, to){
+  const plan = autoBoxPlan(from, to, SF.id);
+  if (!plan) return '';
+  const dana = diffDays(from, to) + 1;
+  const jedan = plan.segs.length === 1 && !plan.full.length && plan.segs[0].f === from && plan.segs[0].t === to;
+  if (jedan && !boxSpare(boxById(plan.segs[0].b) || {})) return '';   // ima pravog boksa za cijelo vrijeme
+  /* hronološki: i mjesta i rupe kad nema ničeg slobodnog */
+  const stavke = plan.segs.map(s => ({ f: s.f, t: s.t, b: s.b }))
+    .concat(dayRanges(plan.full).map(r => ({ f: r.from, t: r.to, b: null })))
+    .sort((a, b) => a.f.localeCompare(b.f));
+  const redovi = stavke.map(s => {
+    const kad = `<span class="num">${s.f === s.t ? fmtD(s.f) : fmtD(s.f) + ' - ' + fmtD(s.t)}</span>`;
+    if (!s.b) return `<div class="plan-row plan-crveno">${I.warn}<span>nema mjesta</span>${kad}</div>`;
+    const b = boxById(s.b) || {};
+    const kavez = boxSpare(b);
+    return `<div class="plan-row">
+      <span class="badge ${kavez ? 'b-warn' : 'b-' + (b.group || 'line')}">${esc(b.name || '?')}</span>${kad}
+      ${kavez ? '<span class="plan-kavez">pravi puni</span>' : ''}
+    </div>`;
+  }).join('');
+  return `<div class="plan">
+    <div class="plan-head">${I.swap} Prijedlog rasporeda · <span class="num">${fmtD(from)} - ${fmtD(to)}</span></div>
+    ${redovi || '<p class="hint" style="margin:0">Nema nijednog slobodnog mjesta u ovom terminu.</p>'}
+    ${plan.segs.length ? `<button class="btn btn-primary btn-block btn-sm" data-act="sf-plan-take" style="margin-top:10px">Prihvati raspored</button>` : ''}
+  </div>`;
 }
 
 /* premještanje u drugi boks usred boravka */
@@ -3153,6 +3256,15 @@ document.addEventListener('click', (e) => {
     case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
     /* mjesto (boks) */
     case 'sf-box-del': sfSync(); { const segs = sfSegs(); segs.splice(Number(id), 1); SF.boxes = segs; } renderStayForm(); break;
+    case 'sf-plan-take': {
+        sfSync();
+        const to2 = SF.type === 'dnevni' ? SF.from : SF.to;
+        const plan = autoBoxPlan(SF.from, to2, SF.id);
+        if (!plan || !plan.segs.length){ toast('Nema slobodnih mjesta u ovom terminu.'); break; }
+        SF.boxes = plan.segs;
+        renderStayForm();
+        toast(plan.segs.length === 1 ? 'Upisan boks.' : 'Raspoređeno u ' + plan.segs.length + ' boksa.');
+      } break;
     case 'sf-box-move': sfSync(); MV = null; sfMoveModal(); break;
     case 'mv-pick': MV.date = id; MV.box = $('#mvBox') ? $('#mvBox').value : ''; sfMoveModal(); break;
     case 'mv-nav': MV.cur = ymShift(MV.cur, Number(id)); MV.box = $('#mvBox') ? $('#mvBox').value : ''; sfMoveModal(); break;
