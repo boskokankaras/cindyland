@@ -599,7 +599,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.5.1';
+const APP_VERSION = 'v1.5.2';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -838,7 +838,9 @@ function boxUsage(from, to, exceptId){
 function stayArrived(st, t){ t = t || todayISO(); return !!st.arrivedAt || st.from < t; }
 function stayLeft(st, t){ t = t || todayISO(); return !!st.leftAt || st.to < t; }
 function stayHere(st, t){ t = t || todayISO(); return stayCovers(st, t) && stayArrived(st, t) && !stayLeft(st, t); }
-function stayPets(st){ return Math.max((st.petIds || []).length, 1); }
+/* broji SAMO ljubimce koji stvarno postoje u imeniku - u starim zapisima zna ostati
+   upisan ljubimac koji je u međuvremenu obrisan, pa bi brojčanik pokazivao više nego što jeste */
+function stayPets(st){ return Math.max(petsOfStay(st).length, 1); }
 /* kojoj grupi boravak pripada danas: po boksu, a ako boks nije određen - po vrsti ljubimca */
 function stayGroup(st, iso){
   const b = boxById(boxOn(st, iso));
