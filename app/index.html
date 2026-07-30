@@ -614,7 +614,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.6.2';
+const APP_VERSION = 'v1.6.3';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1000,9 +1000,10 @@ function vDanas(){
   /* štriknuti (i naplaćeni) odlasci silaze sa spiska - spisak je podsjetnik šta još treba */
   const departures = all.filter(st => st.to === t && !stayLeft(st, t));
   const svihOdlazaka = all.filter(st => st.to === t).length;
-  /* u brojčaniku i u pansionu su samo oni koji su STVARNO tu: potvrđen dolazak, bez odlaska */
+  /* u brojčaniku i u pansionu su samo oni koji su STVARNO tu: potvrđen dolazak, bez odlaska.
+     Ko danas odlazi je i dalje U PANSIONU dok se ne štrikne Otišao - zato isti spisak. */
   const here = all.filter(st => stayHere(st, t));
-  const staying = here.filter(st => st.to !== t);
+  const staying = here;
 
   const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
