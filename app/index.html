@@ -255,6 +255,87 @@ p{text-wrap:pretty}
 .dr-foot{margin-top:10px;font-size:13px;color:var(--muted);text-align:center}
 .dr-foot strong{color:var(--primary)}
 
+/* ===== štrik dolaska/odlaska u listama Danas ===== */
+.row-tap{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.row-tap.tappable:active{opacity:.6}
+.tick{
+  display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border-radius:13px;
+  font-weight:750;font-size:14.5px;white-space:nowrap;transition:transform .12s,filter .12s;
+}
+.tick-in{background:var(--ok);color:#fff;box-shadow:0 3px 10px rgba(60,140,90,.28)}
+.tick-out{background:var(--card);color:var(--text);border:1.5px solid var(--line);box-shadow:0 2px 6px rgba(43,35,32,.08)}
+.tick:active{transform:scale(.94)}
+.tick .tick-ico{display:flex;width:18px;height:18px}
+.tick .tick-ico svg{width:100%;height:100%}
+
+/* ===== pretraga: zalijepljena za vrh, sa krstićem ===== */
+.kl-sticky{position:sticky;top:0;z-index:30;background:var(--bg);padding:10px 0 12px;margin-bottom:2px}
+.kl-sticky::after{content:'';position:absolute;left:0;right:0;bottom:-10px;height:10px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.kl-merge-head{background:var(--primary-soft);color:var(--primary);margin-bottom:10px}
+.srch{position:relative;display:flex}
+.srch input{padding-left:40px;padding-right:42px}
+.srch input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.srch-ico{position:absolute;left:12px;top:11px;width:20px;height:20px;color:var(--muted);pointer-events:none}
+.srch-x{
+  position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;
+  display:none;align-items:center;justify-content:center;color:var(--muted);border-radius:50%;
+}
+.srch-x.on{display:flex}
+.srch-x svg{width:17px;height:17px}
+.srch-x:active{background:var(--bg)}
+/* slova sa strane */
+.az-rail{
+  position:fixed;right:1px;top:50%;transform:translateY(-50%);z-index:35;
+  display:flex;flex-direction:column;align-items:center;
+  background:rgba(255,255,255,.75);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border-radius:99px;padding:7px 1px;box-shadow:var(--shadow);
+}
+.az-rail{touch-action:none;-webkit-user-select:none;user-select:none}
+.az{font-size:10.5px;font-weight:800;color:var(--muted);line-height:1.3;padding:1px 7px;pointer-events:none}
+.az-rail:active{background:rgba(255,255,255,.95)}
+/* veliko slovo koje iskoči pri prevlačenju */
+.az-bubble{
+  position:fixed;right:44px;z-index:60;width:62px;height:62px;margin-top:-31px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--primary);color:#fff;border-radius:20px;
+  font-size:30px;font-weight:850;letter-spacing:-.02em;
+  box-shadow:0 10px 26px rgba(224,82,58,.4);
+  opacity:0;transform:scale(.6);pointer-events:none;
+  transition:opacity .14s ease-out,transform .18s cubic-bezier(.2,1.4,.4,1),top .1s linear;
+}
+.az-bubble.on{opacity:1;transform:scale(1)}
+@media (min-width:900px){
+  .az-bubble{right:auto;left:min(calc(232px + 40px + 786px - 76px), calc(100vw - 108px))}
+}
+#klList .row{padding-right:27px}
+.kl-letter{
+  font-size:12px;font-weight:800;color:var(--primary);letter-spacing:.06em;
+  padding:12px 0 5px;border-top:1px solid var(--line);margin-top:5px;
+}
+.kl-letter:first-child{border-top:none;margin-top:0;padding-top:2px}
+@media (min-width:900px){
+  .az-rail{right:auto;left:min(calc(232px + 40px + 786px), calc(100vw - 32px))}
+}
+
+/* ===== mjesto (boks) u boravku ===== */
+.bsegs{display:flex;flex-direction:column;gap:8px}
+.bseg{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:7px 6px 7px 11px}
+.bseg-d{color:var(--muted);font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bseg-x{width:34px;height:34px;background:transparent;border:none}
+.bseg-x svg{width:16px;height:16px}
+/* uplate unutar boravka */
+.pay-list{background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:10px}
+.pay-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;padding:3px 0;color:var(--muted)}
+.pay-row b{color:var(--text)}
+.pay-sum{border-top:1px solid var(--line);margin-top:5px;padding-top:7px;color:var(--text);font-weight:650}
+.paid-row + .paid-row{margin-top:8px}
+.modal-actions.modal-stack{flex-direction:column}
+.mod-list{max-height:44vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mv-off{opacity:.25;pointer-events:none}
+.bdg-swap{padding:3px 6px}
+.bdg-swap svg{width:13px;height:13px}
+.modal .dr{margin-top:2px}
+
 /* ===== objedinjavanje klijenata ===== */
 .row{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .kl-check{
@@ -358,7 +439,7 @@ p{text-wrap:pretty}
 .grow-ico svg{width:28px;height:28px}
 .grow-main{flex:1;min-width:0}
 .grow-name{display:block;font-size:16.5px;font-weight:750}
-.grow-sub{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:1px}
+.grow-sub{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grow-num{font-size:28px;font-weight:850;white-space:nowrap}
 .grow-num small{font-size:15px;color:var(--muted);font-weight:650}
 .empty-line{color:var(--muted);font-size:14px;text-align:center;padding:7px 2px}
@@ -518,7 +599,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.4.0';
+const APP_VERSION = 'v1.5.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -539,6 +620,8 @@ const I = {
   chev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6 15.5 12l-6 6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 7"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 22 20H2z"/><path d="M12 10v4.5M12 17.5v.1"/></svg>',
   ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg>',
@@ -673,57 +756,131 @@ function stayLabel(st){
 function stayCovers(st, iso){ return st.from <= iso && iso <= st.to; }
 function staysOnDate(iso){ return D.stays.filter(st => stayCovers(st, iso)); }
 function overlap(st, from, to){ return st.from <= to && from <= st.to; }
-function boxStays(boxId, from, to, exceptId){
-  return D.stays.filter(st => st.id !== exceptId && st.boxId === boxId && overlap(st, from, to));
+
+/* ---- MJESTO (BOKS) ----
+   Boravak NIJE vezan za jedan boks: st.boxes je niz perioda [{b,f,t}] pa se ljubimac
+   može premjestiti usput. Stari zapisi imaju samo st.boxId - to je jedan period. */
+function stayBoxes(st){
+  let segs = (st.boxes && st.boxes.length ? st.boxes : (st.boxId ? [{ b: st.boxId, f: st.from, t: st.to }] : []))
+    .filter(s => s && s.b)
+    /* period boksa ne može van termina boravka (ako se boravak skrati, skraćuje se i boks) */
+    .map(s => ({ b: s.b, f: (s.f || st.from) < st.from ? st.from : (s.f || st.from), t: (s.t || st.to) > st.to ? st.to : (s.t || st.to) }))
+    .filter(s => s.f <= s.t)
+    .sort((a, b) => a.f.localeCompare(b.f));
+  if (!segs.length) return segs;
+  /* period se prekida kad počne sljedeći (bez preklapanja); prazni ispadaju */
+  for (let i = 0; i < segs.length - 1; i++){
+    const nextF = segs[i + 1].f;
+    if (segs[i].t >= nextF) segs[i].t = addDays(nextF, -1);
+  }
+  segs = segs.filter(s => s.f <= s.t);
+  if (!segs.length) return segs;
+  /* prvi počinje sa dolaskom, posljednji traje do odlaska (bez rupa na krajevima) */
+  segs[0].f = st.from;
+  segs[segs.length - 1].t = st.to;
+  return segs;
 }
+function boxOn(st, iso){
+  for (const s of stayBoxes(st)) if (s.f <= iso && iso <= s.t) return s.b;
+  return null;
+}
+/* STVARNO držanje boksa: kad je odlazak potvrđen, boks je slobodan od tog dana
+   (prikaz u redu boravka ostaje isti - ovo koristi samo računanje zauzetosti) */
+function stayBoxesLive(st){
+  const segs = stayBoxes(st);
+  if (!st.leftAt) return segs;
+  const end = addDays(st.leftAt, -1);
+  return segs.map(s => ({ b: s.b, f: s.f, t: s.t > end ? end : s.t })).filter(s => s.f <= s.t);
+}
+function boxOnLive(st, iso){
+  for (const s of stayBoxesLive(st)) if (s.f <= iso && iso <= s.t) return s.b;
+  return null;
+}
+/* „glavni" boks boravka: onaj koji važi danas, inače prvi upisani */
+function stayBoxId(st){
+  const segs = stayBoxes(st);
+  if (!segs.length) return null;
+  return boxOn(st, todayISO()) || segs[0].b;
+}
+function stayHoldsBox(st, boxId, from, to){
+  return stayBoxesLive(st).some(s => s.b === boxId && s.f <= to && from <= s.t);
+}
+function boxStays(boxId, from, to, exceptId){
+  return D.stays.filter(st => st.id !== exceptId && stayHoldsBox(st, boxId, from, to));
+}
+/* zauzetost SVIH bokseva u periodu u jednom prolazu (za listu bokseva u formi) */
+function boxUsage(from, to, exceptId){
+  const map = {};
+  D.stays.forEach(st => {
+    if (st.id === exceptId || !overlap(st, from, to)) return;
+    stayBoxesLive(st).forEach(seg => {
+      const a = seg.f > from ? seg.f : from, b = seg.t < to ? seg.t : to;
+      if (a > b) return;
+      const m = map[seg.b] = map[seg.b] || { days: new Set(), first: null, who: '' };
+      for (let iso = a; iso <= b; iso = addDays(iso, 1)) m.days.add(iso);
+      if (!m.first || a < m.first){ m.first = a; m.who = stayLabel(st); }
+    });
+  });
+  return map;
+}
+
+/* ---- DOLAZAK / ODLAZAK ----
+   Štrik u Danas upisuje arrivedAt/leftAt. Za ranije dane se podrazumijeva
+   da je stigao/otišao (stara evidencija nema štrikove). */
+function stayArrived(st, t){ t = t || todayISO(); return !!st.arrivedAt || st.from < t; }
+function stayLeft(st, t){ t = t || todayISO(); return !!st.leftAt || st.to < t; }
+function stayHere(st, t){ t = t || todayISO(); return stayCovers(st, t) && stayArrived(st, t) && !stayLeft(st, t); }
+function stayPets(st){ return Math.max((st.petIds || []).length, 1); }
+/* kojoj grupi boravak pripada danas: po boksu, a ako boks nije određen - po vrsti ljubimca */
+function stayGroup(st, iso){
+  const b = boxById(boxOn(st, iso));
+  if (b) return b.group;
+  const pets = petsOfStay(st);
+  if (pets.length && pets.every(p => p.species === 'macka')) return 'm';
+  if (pets.some(p => p.species !== 'macka' && p.size === 'veliki')) return 'vb';
+  return 'mb';
+}
+
 function stayStatus(st){
   const t = todayISO();
-  if (t < st.from) return 'rez';
-  if (t > st.to) return 'done';
+  if (st.leftAt || t > st.to) return 'done';
+  if (t < st.from || !stayArrived(st, t)) return 'rez';
   return 'in';
 }
-function stayDays(st){ return st.type === 'dnevni' ? 1 : diffDays(st.from, st.to) + 1; }
+/* Plaća se NOĆENJE: 25. do 31. = 6 noćenja. Dolazak i odlazak istog dana = dnevno čuvanje. */
+function stayNights(st){ return st.type === 'dnevni' ? 0 : Math.max(0, diffDays(st.from, st.to)); }
 function plural(n, a, b, c){ return n % 10 === 1 && n % 100 !== 11 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? b : c); }
+function nightsLabel(n){ return n ? n + ' ' + plural(n, 'noćenje', 'noćenja', 'noćenja') : 'bez noćenja'; }
+function stayLenLabel(st){ return st.type === 'dnevni' ? 'dnevno čuvanje' : nightsLabel(stayNights(st)); }
 
-/* lanac uzastopnih boravaka istog klijenta (stalni gosti: segmenti po mjesecima naplate / promjeni boksa) */
-function petsShared(a, b){
-  const A = a.petIds || [], B = b.petIds || [];
-  if (!A.length || !B.length) return true;
-  return A.some(id => B.includes(id));
+/* ---- NAPLATE ----
+   Niz naplata sa datumima (stalni gosti plaćaju mjesečno) - Zarada po mjesecima ostaje tačna. */
+function stayPayments(st){
+  if (st.payments && st.payments.length) return st.payments.map(p => ({ a: Number(p.a) || 0, d: p.d || st.to }));
+  if (st.paid && st.price != null) return [{ a: Number(st.price) || 0, d: st.paidAt || st.to }];
+  return [];
 }
-function stayNext(st){
-  const nd = addDays(st.to, 1);
-  return D.stays.find(x => x.id !== st.id && x.clientId === st.clientId && x.to > st.to &&
-    (x.from === nd || x.from === st.to) && petsShared(st, x));
-}
-function stayPrev(st){
-  const pd = addDays(st.from, -1);
-  return D.stays.find(x => x.id !== st.id && x.clientId === st.clientId && x.from < st.from &&
-    (x.to === pd || x.to === st.from) && petsShared(st, x));
-}
-function stayChainEnd(st){
-  let cur = st, guard = 0;
-  while (guard++ < 40){ const n = stayNext(cur); if (!n) break; cur = n; }
-  return cur.to;
-}
-/* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu, 10+ dana i mjesečnom */
+function stayPaidSum(st){ return stayPayments(st).reduce((s, p) => s + p.a, 0); }
+
+/* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu, 10+ noći i mjesečnom */
 function petCat(p){ return p.species === 'macka' ? 'macka' : (p.size === 'veliki' ? 'veliki' : 'mali'); }
-function catAmount(c, days, pair){
-  if (days >= 30) return (pair ? c.parMj : c.mj) * days / 30;
-  if (days >= 10) return days * (pair ? c.par10 : c.dan10);
-  return days * (pair ? c.par : c.dan);
+function catAmount(c, nights, pair){
+  if (nights >= 30) return (pair ? c.parMj : c.mj) * nights / 30;
+  if (nights >= 10) return nights * (pair ? c.par10 : c.dan10);
+  return nights * (pair ? c.par : c.dan);
 }
 function estimateFor(petsArr, type, from, to){
   if (!petsArr.length) return 0;
   if (type === 'dnevni') return petsArr.length * D.prices.dnevni;
-  const days = from && to && to >= from ? diffDays(from, to) + 1 : 0;
-  if (!days) return 0;
+  if (!from || !to || to < from) return 0;
+  const nights = diffDays(from, to);
+  if (nights <= 0) return petsArr.length * D.prices.dnevni;   // došao i otišao istog dana
   const cnt = { mali: 0, veliki: 0, macka: 0 };
   petsArr.forEach(p => cnt[petCat(p)]++);
   let total = 0;
   for (const k of ['mali', 'veliki', 'macka']){
     const c = D.prices[k];
-    total += Math.floor(cnt[k] / 2) * catAmount(c, days, true) + (cnt[k] % 2) * catAmount(c, days, false);
+    total += Math.floor(cnt[k] / 2) * catAmount(c, nights, true) + (cnt[k] % 2) * catAmount(c, nights, false);
   }
   return Math.round(total);
 }
@@ -731,7 +888,7 @@ function stayEstimate(st){ return estimateFor(petsOfStay(st), st.type, st.from, 
 function stayAmount(st){ return st.price != null ? st.price : stayEstimate(st); }
 function groupAvatar(st){
   const pets = petsOfStay(st);
-  const b = boxById(st.boxId);
+  const b = boxById(stayBoxId(st));
   const withPhoto = pets.find(p => p.photo);
   const isCat = pets.length ? pets.every(p => p.species === 'macka') : (b && b.group === 'm');
   const isBig = pets.length ? pets.some(p => p.species === 'pas' && p.size === 'veliki') : (b && b.group === 'vb');
@@ -742,10 +899,14 @@ function petAvatar(p){
   const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
   return `<div class="row-av ${cls}">${p.photo ? `<img src="${esc(p.photo)}" alt="" loading="lazy">` : (p.species === 'macka' ? I.cat : I.dog)}</div>`;
 }
-function boxBadge(st){
-  const b = boxById(st.boxId);
+function boxBadge(st, short){
+  const segs = stayBoxes(st);
+  if (!segs.length) return '<span class="badge b-warn">bez boksa</span>';
+  const b = boxById(stayBoxId(st));
   if (!b) return '';
-  return `<span class="badge b-${b.group}">${esc(GROUPS_1[b.group])} · ${esc(b.name)}</span>`;
+  const more = segs.length > 1 ? `<span class="badge b-line bdg-swap" title="mijenja boks tokom boravka">${I.swap}</span>` : '';
+  const txt = short ? GROUPS_1[b.group] + ' ' + boxShort(b) : GROUPS_1[b.group] + ' · ' + b.name;
+  return `<span class="badge b-${b.group}">${esc(txt)}</span>${more}`;
 }
 </script>
 <script>
@@ -807,23 +968,24 @@ function renderTabbar(){
 function vDanas(){
   const t = todayISO();
   const all = staysOnDate(t);
-  /* nastavak niza (novi mjesec/boks istog gosta) nije pravi dolazak ni odlazak */
-  const arrivals = all.filter(st => st.from === t && !stayPrev(st));
-  const departures = all.filter(st => st.to === t && !stayNext(st));
-  const staying = all.filter(st => !arrivals.includes(st) && !departures.includes(st));
+  const arrivals = all.filter(st => st.from === t && !stayArrived(st, t));
+  const departures = all.filter(st => st.to === t);
+  /* u brojčaniku i u pansionu su samo oni koji su STVARNO tu: potvrđen dolazak, bez odlaska */
+  const here = all.filter(st => stayHere(st, t));
+  const staying = here.filter(st => st.to !== t);
 
   const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
-    const inG = all.filter(st => { const b = boxById(st.boxId); return b && b.group === g; });
-    const occ = new Set(inG.map(st => st.boxId));
-    const petsN = inG.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
+    const inG = here.filter(st => stayGroup(st, t) === g);
+    const occ = new Set(inG.map(st => boxOn(st, t)).filter(id => boxById(id)));
+    const petsN = inG.reduce((s, st) => s + stayPets(st), 0);
     return { g, used: occ.size, total: act.length, petsN };
   });
-  const petCount = all.reduce((s, st) => s + Math.max((st.petIds || []).length, 1), 0);
+  const petCount = here.reduce((s, st) => s + stayPets(st), 0);
 
   const tmr = addDays(t, 1);
-  const tmrIn = D.stays.filter(st => st.from === tmr && !stayPrev(st)).length;
-  const tmrOut = D.stays.filter(st => st.to === tmr && !stayNext(st)).length;
+  const tmrIn = D.stays.filter(st => st.from === tmr).length;
+  const tmrOut = D.stays.filter(st => st.to === tmr).length;
 
   let html = '';
   if (OFFLINE) html += `<div class="banner ban-warn">${I.warn}<span>Nema veze sa serverom - prikazujem posljednje poznato stanje.</span></div>`;
@@ -840,7 +1002,7 @@ function vDanas(){
       ${groups.map(f => `<button class="grow" data-act="group-open" data-id="${f.g}">
         <span class="grow-ico" style="background:var(--${f.g}-soft);color:var(--${f.g})">${f.g === 'm' ? I.cat : I.dog}</span>
         <span class="grow-main"><span class="grow-name">${GROUPS[f.g]}</span>
-        <span class="grow-sub num">${f.used} od ${f.total} bokseva zauzeto</span></span>
+        <span class="grow-sub num">zauzeto ${f.used} od ${f.total}</span></span>
         <span class="grow-num num" style="color:var(--${f.g})">${f.petsN}<small> ${f.g === 'm' ? plural(f.petsN, 'mačka', 'mačke', 'mačaka') : plural(f.petsN, 'pas', 'psa', 'pasa')}</small></span>
       </button>`).join('')}
     </div>
@@ -854,7 +1016,7 @@ function vDanas(){
   html += `<div class="sec-title">Danas dolaze <span class="cnt num">${arrivals.length}</span></div>`;
   html += arrivals.length
     ? `<div class="card">${arrivals.map(st => stayRowHTML(st, 'in')).join('')}</div>`
-    : `<div class="card"><p class="empty-line">Danas niko ne dolazi.</p></div>`;
+    : `<div class="card"><p class="empty-line">${all.some(st => st.from === t) ? 'Svi današnji dolasci su stigli.' : 'Danas niko ne dolazi.'}</p></div>`;
   html += `<div class="sec-title">Danas napuštaju <span class="cnt num">${departures.length}</span></div>`;
   html += departures.length
     ? `<div class="card">${departures.map(st => stayRowHTML(st, 'out')).join('')}</div>`
@@ -866,22 +1028,39 @@ function vDanas(){
   return html;
 }
 
+/* dugme pored reda: potvrda dolaska / odlaska (mora izgledati kao dugme, ne kao status) */
+function tickHTML(act, id, label){
+  const out = act === 'stay-left';
+  return `<button class="tick ${out ? 'tick-out' : 'tick-in'}" data-act="${act}" data-id="${id}">
+    <span class="tick-ico">${out ? I.out : I.in}</span><span class="tick-lbl">${label}</span></button>`;
+}
 function stayRowHTML(st, mode){
   const c = clientById(st.clientId);
+  const t = todayISO();
   let side = '';
   if (mode === 'out'){
-    side = st.paid ? `<span class="badge b-ok">${I.check} naplaćeno</span>` : '';
+    side = stayLeft(st, t)
+      ? `<span class="badge b-line">${I.check} otišao</span>${st.paid ? `<span class="badge b-ok">naplaćeno</span>` : ''}`
+      : (st.paid ? `<span class="badge b-ok">${I.check} naplaćeno</span>` : '') + tickHTML('stay-left', st.id, 'Otišao');
   } else if (mode === 'in'){
-    side = '';
+    side = tickHTML('stay-arrived', st.id, 'Došao');
   } else {
-    side = `<span class="badge b-line num">do ${fmtD(stayChainEnd(st))}</span>`;
+    side = `<span class="badge b-line num">do ${fmtD(st.to)}</span>`;
   }
-  const meta = [c ? c.name : '', st.type === 'dnevni' ? 'dnevno čuvanje' : fmtD(st.from) + ' - ' + fmtD(st.to)].filter(Boolean).join(' · ');
-  return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
-    ${groupAvatar(st)}
-    <div class="row-main">
-      <div class="row-name">${esc(stayLabel(st))}</div>
-      <div class="row-meta">${esc(meta)} ${boxBadge(st)}</div>
+  /* boks ide prvi da se uvijek vidi; datum je kratak jer se drugi kraj vidi iz same liste */
+  const who = c && c.name !== stayLabel(st) ? c.name : '';
+  const dat = st.type === 'dnevni' ? 'dnevno čuvanje'
+    : mode === 'in' ? 'do ' + fmtD(st.to)
+    : mode === 'out' ? 'od ' + fmtD(st.from)
+    : 'od ' + fmtD(st.from);
+  const meta = [dat, who].filter(Boolean).join(' · ');
+  return `<div class="row">
+    <div class="row-tap tappable" data-act="stay-edit" data-id="${st.id}">
+      ${groupAvatar(st)}
+      <div class="row-main">
+        <div class="row-name">${esc(stayLabel(st))}</div>
+        <div class="row-meta">${boxBadge(st, true)} ${esc(meta)}</div>
+      </div>
     </div>
     <div class="row-side">${side}</div>
   </div>`;
@@ -910,8 +1089,8 @@ function calMrezaHTML(){
   for (let d = 1; d <= dim; d++){
     const iso = CAL_YM + '-' + pad(d);
     const stays = staysOnDate(iso);
-    const hasIn = stays.some(st => st.from === iso && !stayPrev(st));
-    const hasOut = stays.some(st => st.to === iso && !stayNext(st));
+    const hasIn = stays.some(st => st.from === iso);
+    const hasOut = stays.some(st => st.to === iso);
     cells += `<div class="cal-cell ${iso === t ? 'today' : ''} ${iso < t ? 'past' : ''}" data-act="day-open" data-id="${iso}">
       <span class="cal-num num">${d}</span>
       <span class="cal-cnt num ${stays.length ? '' : 'zero'}">${stays.length}</span>
@@ -927,7 +1106,8 @@ function gridBoxes(){
   // aktivni + neaktivni koji imaju boravke u prikazanom mjesecu
   const dim = daysInMonth(CAL_YM);
   const mFrom = CAL_YM + '-01', mTo = CAL_YM + '-' + pad(dim);
-  const used = new Set(D.stays.filter(st => overlap(st, mFrom, mTo)).map(st => st.boxId));
+  const used = new Set();
+  D.stays.filter(st => overlap(st, mFrom, mTo)).forEach(st => stayBoxes(st).forEach(s => used.add(s.b)));
   return sortedBoxes().filter(b => b.active || used.has(b.id));
 }
 
@@ -941,12 +1121,15 @@ function calGridHTML(){
   boxes.forEach(b => map[b.id] = {});
   const mFrom = CAL_YM + '-01', mTo = CAL_YM + '-' + pad(dim);
   D.stays.forEach(st => {
-    if (!overlap(st, mFrom, mTo) || !map[st.boxId]) return;
-    const a = st.from > mFrom ? st.from : mFrom;
-    const b = st.to < mTo ? st.to : mTo;
-    for (let iso = a; iso <= b; iso = addDays(iso, 1)){
-      (map[st.boxId][iso] = map[st.boxId][iso] || []).push(st);
-    }
+    if (!overlap(st, mFrom, mTo)) return;
+    stayBoxesLive(st).forEach(seg => {
+      if (!map[seg.b]) return;
+      const a = seg.f > mFrom ? seg.f : mFrom;
+      const b = seg.t < mTo ? seg.t : mTo;
+      for (let iso = a; iso <= b; iso = addDays(iso, 1)){
+        (map[seg.b][iso] = map[seg.b][iso] || []).push(st);
+      }
+    });
   });
 
   // grupni red (colspan po grupama, redoslijed mb-vb-m po sortiranju)
@@ -973,7 +1156,9 @@ function calGridHTML(){
       if (sts && sts.length){
         const st = sts[0];
         const label = sts.length > 1 ? sts.map(stayLabel).join(' / ') : stayLabel(st);
-        const cls = `occ-${b.group} ${st.from === iso ? 'stay-first' : ''} ${st.to === iso ? 'stay-last' : ''}`;
+        const prevSame = boxOn(st, addDays(iso, -1)) === b.id;
+        const nextSame = boxOn(st, addDays(iso, 1)) === b.id;
+        const cls = `occ-${b.group} ${prevSame ? '' : 'stay-first'} ${nextSame ? '' : 'stay-last'}`;
         rows += `<td class="bg-cell ${cls}" data-act="stay-edit" data-id="${st.id}"><span class="bg-in">${esc(label)}</span></td>`;
       } else {
         rows += `<td class="bg-cell free" data-act="grid-new" data-date="${iso}" data-box="${b.id}"></td>`;
@@ -986,13 +1171,13 @@ function calGridHTML(){
 
 function groupSheet(g){
   const t = todayISO();
-  const inGroup = staysOnDate(t).filter(st => { const b = boxById(st.boxId); return b && b.group === g; })
-    .sort((a, b) => (boxById(a.boxId).sort || 0) - (boxById(b.boxId).sort || 0));
-  const occupied = new Set(inGroup.map(st => st.boxId));
+  const inGroup = staysOnDate(t).filter(st => stayHere(st, t) && stayGroup(st, t) === g)
+    .sort((a, b) => ((boxById(boxOn(a, t)) || {}).sort || 0) - ((boxById(boxOn(b, t)) || {}).sort || 0));
+  const occupied = new Set(inGroup.map(st => boxOn(st, t)));
   const freeBoxes = sortedBoxes().filter(b => b.active && b.group === g && !occupied.has(b.id));
   let html = '';
   if (inGroup.length){
-    html += `<div class="card">${inGroup.map(st => stayRowHTML(st, st.to === t && !stayNext(st) ? 'out' : (st.from === t && !stayPrev(st) ? 'in' : undefined))).join('')}</div>`;
+    html += `<div class="card">${inGroup.map(st => stayRowHTML(st, st.to === t ? 'out' : undefined)).join('')}</div>`;
   } else {
     html += `<div class="card"><div class="empty">${g === 'm' ? I.cat : I.dog}Danas nema nikoga u ovoj grupi.</div></div>`;
   }
@@ -1007,9 +1192,9 @@ function groupSheet(g){
 
 function daySheet(iso){
   const stays = staysOnDate(iso);
-  const arrivals = stays.filter(st => st.from === iso && !stayPrev(st));
-  const departures = stays.filter(st => st.to === iso && !stayNext(st));
-  const occupied = new Set(stays.map(st => st.boxId));
+  const arrivals = stays.filter(st => st.from === iso);
+  const departures = stays.filter(st => st.to === iso);
+  const occupied = new Set(stays.map(st => boxOnLive(st, iso)).filter(Boolean));
   const freeBoxes = sortedBoxes().filter(b => b.active && !occupied.has(b.id));
 
   let html = '';
@@ -1032,15 +1217,97 @@ function daySheet(iso){
 /* ============ KLIJENTI ============ */
 function vKlijenti(){
   const base = KL_MERGE ? clientById(KL_MERGE.baseId) : null;
-  const mergeHead = base ? `<div class="banner" style="background:var(--primary-soft);color:var(--primary)">${I.people}
+  /* pretraga je zalijepljena za vrh - kod objedinjavanja ne moraš da se vraćaš gore */
+  const mergeHead = base ? `<div class="banner kl-merge-head">${I.people}
     <span style="flex:1">Objedinjavanje pod <b>${esc(base.name)}</b> - dodirni klijente koji su ista osoba.</span></div>` : '';
-  return `${mergeHead}<div class="fld" style="position:relative;margin-bottom:12px">
-    <input type="search" id="klSearch" placeholder="Pretraži klijente i ljubimce…" value="${esc(KL_Q)}" style="padding-left:40px">
-    <span style="position:absolute;left:12px;top:11px;width:20px;height:20px;color:var(--muted)">${I.search}</span>
-  </div>
+  return `<div class="kl-sticky">${mergeHead}${searchFieldHTML('klSearch', 'Pretraži klijente i ljubimce…', KL_Q, 'kl-clear')}</div>
   <div id="klList">${klListHTML()}</div>
+  <div id="klRail">${azRailHTML()}</div>
   ${KL_MERGE ? mergeBarHTML() : ''}`;
 }
+/* polje pretrage sa lupom i krstićem za brisanje */
+function searchFieldHTML(id, placeholder, value, clearAct){
+  return `<div class="srch">
+    <input type="search" id="${id}" placeholder="${esc(placeholder)}" value="${esc(value)}" autocomplete="off">
+    <span class="srch-ico">${I.search}</span>
+    <button class="srch-x ${value ? 'on' : ''}" data-act="${clearAct}" aria-label="Obriši pretragu">${I.x}</button>
+  </div>`;
+}
+/* slova sa strane - skok na slovo (kao u imeniku telefona).
+   Č/Ć idu pod C, Š pod S, Ž pod Z, Đ pod D - jer se imena u evidenciji pišu i sa i bez kvačica. */
+const KL_FOLD = { 'Č': 'C', 'Ć': 'C', 'Š': 'S', 'Ž': 'Z', 'Đ': 'D', 'č': 'c', 'ć': 'c', 'š': 's', 'ž': 'z', 'đ': 'd' };
+function klFold(s){ return (s || '').replace(/[ČĆŠŽĐčćšžđ]/g, ch => KL_FOLD[ch]); }
+function klLetter(c){
+  const ch = klFold((c.name || '?').trim()).charAt(0).toUpperCase();
+  return /[A-Z]/.test(ch) ? ch : '#';
+}
+function klSorted(){
+  let clients = [...D.clients].sort((a, b) => klFold(a.name).localeCompare(klFold(b.name), 'sr'));
+  if (KL_MERGE) clients = clients.filter(c => c.id !== KL_MERGE.baseId);
+  return clients;
+}
+function azRailHTML(){
+  if (KL_Q.trim()) return '';
+  const have = [...new Set(klSorted().map(klLetter))].sort((a, b) => a.localeCompare(b, 'sr'));
+  if (have.length < 4) return '';
+  return `<div class="az-rail">${have.map(l => `<button class="az" data-act="kl-jump" data-id="${l}">${l}</button>`).join('')}</div>`;
+}
+/* skok na slovo: trenutan (kao imenik u telefonu); drugi prolaz ispravlja pomjeranje poslije crtanja */
+function klJump(letter){
+  if (!KL_ALL){ KL_ALL = true; const l = $('#klList'); if (l) l.innerHTML = klListHTML(); }
+  const jump = () => {
+    const el = document.getElementById('kl-' + letter);
+    if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 68) });
+  };
+  jump();
+  requestAnimationFrame(() => requestAnimationFrame(jump));
+}
+/* prevlačenje prstom po slovima: veliko slovo iskače i lista prati prst */
+let AZ = { on: false, last: null };
+function azLetterAt(y){
+  const items = document.querySelectorAll('.az-rail .az');
+  if (!items.length) return null;
+  let best = null, bd = Infinity;
+  items.forEach(it => {
+    const r = it.getBoundingClientRect();
+    const d = Math.abs(r.top + r.height / 2 - y);
+    if (d < bd){ bd = d; best = it; }
+  });
+  return best ? { letter: best.dataset.id, y: best.getBoundingClientRect().top + best.getBoundingClientRect().height / 2 } : null;
+}
+function azBubble(letter, y){
+  let b = $('#azBubble');
+  if (!b){ b = document.createElement('div'); b.id = 'azBubble'; b.className = 'az-bubble'; document.body.appendChild(b); }
+  b.textContent = letter;
+  b.style.top = Math.round(y) + 'px';
+  b.classList.add('on');
+}
+function azBubbleOff(){ const b = $('#azBubble'); if (b) b.classList.remove('on'); }
+document.addEventListener('pointerdown', (e) => {
+  const rail = e.target.closest && e.target.closest('.az-rail');
+  if (!rail) return;
+  e.preventDefault();
+  AZ.on = true; AZ.last = null;
+  try { rail.setPointerCapture(e.pointerId); } catch (err){}
+  azDrag(e);
+}, { passive: false });
+function azDrag(e){
+  if (!AZ.on) return;
+  const hit = azLetterAt(e.clientY);
+  if (!hit) return;
+  azBubble(hit.letter, hit.y);
+  if (hit.letter !== AZ.last){
+    AZ.last = hit.letter;
+    klJump(hit.letter);
+    if (navigator.vibrate) navigator.vibrate(3);
+  }
+}
+document.addEventListener('pointermove', (e) => { if (AZ.on){ e.preventDefault(); azDrag(e); } }, { passive: false });
+['pointerup', 'pointercancel'].forEach(ev => document.addEventListener(ev, () => {
+  if (!AZ.on) return;
+  AZ.on = false;
+  setTimeout(azBubbleOff, 380);
+}));
 function mergeBarHTML(){
   const n = KL_MERGE.sel.size;
   return `<div class="merge-bar" id="mergeBar">
@@ -1050,8 +1317,7 @@ function mergeBarHTML(){
 }
 function klListHTML(){
   const q = KL_Q.trim().toLowerCase();
-  let clients = [...D.clients].sort((a, b) => a.name.localeCompare(b.name, 'sr'));
-  if (KL_MERGE) clients = clients.filter(c => c.id !== KL_MERGE.baseId);
+  let clients = klSorted();
   if (q){
     clients = clients.filter(c =>
       c.name.toLowerCase().includes(q) ||
@@ -1063,7 +1329,13 @@ function klListHTML(){
   }
   const LIMIT = 80;
   const shown = KL_ALL || q ? clients : clients.slice(0, LIMIT);
+  let letter = '';
   let html = '<div class="card">' + shown.map(c => {
+    let head = '';
+    if (!q){
+      const L = klLetter(c);
+      if (L !== letter){ letter = L; head = `<div class="kl-letter" id="kl-${L}">${L}</div>`; }
+    }
     const pets = petsOfClient(c.id);
     const petStr = pets.map(petLabel).join(', ');
     const n = D.stays.filter(st => st.clientId === c.id).length;
@@ -1071,7 +1343,7 @@ function klListHTML(){
     const side = KL_MERGE
       ? `${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="kl-check ${sel ? 'on' : ''}">${I.check}</span>`
       : `${n ? `<span class="badge b-line num">${n}×</span>` : ''}<span class="chev" style="width:18px;height:18px">${I.chev}</span>`;
-    return `<div class="row tappable ${sel ? 'kl-sel' : ''}" data-act="${KL_MERGE ? 'kl-merge-toggle' : 'client-open'}" data-id="${c.id}" ${KL_MERGE ? '' : 'data-lp="client"'}>
+    return `${head}<div class="row tappable ${sel ? 'kl-sel' : ''}" data-act="${KL_MERGE ? 'kl-merge-toggle' : 'client-open'}" data-id="${c.id}" ${KL_MERGE ? '' : 'data-lp="client"'}>
       <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
       <div class="row-main">
         <div class="row-name">${esc(c.name)}${c.blacklist ? ' <span class="badge b-danger" style="vertical-align:1px">crna lista</span>' : ''}</div>
@@ -1140,7 +1412,7 @@ function clientSheet(cid){
   const c = clientById(cid); if (!c) return;
   const pets = petsOfClient(cid);
   const stays = D.stays.filter(st => st.clientId === cid).sort((a, b) => b.from.localeCompare(a.from));
-  const totalPaid = stays.filter(st => st.paid).reduce((s, st) => s + (st.price || 0), 0);
+  const totalPaid = stays.reduce((s, st) => s + stayPaidSum(st), 0);
 
   let html = '';
   if (c.blacklist) html += `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger)">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom ili ljubimcem.</span></div>`;
@@ -1168,13 +1440,15 @@ function clientSheet(cid){
   if (stays.length){
     html += stays.slice(0, 15).map(st => {
       const status = stayStatus(st);
-      const badge = st.paid ? `<span class="amount num" style="color:var(--ok)">${money(st.price)}</span>`
+      const paidSum = stayPaidSum(st);
+      const badge = st.paid ? `<span class="amount num" style="color:var(--ok)">${money(paidSum)}</span>`
+        : paidSum ? `<span class="amount num" style="color:var(--ok)">${money(paidSum)}</span><span class="badge b-warn">djelimično</span>`
         : status === 'done' ? `<span class="badge b-warn">nenaplaćeno</span>`
         : status === 'in' ? `<span class="badge b-ok">u pansionu</span>` : `<span class="badge b-line">rezervacija</span>`;
       return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
         <div class="row-main">
           <div class="row-name">${esc(stayLabel(st))}</div>
-          <div class="row-meta num">${fmtDY(st.from)}${st.from !== st.to ? ' - ' + fmtDY(st.to) : ''} ${boxBadge(st)}</div>
+          <div class="row-meta num">${fmtDY(st.from)}${st.from !== st.to ? ' - ' + fmtDY(st.to) : ''} · ${stayLenLabel(st)}</div>
         </div><div class="row-side">${badge}</div></div>`;
     }).join('');
     if (stays.length > 15) html += `<p class="hint">…i još ${stays.length - 15} starijih.</p>`;
@@ -1187,16 +1461,29 @@ function clientSheet(cid){
 }
 
 /* ============ ZARADA ============ */
+/* svaka naplata nosi svoj datum - dug boravak plaćen u više navrata ulazi u mjesec kad je plaćen */
+function allPayments(){
+  const out = [];
+  D.stays.forEach(st => stayPayments(st).forEach(p => out.push({ st, a: p.a, d: p.d })));
+  return out;
+}
+function unpaidStays(){
+  const t = todayISO();
+  /* završen = prošao datum odlaska ILI je štriknut odlazak */
+  return D.stays.filter(st => {
+    if (st.paid || chargeDue(st) <= 0) return false;
+    const kraj = st.leftAt && st.leftAt < st.to ? st.leftAt : st.to;
+    return kraj < t && kraj >= addDays(t, -45);
+  });
+}
 function vZarada(){
-  const paidStays = D.stays.filter(st => st.paid && (st.paidAt || st.to).slice(0, 7) === ZAR_YM)
-    .sort((a, b) => (b.paidAt || b.to).localeCompare(a.paidAt || a.to));
-  const total = paidStays.reduce((s, st) => s + (st.price || 0), 0);
-  const unpaid = D.stays.filter(st => !st.paid && stayStatus(st) === 'done' && st.to >= addDays(todayISO(), -45));
-  const unpaidSum = unpaid.reduce((s, st) => s + stayAmount(st), 0);
+  const pays = allPayments().filter(p => (p.d || '').slice(0, 7) === ZAR_YM).sort((a, b) => b.d.localeCompare(a.d));
+  const total = pays.reduce((s, p) => s + p.a, 0);
+  const unpaid = unpaidStays();
+  const unpaidSum = unpaid.reduce((s, st) => s + chargeDue(st), 0);
 
   const year = ZAR_YM.slice(0, 4);
-  const yearTotal = D.stays.filter(st => st.paid && (st.paidAt || st.to).slice(0, 4) === year)
-    .reduce((s, st) => s + (st.price || 0), 0);
+  const yearTotal = allPayments().filter(p => (p.d || '').slice(0, 4) === year).reduce((s, p) => s + p.a, 0);
 
   let html = `<div class="cal-head">
     <button class="iconbtn" data-act="zar-nav" data-id="-1" aria-label="Prethodni mjesec">${I.chevL}</button>
@@ -1208,7 +1495,7 @@ function vZarada(){
     <div class="big-amount num" style="color:var(--ok)">${money(total)}</div>
     <div style="color:var(--muted);font-weight:600;margin-top:2px">naplaćeno · ${monthLabel(ZAR_YM)}</div>
     <div class="stat-grid">
-      <div class="stat"><div class="s-val num">${paidStays.length}</div><div class="s-lbl">naplaćenih boravaka</div></div>
+      <div class="stat"><div class="s-val num">${pays.length}</div><div class="s-lbl">${plural(pays.length, 'naplata', 'naplate', 'naplata')}</div></div>
       <div class="stat"><div class="s-val num">${money(yearTotal)}</div><div class="s-lbl">ukupno u ${year}.</div></div>
     </div>
   </div>`;
@@ -1219,16 +1506,16 @@ function vZarada(){
   }
 
   html += `<div class="sec-title">Naplate</div><div class="card">`;
-  if (paidStays.length){
-    html += paidStays.map(st => {
-      const c = clientById(st.clientId);
+  if (pays.length){
+    html += pays.map(p => {
+      const st = p.st, c = clientById(st.clientId);
       return `<div class="row tappable" data-act="stay-edit" data-id="${st.id}">
         ${groupAvatar(st)}
         <div class="row-main">
           <div class="row-name">${esc(stayLabel(st))}</div>
           <div class="row-meta num">${esc(c ? c.name + ' · ' : '')}${fmtD(st.from)} - ${fmtD(st.to)}</div>
         </div>
-        <span class="amount num" style="color:var(--ok)">${money(st.price)}</span>
+        <span class="amount num" style="color:var(--ok)">${money(p.a)}</span>
       </div>`;
     }).join('');
   } else html += `<div class="empty">${I.euro}Još nema naplata u ovom mjesecu.</div>`;
@@ -1237,7 +1524,7 @@ function vZarada(){
 }
 
 function unpaidSheet(){
-  const unpaid = D.stays.filter(st => !st.paid && stayStatus(st) === 'done' && st.to >= addDays(todayISO(), -45)).sort((a, b) => b.to.localeCompare(a.to));
+  const unpaid = unpaidStays().sort((a, b) => b.to.localeCompare(a.to));
   let html = '<div class="card">';
   html += unpaid.map(st => {
     const c = clientById(st.clientId);
@@ -1272,7 +1559,7 @@ function vJos(){
     <span class="pf-paw">${I.paw}</span>
   </div>
   <div id="updBox" class="ver-box ver-update ${PWA.needRefresh ? 'show' : ''}">${I.refresh}
-    <span>Nova verzija je spremna.</span>
+    <span>Nova verzija je spremna${PWA.newVer ? ' <b class="num">' + esc(PWA.newVer) + '</b>' : ''}.</span>
     <button class="btn btn-primary btn-sm" data-act="upd-apply">Osvježi i ažuriraj</button>
   </div>
   <div id="verOk" class="ver-box ver-ok">${I.check}<span>Već imaš posljednju verziju.</span></div>
@@ -1282,7 +1569,7 @@ function vJos(){
     <button class="set-row" data-act="prices-open">
       <span class="sr-ico" style="background:var(--ok-soft);color:var(--ok)">${I.euro}</span>
       <span class="sr-main"><span class="sr-name">Cjenovnik</span>
-      <span class="sr-meta num">24h: ${p.mali.dan} · ${p.veliki.dan} · ${p.macka.dan} € · dnevno ${p.dnevni} €</span></span>
+      <span class="sr-meta num">noćenje: ${p.mali.dan} · ${p.veliki.dan} · ${p.macka.dan} € · dnevno ${p.dnevni} €</span></span>
       <span class="chev">${I.chev}</span>
     </button>
     <button class="set-row" data-act="boxes-open">
@@ -1359,11 +1646,11 @@ function pricesSheet(){
     <div class="sec-title">${title}</div>
     <div class="card">
       <div class="form-grid2">
-        <div class="fld"><label class="lbl">Dan (24h)</label><input type="text" inputmode="decimal" id="pr_${key}_dan" value="${c.dan}"></div>
-        <div class="fld"><label class="lbl">Dva u boksu · dan</label><input type="text" inputmode="decimal" id="pr_${key}_par" value="${c.par}"></div>
-        <div class="fld"><label class="lbl">10+ dana · po danu</label><input type="text" inputmode="decimal" id="pr_${key}_dan10" value="${c.dan10}"></div>
-        <div class="fld"><label class="lbl">Dva · 10+ dana</label><input type="text" inputmode="decimal" id="pr_${key}_par10" value="${c.par10}"></div>
-        <div class="fld" style="margin-bottom:2px"><label class="lbl">Mjesec dana</label><input type="text" inputmode="decimal" id="pr_${key}_mj" value="${c.mj}"></div>
+        <div class="fld"><label class="lbl">Noćenje</label><input type="text" inputmode="decimal" id="pr_${key}_dan" value="${c.dan}"></div>
+        <div class="fld"><label class="lbl">Dva u boksu · noćenje</label><input type="text" inputmode="decimal" id="pr_${key}_par" value="${c.par}"></div>
+        <div class="fld"><label class="lbl">10+ noćenja · po noći</label><input type="text" inputmode="decimal" id="pr_${key}_dan10" value="${c.dan10}"></div>
+        <div class="fld"><label class="lbl">Dva · 10+ noćenja</label><input type="text" inputmode="decimal" id="pr_${key}_par10" value="${c.par10}"></div>
+        <div class="fld" style="margin-bottom:2px"><label class="lbl">Mjesec (30 noćenja)</label><input type="text" inputmode="decimal" id="pr_${key}_mj" value="${c.mj}"></div>
         <div class="fld" style="margin-bottom:2px"><label class="lbl">Dva · mjesec</label><input type="text" inputmode="decimal" id="pr_${key}_parMj" value="${c.parMj}"></div>
       </div>
     </div>`;
@@ -1477,49 +1764,66 @@ function confirmModal(title, text, act, id, btnLabel, danger){
 }
 
 /* ============ NAPLATA ============ */
-function chargeDue(st){ return Math.max(0, (stayAmount(st) || 0) - (st.deposit || 0)); }
+/* ostatak za naplatu = cijena - depozit - ono što je već plaćeno */
+function chargeDue(st){ return Math.max(0, (stayAmount(st) || 0) - (st.deposit || 0) - stayPaidSum(st)); }
 
 function chargeStart(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
-  if (st.to !== todayISO()){
+  if (st.to !== todayISO() && !stayLeft(st)){
     const n = (st.petIds || []).length;
     showModal(`<div class="modal-title">Naplata</div>
-      <div class="modal-text"><b>${esc(stayLabel(st))}</b> danas ne napušta${n > 1 ? 'ju' : ''} pansion. Da li želite da nastavite sa naplatom?</div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" data-act="modal-close">Ne</button>
-        <button class="btn btn-primary" data-act="charge-force" data-id="${st.id}">Da</button>
+      <div class="modal-text"><b>${esc(stayLabel(st))}</b> danas ne napušta${n > 1 ? 'ju' : ''} pansion (boravak traje do ${fmtDY(st.to)}).</div>
+      <div class="modal-actions modal-stack">
+        <button class="btn btn-primary" data-act="charge-force" data-id="${st.id}">Naplati i odjavi (boks se oslobađa)</button>
+        <button class="btn btn-ghost" data-act="charge-stay" data-id="${st.id}">Samo naplata, ostaje u pansionu</button>
+        <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
       </div>`);
     return;
   }
-  chargeModal(stayId);
+  chargeModal(stayId, true);
 }
 
-function chargeModal(stayId){
+function chargeModal(stayId, andLeave){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   const amount = stayAmount(st);
   const dep = st.deposit || 0;
+  const before = stayPaidSum(st);
   const due = chargeDue(st);
-  const days = stayDays(st);
   showModal(`<div class="modal-title">Naplata</div>
-    <div class="modal-text">${esc(stayLabel(st))} · ${days} dan${days === 1 ? '' : 'a'} (${fmtD(st.from)} - ${fmtD(st.to)})${dep ? `<br>Cijena ${money(amount || 0)} · depozit ${money(dep)}` : ''}</div>
-    <div class="fld"><label class="lbl">${dep ? 'Za naplatu (€)' : 'Iznos (€)'}</label>
-      <input type="text" inputmode="decimal" id="chargeAmount" value="${(dep ? due : amount) || ''}" style="font-size:22px;font-weight:800;text-align:center">
+    <div class="modal-text">${esc(stayLabel(st))} · ${stayLenLabel(st)} (${fmtD(st.from)} - ${fmtD(st.to)})
+      ${dep ? `<br>Cijena ${money(amount || 0)} · depozit ${money(dep)}` : ''}
+      ${before ? `<br>Već naplaćeno: <b>${money(before)}</b>` : ''}</div>
+    <div class="fld"><label class="lbl">${dep || before ? 'Za naplatu (€)' : 'Iznos (€)'}</label>
+      <input type="text" inputmode="decimal" id="chargeAmount" value="${due || ''}" style="font-size:22px;font-weight:800;text-align:center">
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
-      <button class="btn btn-ok" data-act="charge-confirm" data-id="${st.id}">${I.check} Naplaćeno</button>
+      <button class="btn btn-ok" data-act="charge-confirm" data-id="${st.id}" data-leave="${andLeave ? 1 : 0}">${I.check} Naplaćeno</button>
     </div>`);
   setTimeout(() => { const i = $('#chargeAmount'); if (i){ i.focus(); i.select(); } }, 60);
 }
-function chargeConfirm(stayId){
+function chargeConfirm(stayId, andLeave){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   const val = parseMoney($('#chargeAmount').value);
   if (val == null){ toast('Upiši iznos.'); return; }
   const dep = st.deposit || 0;
-  st.price = dep + val; st.paid = true; st.paidAt = todayISO();
+  const pays = stayPayments(st);
+  pays.push({ a: val, d: todayISO() });
+  st.payments = pays;
+  if (andLeave){
+    /* boravak je zaključen: ukupna cijena = depozit + sve uplate, boks se oslobađa */
+    st.price = dep + pays.reduce((s, p) => s + p.a, 0);
+    st.paid = true; st.paidAt = todayISO();
+    if (!st.leftAt) st.leftAt = todayISO();
+  } else {
+    /* uplata usput - boravak i dalje traje */
+    st.paid = false; st.paidAt = null;
+  }
   dbSave('stays', st);
   closeModal(); if (sheetOpen) closeSheet(); render();
-  toast('Naplaćeno ' + money(val) + (dep ? ' (ukupno ' + money(st.price) + ' sa depozitom)' : ''));
+  toast(andLeave
+    ? 'Naplaćeno ' + money(val) + (dep ? ' (ukupno ' + money(st.price) + ' sa depozitom)' : '')
+    : 'Upisana uplata ' + money(val) + ' - boravak i dalje traje.');
 }
 </script>
 <script>
@@ -1534,7 +1838,7 @@ function openStayForm(opts){
       id: st.id, clientId: st.clientId, clientQ: '', newClient: null,
       petIds: new Set(st.petIds || []), newPets: [], petForm: null,
       type: st.type, from: st.from, to: st.to, calCur: st.from.slice(0, 7),
-      boxId: st.boxId || '', price: st.price != null ? String(st.price) : '',
+      boxes: stayBoxes(st).map(s => ({ ...s })), price: st.price != null ? String(st.price) : '',
       deposit: st.deposit != null ? String(st.deposit) : '',
       paid: !!st.paid, paidAt: st.paidAt || null, note: st.note || '',
     };
@@ -1544,7 +1848,8 @@ function openStayForm(opts){
       id: null, clientId: opts.clientId || null, clientQ: '', newClient: null,
       petIds: new Set(), newPets: [], petForm: null,
       type: 'pansion', from, to: '', calCur: (from || todayISO()).slice(0, 7),
-      boxId: opts.boxId || '', price: '', deposit: '', paid: false, paidAt: null, note: '',
+      boxes: opts.boxId ? [{ b: opts.boxId, f: from, t: from }] : [],
+      price: '', deposit: '', paid: false, paidAt: null, note: '',
     };
     if (SF.clientId){
       const pets = petsOfClient(SF.clientId);
@@ -1561,7 +1866,6 @@ function sfSync(){
   if (g('sfPrice')) SF.price = g('sfPrice').value;
   if (g('sfDeposit')) SF.deposit = g('sfDeposit').value;
   if (g('sfNote')) SF.note = g('sfNote').value;
-  if (g('sfBox')) SF.boxId = g('sfBox').value;
   if (SF.newClient){
     if (g('sfNcName')) SF.newClient.name = g('sfNcName').value;
     if (g('sfNcPhone')) SF.newClient.phone = g('sfNcPhone').value;
@@ -1601,8 +1905,8 @@ function drCalHTML(){
   if (SF.type === 'dnevni'){
     foot = od ? `Dan: <strong>${fmtDY(od)}</strong>` : 'Izaberi dan';
   } else if (od && doo){
-    const n = diffDays(od, doo) + 1;
-    foot = `Trajanje: <strong>${n} ${n === 1 ? 'dan' : 'dana'}</strong> · ${fmtDY(od)} - ${fmtDY(doo)}`;
+    const n = diffDays(od, doo);
+    foot = `Trajanje: <strong>${nightsLabel(n)}</strong> · ${fmtDY(od)} - ${fmtDY(doo)}`;
   } else if (od){
     foot = `Dolazak: <strong>${fmtDY(od)}</strong> - sad izaberi dan odlaska`;
   } else {
@@ -1701,18 +2005,26 @@ function sfRelevantGroups(){
   if (!g.size){ g.add('mb'); g.add('vb'); g.add('m'); }
   return g;
 }
+/* dani u kojima su SVA mjesta (za vrstu ljubimca) zauzeta - stvarna popunjenost, po danu */
 function sfFullDays(){
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
-  if (!from || !to || to < from || diffDays(from, to) > 120) return [];
+  if (!from || !to || to < from || diffDays(from, to) > 400) return [];
   const groups = sfRelevantGroups();
   const boxes = D.boxes.filter(b => b.active && groups.has(b.group));
   if (!boxes.length) return [];
-  const rel = D.stays.filter(st => st.id !== SF.id && st.boxId && overlap(st, from, to));
+  const ours = new Set(boxes.map(b => b.id));
+  const busy = {};   // datum -> Set zauzetih bokseva
+  D.stays.forEach(st => {
+    if (st.id === SF.id || !overlap(st, from, to)) return;
+    stayBoxesLive(st).forEach(seg => {
+      if (!ours.has(seg.b)) return;
+      const a = seg.f > from ? seg.f : from, b = seg.t < to ? seg.t : to;
+      for (let iso = a; iso <= b; iso = addDays(iso, 1)) (busy[iso] = busy[iso] || new Set()).add(seg.b);
+    });
+  });
   const full = [];
   for (let iso = from; iso <= to; iso = addDays(iso, 1)){
-    const busy = new Set();
-    for (const st of rel) if (stayCovers(st, iso)) busy.add(st.boxId);
-    if (!boxes.some(b => !busy.has(b.id))) full.push(iso);
+    if ((busy[iso] ? busy[iso].size : 0) >= boxes.length) full.push(iso);
   }
   return full;
 }
@@ -1730,16 +2042,21 @@ function sfPetsSuffix(){
   const dog = pets.some(p => p.species !== 'macka'), cat = pets.some(p => p.species === 'macka');
   return cat && !dog ? ' za mačke' : (dog && !cat ? ' za pse' : '');
 }
-/* popup poslije kompletiranog izbora termina */
-function sfCapacityWarn(){
-  if (!SF) return;
-  const to = SF.type === 'dnevni' ? SF.from : SF.to;
-  if (!SF.from || !to) return;
+/* Popunjeno NIJE zabrana: pitamo i upisujemo ako Vesna/Novica tako odluče. */
+function sfCapacityAsk(next){
   const days = sfFullDays();
-  if (!days.length) return;
-  showModal(`<div class="modal-title">Kapaciteti popunjeni</div>
-    <div class="modal-text">Nema slobodnih mjesta${sfPetsSuffix()}: <b class="num">${fullDaysLabel(days)}</b></div>
-    <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">U redu</button></div>`);
+  if (!days.length) return false;
+  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
+  const uk = diffDays(from, to) + 1;
+  showModal(`<div class="modal-title">Preko kapaciteta</div>
+    <div class="modal-text"><b class="num">${days.length}</b> od <b class="num">${uk}</b> ${plural(uk, 'dana', 'dana', 'dana')} ovog boravka je preko predviđenog kapaciteta${sfPetsSuffix()}:
+      <br><b class="num">${fullDaysLabel(days)}</b>
+      <br><span class="hint" style="display:block;margin-top:8px">Boravak se svejedno može upisati.</span></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-act="modal-close">Odustani</button>
+      <button class="btn btn-primary" data-act="${next}">Upiši</button>
+    </div>`);
+  return true;
 }
 
 function renderStayForm(){
@@ -1749,9 +2066,14 @@ function renderStayForm(){
   let clientHTML = '';
   if (SF.clientId){
     const c = clientById(SF.clientId);
+    const before = D.stays.filter(s => s.clientId === c.id && s.id !== SF.id).length;
     clientHTML = `<div class="row" style="border:none;padding:4px 0">
-      <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
-      <div class="row-main"><div class="row-name">${esc(c.name)}</div>${c.phone ? `<div class="row-meta num">${esc(c.phone)}</div>` : ''}</div>
+      <div class="row-tap tappable" data-act="client-history" data-id="${c.id}">
+        <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
+        <div class="row-main"><div class="row-name">${esc(c.name)}</div>
+          <div class="row-meta">${c.phone ? `<span class="num">${esc(c.phone)}</span> · ` : ''}${before ? before + ' ranij' + (before === 1 ? 'i boravak' : 'ih boravaka') : 'prvi boravak'}</div></div>
+        <span class="chev" style="width:18px;height:18px">${I.chev}</span>
+      </div>
       <button class="iconbtn" data-act="sf-client-pop" data-id="${c.id}" aria-label="Izmijeni klijenta">${I.edit}</button>
     </div>
     ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
@@ -1803,27 +2125,32 @@ function renderStayForm(){
       ${fullDays.length ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:10px 0 0">${I.warn}<span><b>Popunjeno${sfPetsSuffix()}</b>: <span class="num">${fullDaysLabel(fullDays)}</span></span></div>` : ''}
     </div>`;
 
-  /* --- boks (padajući meni) --- */
+  /* --- mjesto (boks): boravak može mijenjati boks usput, i može stajati bez boksa --- */
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
   const validRange = from && to && to >= from;
-  let boxOpts = '<option value="">- izaberi boks -</option>';
-  for (const g of ['mb', 'vb', 'm']){
-    const items = sortedBoxes().filter(b => b.group === g && (b.active || b.id === SF.boxId));
-    if (!items.length) continue;
-    boxOpts += `<optgroup label="${GROUPS[g]}">`;
-    boxOpts += items.map(b => {
-      const conflicts = validRange ? boxStays(b.id, from, to, SF.id) : [];
-      const busy = conflicts.length > 0;
-      const who = busy ? stayLabel(conflicts[0]) : '';
-      return `<option value="${b.id}" ${SF.boxId === b.id ? 'selected' : ''}>${esc(b.name)}${busy ? ' - zauzet (' + esc(who.length > 18 ? who.slice(0, 17) + '…' : who) + ')' : ''}</option>`;
+  const segs = sfSegs();
+  let boxHTML;
+  if (!segs.length){
+    boxHTML = `<div class="fld"><label class="lbl">Mjesto (boks)</label>
+      <select id="sfBox">${boxOptionsHTML(from, to, '')}</select>
+      <p class="hint" style="margin-top:6px">Ako još ne znaš gdje ide, ostavi prazno - upisaćeš kasnije.</p>
+    </div>`;
+  } else {
+    const rows = segs.map((s, i) => {
+      const b = boxById(s.b);
+      const busy = boxStays(s.b, s.f, s.t, SF.id);
+      return `<div class="bseg">
+        <span class="badge b-${b ? b.group : 'line'}">${esc(b ? b.name : '?')}</span>
+        <span class="bseg-d num">${segs.length > 1 ? fmtD(s.f) + ' - ' + fmtD(s.t) : 'cijeli boravak'}</span>
+        ${busy.length ? `<span class="badge b-warn">zauzet</span>` : ''}
+        <button class="iconbtn bseg-x" data-act="sf-box-del" data-id="${i}" aria-label="Ukloni">${I.x}</button>
+      </div>`;
     }).join('');
-    boxOpts += '</optgroup>';
+    boxHTML = `<div class="fld"><label class="lbl">Mjesto (boks)</label>
+      <div class="bsegs">${rows}</div>
+      ${validRange && diffDays(from, to) >= 1 ? `<button class="btn btn-ghost btn-sm" data-act="sf-box-move" style="margin-top:8px">${I.swap} Premjesti u drugi boks</button>` : ''}
+    </div>`;
   }
-  const selBusy = SF.boxId && validRange && boxStays(SF.boxId, from, to, SF.id).length > 0;
-  const boxHTML = `<div class="fld"><label class="lbl">Mjesto (boks)</label>
-    <select id="sfBox">${boxOpts}</select>
-    ${selBusy ? `<div class="banner ban-warn" style="margin-top:10px;margin-bottom:0">${I.warn}<span>Pažnja: izabrani boks je već zauzet u ovom terminu.</span></div>` : ''}
-  </div>`;
 
   /* --- napomena, pa depozit + cijena + naplata --- */
   const noteHTML = `<div class="fld"><label class="lbl">Napomena</label>
@@ -1831,14 +2158,31 @@ function renderStayForm(){
 
   const estPets = sfDraftPets();
   const est = estimateFor(estPets, SF.type, from, to);
-  const days = SF.type === 'dnevni' ? 1 : (validRange ? diffDays(from, to) + 1 : 0);
+  const nights = SF.type === 'dnevni' ? 0 : (validRange ? diffDays(from, to) : 0);
   const priceHTML = `
     <div class="fld"><label class="lbl">Depozit (€)</label>
       <input type="text" inputmode="decimal" id="sfDeposit" value="${esc(SF.deposit)}"></div>
     <div class="fld"><label class="lbl">Cijena (€)</label>
       <input type="text" inputmode="decimal" id="sfPrice" placeholder="${est || ''}" value="${esc(SF.price)}">
-      ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${days} dan${days === 1 ? '' : 'a'}, ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}
+      ${est ? `<p class="hint" style="margin-top:6px">Predračun po cjenovniku: <b class="num">${money(est)}</b> (${SF.type === 'dnevni' || nights === 0 ? 'dnevno čuvanje' : nightsLabel(nights)}, ${estPets.length} ljubim${estPets.length === 1 ? 'ac' : 'ca'}). Ako polje ostaviš prazno, važi predračun; upiši iznos samo ako ste se dogovorili drugačije.</p>` : ''}
     </div>`;
+
+  /* --- dolazak / odlazak / naplate (samo kad se boravak otvara, ne kod novog) --- */
+  let stateHTML = '';
+  if (edit){
+    const st0 = D.stays.find(s => s.id === SF.id) || {};
+    const pays = stayPayments(st0);
+    const rows = [];
+    if (st0.arrivedAt) rows.push(`<div class="paid-row"><span class="pr-lbl" style="color:var(--ok)">${I.check} Stigao · ${fmtD(st0.arrivedAt)}</span>
+      <button class="btn btn-ghost btn-sm" data-act="sf-undo-arrived">Poništi</button></div>`);
+    if (st0.leftAt) rows.push(`<div class="paid-row"><span class="pr-lbl" style="color:var(--muted)">${I.check} Otišao · ${fmtD(st0.leftAt)}</span>
+      <button class="btn btn-ghost btn-sm" data-act="sf-undo-left">Poništi</button></div>`);
+    if (pays.length > 1 || (pays.length && !SF.paid)){
+      rows.push(`<div class="pay-list">${pays.map(p => `<div class="pay-row"><span class="num">${fmtDY(p.d)}</span><b class="num">${money(p.a)}</b></div>`).join('')}
+        <div class="pay-row pay-sum"><span>ukupno uplaćeno</span><b class="num">${money(stayPaidSum(st0))}</b></div></div>`);
+    }
+    if (rows.length) stateHTML = `<div class="fld">${rows.join('')}</div>`;
+  }
 
   let chargeHTML = '';
   if (edit){
@@ -1856,11 +2200,125 @@ function renderStayForm(){
     ${edit ? `<button class="btn btn-danger btn-block" data-act="stay-del" data-id="${SF.id}" style="margin-top:10px">${I.trash} Obriši boravak</button>` : ''}`;
 
   const picking = !SF.clientId && !SF.newClient;
+  const keep = $('#sheetBody') && sheetOpen ? $('#sheetBody').scrollTop : 0;
   openSheet(edit ? 'Boravak' : 'Novi boravak', `
     <div class="fld"><label class="lbl">Vlasnik</label>${clientHTML}</div>
     ${petsHTML}
-    ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + noteHTML + priceHTML + actionsHTML : ''}
+    ${(SF.clientId || SF.newClient) ? datesHTML + boxHTML + stateHTML + noteHTML + priceHTML + actionsHTML : ''}
   `, picking ? { label: 'Dodaj klijenta', act: 'sf-client-new' } : null);
+  if (keep) $('#sheetBody').scrollTop = keep;   // re-render ne vraća formu na vrh
+}
+
+/* segmenti boksa u formi, poravnati na izabrani termin */
+function sfSegs(){
+  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
+  if (!from || !to || to < from) return (SF.boxes || []).filter(s => s && s.b);
+  return stayBoxes({ boxes: SF.boxes, from, to, boxId: null });
+}
+/* padajući meni bokseva: koliko je koji slobodan u izabranom terminu */
+function boxOptionsHTML(from, to, selected){
+  const groups = sfRelevantGroups();
+  const valid = from && to && to >= from;
+  const use = valid ? boxUsage(from, to, SF ? SF.id : null) : {};
+  const total = valid ? diffDays(from, to) + 1 : 0;
+  let out = '<option value="">- izaberi boks -</option>';
+  for (const g of ['mb', 'vb', 'm']){
+    if (!groups.has(g)) continue;
+    const items = sortedBoxes().filter(b => b.group === g && (b.active || b.id === selected));
+    if (!items.length) continue;
+    out += `<optgroup label="${GROUPS[g]}">`;
+    out += items.map(b => {
+      let suffix = '';
+      const inf = use[b.id];
+      if (valid && inf){
+        const free = total - inf.days.size;
+        if (free <= 0){
+          const who = inf.who.length > 16 ? inf.who.slice(0, 15) + '…' : inf.who;
+          suffix = ' - zauzet (' + who + ')';
+        } else if (inf.first > from){
+          suffix = ' - slobodan do ' + fmtD(addDays(inf.first, -1));
+        } else {
+          suffix = ' - slobodan ' + free + ' od ' + total + ' dana';
+        }
+      }
+      return `<option value="${b.id}" ${selected === b.id ? 'selected' : ''}>${esc(b.name + suffix)}</option>`;
+    }).join('');
+    out += '</optgroup>';
+  }
+  return out;
+}
+/* kartica vlasnika iz boravka: telefon + kad je ranije dolazio (bez traženja po Klijentima) */
+function clientHistoryModal(cid){
+  const c = clientById(cid); if (!c) return;
+  const stays = D.stays.filter(s => s.clientId === cid).sort((a, b) => b.from.localeCompare(a.from));
+  const pets = petsOfClient(cid);
+  const rows = stays.slice(0, 12).map(st => {
+    const paid = stayPaidSum(st);
+    return `<div class="row">
+      <div class="row-main">
+        <div class="row-name">${esc(stayLabel(st))}</div>
+        <div class="row-meta num">${fmtDY(st.from)}${st.from !== st.to ? ' - ' + fmtDY(st.to) : ''} · ${stayLenLabel(st)}</div>
+      </div>
+      <div class="row-side">${paid ? `<span class="amount num" style="color:var(--ok)">${money(paid)}</span>` : (stayStatus(st) === 'rez' ? '<span class="badge b-line">rezervacija</span>' : '<span class="badge b-warn">nenaplaćeno</span>')}</div>
+    </div>`;
+  }).join('');
+  showModal(`<div class="modal-title">${esc(c.name)}</div>
+    ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger)">${I.warn}<span><b>Crna lista</b></span></div>` : ''}
+    ${pets.length ? `<div class="modal-text" style="margin-bottom:8px">${esc(pets.map(petLabel).join(', '))}</div>` : ''}
+    ${c.phone ? `<a class="btn btn-ghost btn-block" href="tel:${esc(c.phone)}" style="margin-bottom:10px">${I.phone} <span class="num">${esc(c.phone)}</span></a>` : ''}
+    ${c.note ? `<p class="hint" style="margin:0 2px 10px">${esc(c.note)}</p>` : ''}
+    <div class="lbl" style="margin-bottom:2px">Boravci (${stays.length})</div>
+    <div class="mod-list">${rows || '<div class="empty">Nema ranijih boravaka.</div>'}</div>
+    ${stays.length > 12 ? `<p class="hint">…i još ${stays.length - 12} starijih.</p>` : ''}
+    <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">Zatvori</button></div>`, true);
+}
+
+/* premještanje u drugi boks usred boravka */
+let MV = null;
+function sfMoveModal(){
+  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
+  if (!from || !to || to < from){ toast('Prvo izaberi termin.'); return; }
+  const segs = sfSegs();
+  const minD = segs.length ? addDays(segs[segs.length - 1].f, 1) : from;
+  if (minD > to){ toast('Boravak je prekratak za premještanje.'); return; }
+  const t = todayISO();
+  if (!MV || MV.date < minD || MV.date > to) MV = { date: (t > minD && t <= to) ? t : minD, box: '' };
+  if (!MV.cur) MV.cur = MV.date.slice(0, 7);
+  showModal(`<div class="modal-title">Premještanje</div>
+    <div class="fld"><label class="lbl">Od kog dana</label>${mvCalHTML(minD, to)}</div>
+    <div class="fld"><label class="lbl">U koji boks od ${fmtDY(MV.date)}</label>
+      <select id="mvBox">${boxOptionsHTML(MV.date, to, MV.box)}</select></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
+      <button class="btn btn-primary" data-act="sf-box-move-do">Premjesti</button>
+    </div>`);
+}
+/* mali kalendar u prozoru premještanja - isti izgled kao birač termina, bez engleskih datuma */
+function mvCalHTML(minD, maxD){
+  const [cy, cm] = MV.cur.split('-').map(Number);
+  const first = new Date(cy, cm - 1, 1);
+  const start = new Date(first);
+  start.setDate(1 - ((first.getDay() + 6) % 7));
+  let days = '';
+  for (let i = 0; i < 42; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const iso = isoFromDate(d);
+    const inMonth = d.getMonth() === cm - 1;
+    const off = iso < minD || iso > maxD;
+    days += `<button type="button" class="dr-day ${inMonth ? '' : 'other'} ${iso === MV.date ? 'r-edge' : ''} ${off ? 'mv-off' : ''}"
+      ${off ? 'disabled' : `data-act="mv-pick" data-id="${iso}"`}><span class="dr-num num">${d.getDate()}</span></button>`;
+  }
+  const dows = DOWS_S.map((x, i) => `<span class="dr-dow ${i === 6 ? 'ned' : ''}">${x}</span>`).join('');
+  const prevOff = MV.cur <= minD.slice(0, 7), nextOff = MV.cur >= maxD.slice(0, 7);
+  return `<div class="dr">
+    <div class="dr-head">
+      <button type="button" class="dr-nav ${prevOff ? 'mv-off' : ''}" ${prevOff ? 'disabled' : 'data-act="mv-nav" data-id="-1"'}>‹</button>
+      <span class="dr-title">${monthLabel(MV.cur)}</span>
+      <button type="button" class="dr-nav ${nextOff ? 'mv-off' : ''}" ${nextOff ? 'disabled' : 'data-act="mv-nav" data-id="1"'}>›</button>
+    </div>
+    <div class="dr-grid">${dows}${days}</div>
+    <div class="dr-foot">Premještaj od: <strong>${fmtDY(MV.date)}</strong></div>
+  </div>`;
 }
 
 function sfSaveClient(){
@@ -1895,13 +2353,14 @@ function sfPersist(){
   if (!from){ toast('Izaberi datum dolaska.'); return null; }
   if (!to){ toast('Izaberi datum odlaska u kalendaru.'); return null; }
   if (to < from){ toast('Odlazak ne može biti prije dolaska.'); return null; }
-  if (!SF.boxId){ toast('Izaberi mjesto (boks).'); return null; }
   const price = parseMoney(SF.price);
   const deposit = parseMoney(SF.deposit);
+  const boxes = sfSegs();
+  const boxId = boxes.length ? boxes[0].b : null;
 
   if (SF.id){
     const st = D.stays.find(s => s.id === SF.id);
-    Object.assign(st, { petIds, type: SF.type, from, to, boxId: SF.boxId, price, deposit, paid: SF.paid, note: SF.note.trim() });
+    Object.assign(st, { petIds, type: SF.type, from, to, boxes, boxId, price, deposit, paid: SF.paid, note: SF.note.trim() });
     if (SF.paid && !st.paidAt) st.paidAt = todayISO();
     if (!SF.paid) st.paidAt = null;
     dbSave('stays', st);
@@ -1909,7 +2368,8 @@ function sfPersist(){
   }
   const st = {
     id: uid(), clientId, petIds, type: SF.type, from, to,
-    boxId: SF.boxId, price, deposit, paid: SF.paid, paidAt: SF.paid ? todayISO() : null,
+    boxes, boxId, price, deposit, paid: SF.paid, paidAt: SF.paid ? todayISO() : null,
+    arrivedAt: from === todayISO() ? null : (from < todayISO() ? from : null), leftAt: null,
     note: SF.note.trim(), createdAt: new Date().toISOString(),
   };
   D.stays.push(st);
@@ -1917,10 +2377,15 @@ function sfPersist(){
   return st;
 }
 
-function sfSave(){
+function sfSave(force){
+  if (!SF) return;
+  sfSync();
+  /* popunjeno = pitanje, ne zabrana; za završene boravke se i ne pita */
+  const zavrsen = SF.id && SF.to && SF.to < todayISO();
+  if (!force && !zavrsen && sfCapacityAsk('sf-save-force')) return;
   const edit = !!SF.id;
   const st = sfPersist(); if (!st) return;
-  closeSheet(); render();
+  closeModal(); closeSheet(); render();
   toast(edit ? 'Boravak sačuvan.' : 'Boravak dodat.');
 }
 
@@ -1929,6 +2394,28 @@ function sfCharge(){
   const st = sfPersist(); if (!st) return;
   render();
   chargeStart(st.id);
+}
+/* štrik Došao / Otišao */
+function stayMark(id, field){
+  const st = D.stays.find(s => s.id === id); if (!st) return;
+  const t = todayISO();
+  if (field === 'arrived'){
+    st.arrivedAt = t;
+    if (st.leftAt && st.leftAt < t) st.leftAt = null;
+  } else {
+    st.leftAt = t;
+    if (!st.arrivedAt) st.arrivedAt = st.from;
+  }
+  dbSave('stays', st);
+  render();
+  if (SF && SF.id === id) renderStayForm();
+  toast(field === 'arrived' ? stayLabel(st) + ' je u pansionu.' : stayLabel(st) + ' je otišao - boks je slobodan.');
+}
+function stayUnmark(id, field){
+  const st = D.stays.find(s => s.id === id); if (!st) return;
+  if (field === 'arrived'){ st.arrivedAt = null; st.leftAt = null; } else st.leftAt = null;
+  dbSave('stays', st);
+  render(); if (SF && SF.id === id) renderStayForm();
 }
 
 function sfUnpay(){
@@ -2199,13 +2686,13 @@ async function uploadPetPhoto(petId, file){
 const DB_MAP = {
   clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
   pets: r => ({ id: r.id, client_id: r.clientId, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
-  stays: r => ({ id: r.id, client_id: r.clientId, pet_ids: r.petIds || [], type: r.type, from_date: r.from, to_date: r.to, box_id: r.boxId, price: r.price, deposit: r.deposit == null ? null : r.deposit, paid: !!r.paid, paid_at: r.paidAt, note: r.note || '', created_at: r.createdAt || new Date().toISOString() }),
+  stays: r => ({ id: r.id, client_id: r.clientId, pet_ids: r.petIds || [], type: r.type, from_date: r.from, to_date: r.to, box_id: r.boxId || null, boxes: r.boxes || null, payments: r.payments || null, arrived_at: r.arrivedAt || null, left_at: r.leftAt || null, price: r.price, deposit: r.deposit == null ? null : r.deposit, paid: !!r.paid, paid_at: r.paidAt, note: r.note || '', created_at: r.createdAt || new Date().toISOString() }),
   boxes: r => ({ id: r.id, name: r.name, grp: r.group, active: !!r.active, sort: r.sort || 0 }),
 };
 const DB_UNMAP = {
   clients: r => ({ id: r.id, name: r.name, phone: r.phone || '', note: r.note || '', blacklist: !!r.blacklist }),
   pets: r => ({ id: r.id, clientId: r.client_id, name: r.name, species: r.species, size: r.size, sex: r.sex, breed: r.breed || '', note: r.note || '', photo: r.photo || null }),
-  stays: r => ({ id: r.id, clientId: r.client_id, petIds: r.pet_ids || [], type: r.type, from: r.from_date, to: r.to_date, boxId: r.box_id, price: r.price == null ? null : Number(r.price), deposit: r.deposit == null ? null : Number(r.deposit), paid: !!r.paid, paidAt: r.paid_at, note: r.note || '', createdAt: r.created_at }),
+  stays: r => ({ id: r.id, clientId: r.client_id, petIds: r.pet_ids || [], type: r.type, from: r.from_date, to: r.to_date, boxId: r.box_id, boxes: r.boxes || null, payments: (r.payments || null) && r.payments.map(p => ({ a: Number(p.a) || 0, d: p.d })), arrivedAt: r.arrived_at || null, leftAt: r.left_at || null, price: r.price == null ? null : Number(r.price), deposit: r.deposit == null ? null : Number(r.deposit), paid: !!r.paid, paidAt: r.paid_at, note: r.note || '', createdAt: r.created_at }),
   boxes: r => ({ id: r.id, name: r.name, group: r.grp, active: !!r.active, sort: r.sort || 0 }),
 };
 
@@ -2405,20 +2892,32 @@ function applySeed(seed){
   (seed.adhocBoxes || []).forEach(b => D.boxes.push({ id: b.id, name: b.name, group: b.group, active: false, sort: s++ }));
   D.clients = seed.clients.map(c => ({ id: c.id, name: c.name, phone: c.phone || '', note: c.note || '' }));
   D.pets = seed.pets.map(p => ({ id: p.id, clientId: p.clientId, name: p.name, species: p.species, size: p.size, sex: p.sex || null, breed: p.breed || '', note: p.note || '' }));
-  D.stays = seed.stays.map(st => ({ id: st.id, clientId: st.clientId, petIds: st.petIds, type: st.type, from: st.from, to: st.to, boxId: st.boxId, price: st.price, deposit: st.deposit != null ? st.deposit : null, paid: !!st.paid, paidAt: st.paidAt, note: st.note || '', createdAt: null }));
+  D.stays = seed.stays.map(st => ({ id: st.id, clientId: st.clientId, petIds: st.petIds, type: st.type, from: st.from, to: st.to, boxId: st.boxId, boxes: st.boxes && st.boxes.length ? st.boxes : (st.boxId ? [{ b: st.boxId, f: st.from, t: st.to }] : null), payments: st.payments && st.payments.length ? st.payments : (st.paid && st.price != null ? [{ a: st.price, d: st.paidAt || st.to }] : null), arrivedAt: null, leftAt: null, price: st.price, deposit: st.deposit != null ? st.deposit : null, paid: !!st.paid, paidAt: st.paidAt, note: st.note || '', createdAt: null }));
   save();
 }
 </script>
 <script>
-/* ============ PWA / AŽURIRANJE (ista logika kao K-Sport Hub) ============ */
-const PWA = { reg: null, needRefresh: false, lastCheck: 0, hadController: false };
+/* ============ PWA / AŽURIRANJE (kao K-Sport Hub + version.json za brzu provjeru) ============ */
+const PWA = { reg: null, needRefresh: false, lastCheck: 0, hadController: false, newVer: null };
 
-function flagNeedRefresh(){
-  if (PWA.needRefresh) return;
+/* version.json se NIKAD ne kešira - odgovor stiže za desetinku sekunde i odmah
+   znamo da li na serveru stoji novija verzija (ne čeka se instalacija workera). */
+async function serverVersion(){
+  try {
+    const r = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && j.version ? j.version : null;
+  } catch (e){ return null; }
+}
+function flagNeedRefresh(ver){
+  if (ver) PWA.newVer = ver;
+  if (PWA.needRefresh){ const b0 = $('#updBox'); if (b0) b0.classList.add('show'); return; }
   PWA.needRefresh = true;
   if (APP_SHOWN) renderTabbar();
   const row = $('#updCheckBtn'); if (row) row.classList.remove('checking');
   const box = $('#updBox'); if (box) box.classList.add('show');
+  if (APP_SHOWN && TAB === 'jos') render();   // da se ispiše broj nove verzije
 }
 function trackInstalling(sw){
   if (!sw) return;
@@ -2438,29 +2937,60 @@ async function initPWA(){
     if (reg.installing) trackInstalling(reg.installing);
     reg.addEventListener('updatefound', () => trackInstalling(reg.installing));
   } catch (e){}
+  /* odmah po ulasku tiho provjeri verziju na serveru (par stotina bajta) */
+  if (PWA.hadController){
+    const v = await serverVersion();
+    if (v && v !== APP_VERSION) flagNeedRefresh(v);
+  }
 }
-function applyUpdate(){
+/* „Osvježi i ažuriraj": ako nova verzija čeka - preuzmi je odmah; ako ne (npr. worker
+   se još instalira), obriši keš i učitaj iznova da korisnik ne čeka instalaciju. */
+async function applyUpdate(){
   const reg = PWA.reg;
-  if (!reg || !reg.waiting){ window.location.reload(); return; }
   let reloaded = false;
   const doReload = () => { if (reloaded) return; reloaded = true; window.location.reload(); };
-  navigator.serviceWorker.addEventListener('controllerchange', doReload);
-  reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-  setTimeout(doReload, 3000);
+  if (reg && reg.waiting){
+    navigator.serviceWorker.addEventListener('controllerchange', doReload);
+    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    setTimeout(doReload, 2500);
+    return;
+  }
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  } catch (e){}
+  doReload();
 }
-function autoCheckUpdate(){
+async function autoCheckUpdate(){
   const now = Date.now();
   if (now - PWA.lastCheck < 60000) return;
   PWA.lastCheck = now;
+  const v = await serverVersion();
+  if (v && v !== APP_VERSION) flagNeedRefresh(v);
   try { PWA.reg && PWA.reg.update(); } catch (e){}
 }
+/* Ručna provjera: odgovor sa version.json (brzo), pa tek onda service worker. */
 async function checkForUpdate(){
   const okBox = $('#verOk');
   const row = $('#updCheckBtn');
   if (okBox) okBox.classList.remove('show');
   if (PWA.needRefresh || (PWA.reg && PWA.reg.waiting)){ flagNeedRefresh(); return; }
-  if (!PWA.reg){ if (okBox) okBox.classList.add('show'); return; }
   if (row) row.classList.add('checking');
+
+  const v = await serverVersion();
+  if (v && v !== APP_VERSION){
+    if (row) row.classList.remove('checking');
+    flagNeedRefresh(v);
+    try { PWA.reg && PWA.reg.update(); } catch (e){}   // u pozadini povuci novu verziju
+    return;
+  }
+  if (v === APP_VERSION){
+    if (row) row.classList.remove('checking');
+    if (okBox) okBox.classList.add('show');
+    return;
+  }
+  /* version.json nedostupan (stara objava ili nema mreže) - stari način preko workera */
+  if (!PWA.reg){ if (row) row.classList.remove('checking'); if (okBox) okBox.classList.add('show'); return; }
   const reg = PWA.reg;
   const result = await new Promise((resolve) => {
     let done = false;
@@ -2561,8 +3091,14 @@ document.addEventListener('click', (e) => {
     case 'stay-del': confirmModal('Obrisati boravak?', 'Ovo se ne može poništiti.', 'stay-del-yes', id, 'Obriši', true); break;
     case 'stay-del-yes': stayDelete(id); break;
     case 'charge': chargeStart(id); break;
-    case 'charge-force': closeModal(); chargeModal(id); break;
-    case 'charge-confirm': chargeConfirm(id); break;
+    case 'charge-force': closeModal(); chargeModal(id, true); break;
+    case 'charge-stay': closeModal(); chargeModal(id, false); break;
+    case 'charge-confirm': chargeConfirm(id, t.dataset.leave === '1'); break;
+    /* štrik dolaska i odlaska */
+    case 'stay-arrived': stayMark(id, 'arrived'); break;
+    case 'stay-left': stayMark(id, 'left'); break;
+    case 'sf-undo-arrived': stayUnmark(SF.id, 'arrived'); break;
+    case 'sf-undo-left': stayUnmark(SF.id, 'left'); break;
     /* forma boravka */
     case 'sf-client-pick': sfSync(); SF.clientId = id; SF.newClient = null; SF.petIds = new Set(); {
         const pets = petsOfClient(id);
@@ -2595,12 +3131,36 @@ document.addEventListener('click', (e) => {
       } break;
     case 'sf-type': sfSync(); SF.type = id; if (id === 'dnevni' && SF.from) SF.to = SF.from; renderStayForm(); break;
     case 'dr-nav': sfSync(); SF.calCur = ymShift(SF.calCur, Number(id)); renderStayForm(); break;
-    case 'dr-pick': sfSync(); drPick(id); renderStayForm(); sfCapacityWarn(); break;
+    case 'dr-pick': sfSync(); drPick(id); renderStayForm(); break;
+    /* mjesto (boks) */
+    case 'sf-box-del': sfSync(); { const segs = sfSegs(); segs.splice(Number(id), 1); SF.boxes = segs; } renderStayForm(); break;
+    case 'sf-box-move': sfSync(); MV = null; sfMoveModal(); break;
+    case 'mv-pick': MV.date = id; MV.box = $('#mvBox') ? $('#mvBox').value : ''; sfMoveModal(); break;
+    case 'mv-nav': MV.cur = ymShift(MV.cur, Number(id)); MV.box = $('#mvBox') ? $('#mvBox').value : ''; sfMoveModal(); break;
+    case 'sf-box-move-do': {
+        const d = MV ? MV.date : '', b = $('#mvBox').value;
+        if (!b){ toast('Izaberi boks.'); break; }
+        const to = SF.type === 'dnevni' ? SF.from : SF.to;
+        if (!d || d < SF.from || d > to){ toast('Datum mora biti unutar boravka.'); break; }
+        SF.boxes = sfSegs().concat([{ b, f: d, t: to }]);
+        closeModal(); renderStayForm();
+      } break;
     case 'sf-save': sfSave(); break;
+    case 'sf-save-force': sfSave(true); break;
     case 'sf-charge': sfCharge(); break;
     case 'sf-unpay': sfUnpay(); break;
     /* klijenti */
     case 'client-open': clientSheet(id); break;
+    case 'client-history': clientHistoryModal(id); break;
+    case 'kl-clear': {
+        KL_Q = '';
+        const inp = $('#klSearch'); if (inp) inp.value = '';
+        const l = $('#klList'); if (l) l.innerHTML = klListHTML();
+        const x = document.querySelector('.srch-x'); if (x) x.classList.remove('on');
+        const r = $('#klRail'); if (r) r.innerHTML = azRailHTML();
+        if (inp) inp.focus();
+      } break;
+    case 'kl-jump': klJump(id); break;
     case 'client-edit': clientFormSheet(id); break;
     case 'client-del': confirmModal('Obrisati klijenta?', 'Obrisaće se i svi njegovi ljubimci i boravci. Ovo se ne može poništiti.', 'client-del-yes', id, 'Obriši', true); break;
     case 'client-del-yes': clientDelete(id); break;
@@ -2656,14 +3216,25 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('input', (e) => {
-  if (e.target.id === 'klSearch'){ KL_Q = e.target.value; const l = $('#klList'); if (l) l.innerHTML = klListHTML(); }
+  if (e.target.id === 'klSearch'){
+    KL_Q = e.target.value;
+    const l = $('#klList'); if (l) l.innerHTML = klListHTML();
+    const x = document.querySelector('.srch-x'); if (x) x.classList.toggle('on', !!KL_Q);
+    const r = $('#klRail'); if (r) r.innerHTML = azRailHTML();
+  }
   if (e.target.id === 'sfClientQ' && SF){
     SF.clientQ = e.target.value;
     const l = $('#sfClientList'); if (l) l.innerHTML = sfClientListHTML();
   }
 });
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'sfBox' && SF){ SF.boxId = e.target.value; sfSync(); renderStayForm(); }
+  if (e.target.id === 'sfBox' && SF){
+    sfSync();
+    const to = SF.type === 'dnevni' ? SF.from : SF.to;
+    SF.boxes = e.target.value ? [{ b: e.target.value, f: SF.from, t: to || SF.from }] : [];
+    renderStayForm();
+  }
+  if (e.target.id === 'mvBox' && MV) MV.box = e.target.value;
   if (e.target.id === 'petPhotoFile' && e.target.files[0]){ uploadPetPhoto(e.target.dataset.pet, e.target.files[0]); e.target.value = ''; }
 });
 document.addEventListener('keydown', (e) => {

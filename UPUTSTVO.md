@@ -14,8 +14,22 @@ Od tada je otvaraš sa početnog ekrana kao svaku aplikaciju. Vas dvoje vidite i
 
 ## Svaki dan
 
-- **Danas** - prva stranica: koliko ih je u pansionu, slobodna mjesta po grupama, ko danas dolazi i ko odlazi. Kod odlaska stoji dugme **Naplati** sa već izračunatim iznosom - klikneš, po potrebi ispraviš iznos, potvrdiš.
-- **Dodaj boravak** (narandžasto dugme dole desno): izabereš klijenta (ili upišeš novog), ljubimce, u kalendaru klikneš dan dolaska pa dan odlaska, izabereš boks iz spiska (piše ako je zauzet), i sačuvaš. Cijena se predloži sama - možeš je promijeniti.
+- **Danas** - prva stranica: koliko ih je u pansionu, slobodna mjesta po grupama, ko danas dolazi i ko odlazi.
+- **Kad ljubimac stigne** klikneš zeleno dugme **Došao** u redu - tek tada ulazi u brojčanik i zauzima svoj boks.
+- **Kad ode** klikneš **Otišao** i boks je odmah slobodan. Naplata takođe znači da je otišao.
+- **Dodaj boravak** (narandžasto dugme dole desno): izabereš klijenta (ili upišeš novog), ljubimce, u kalendaru klikneš dan dolaska pa dan odlaska, izabereš boks (ili ostaviš prazno pa upišeš kasnije) i sačuvaš. Cijena se predloži sama - možeš je promijeniti.
+
+## Cijena se računa po noćenjima
+
+Od 25. do 31. je **6 noćenja** - dan odlaska se ne naplaćuje. Ako ljubimac dođe i ode istog dana, to je dnevno čuvanje.
+
+## Jedan boravak, više boksova
+
+Boravak se više ne cijepa na komade. Ako ljubimac usred boravka pređe u drugi boks, otvoriš boravak i klikneš **Premjesti u drugi boks** - izabereš od kog dana i gdje. Boravak ostaje jedan, sa jednom cijenom, ma koliko mjeseci trajao.
+
+## Kad je gužva
+
+Ako u nekim danima nema više slobodnih mjesta, aplikacija ne zabranjuje upis - javi ti koliko je dana preko kapaciteta i pita **Upiši** ili **Odustani**.
 
 ## Kalendar
 
@@ -25,6 +39,10 @@ Od tada je otvaraš sa početnog ekrana kao svaku aplikaciju. Vas dvoje vidite i
 ## Klijenti
 
 Svi klijenti i njihovi ljubimci, sa istorijom boravaka i telefonom (klik na broj - poziv). Tu je prenesena i sva istorija iz stare Excel tabele, od juna 2024.
+
+- Pretraga je uvijek na vrhu ekrana, ne moraš se vraćati gore (važi i dok objedinjuješ klijente). Krstić u polju briše ukucano.
+- Sa desne strane su slova: drži prst i povlači - iskoči veliko slovo, a lista prati.
+- Iz otvorenog boravka klik na ime vlasnika pokazuje njegov telefon i kad je ranije dolazio.
 
 ## Finansije
 

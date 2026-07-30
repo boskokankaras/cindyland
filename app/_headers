@@ -1,0 +1,7 @@
+# version.json mora uvijek stizati svjež sa servera (po njemu app zna ima li nove verzije)
+/version.json
+  Cache-Control: no-store, max-age=0
+
+# service worker se ne smije keširati na CDN-u
+/sw.js
+  Cache-Control: no-store, max-age=0

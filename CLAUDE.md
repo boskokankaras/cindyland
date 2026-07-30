@@ -9,13 +9,14 @@ PWA za evidenciju pansiona za pse i mačke. Korisnici: **Vesna i Novica** (vlasn
 - **Bez builda**: `app/index.html` je cijela aplikacija (HTML+CSS+JS u jednom fajlu, vanilla). `app/` je JEDINI deploy folder.
 - `app/config.js` - Supabase URL + anon ključ (`window.CINDY`). **Prazan config = lokalni probni režim** (localStorage + demo istorija iz `seed/seed.json`). Sa ključevima = prava app: prijava + baza + realtime.
 - `app/supabase.js` - lokalna kopija supabase-js v2 UMD (bez CDN-a, radi offline).
-- Podaci u bazi: `clients`, `pets`, `stays` (boravci; `pet_ids text[]`, `box_id`), `boxes`, `settings` (ključ `prices`). RLS: sve samo `authenticated`. Realtime na svim tabelama → app radi `loadAll()` refetch (debounce 600ms).
+- Podaci u bazi: `clients`, `pets`, `stays` (boravci; `pet_ids text[]`), `boxes`, `settings` (ključ `prices`). RLS: sve samo `authenticated`. Realtime na svim tabelama → app radi `loadAll()` refetch (debounce 600ms).
 - Mutacije: optimistički u `D` + `dbSave`/`dbKill` (upsert/delete po `id`); id-jevi su tekstualni (`uid()` / `c123`/`p123`/`s123` iz seed-a).
 - Boksovi: grupe `mb` (Mali boksevi: Boks 1-13, Kotilica, Kotilica 2), `vb` (Veliki boksevi: Boks 1,2,4,5,6,7 - VB 3 ne postoji fizički), `m` (Mačke: Boks 1-5) + improvizovana mjesta iz istorije (kavezi, Kuća - `active:false`).
 
 ## Verzioniranje / PWA update (ista logika kao K-Sport Hub)
 
-- **Na SVAKOM deployu podigni verziju na OBA mjesta:** `APP_VERSION` u `app/index.html` + `CACHE` u `app/sw.js` (semver `vX.Y.Z`). Promjena sw.js je signal browseru da postoji update.
+- **Na SVAKOM deployu podigni verziju na TRI mjesta:** `APP_VERSION` u `app/index.html`, `CACHE` u `app/sw.js` i `app/version.json` (semver `vX.Y.Z`). Promjena sw.js je signal browseru da postoji update.
+- **Brza provjera (od v1.5.0):** `app/version.json` se ne kešira (`app/_headers`) - app ga pročita za desetinku sekunde i odmah zna da li ima novija verzija, bez čekanja da se worker instalira. „Osvježi i ažuriraj" preuzme workera na čekanju, a ako ga nema - obriše keš i učita iznova. Service worker precache-uje samo jezgro (index/config/supabase/manifest), ikone ulaze u kesh usput - zato je instalacija brza.
 - Ponašanje: prompt (ništa se ne mijenja tiho) - tačkica na tabu Podešavanja + kutija „Nova verzija je spremna" + „Osvježi i ažuriraj" (SKIP_WAITING → controllerchange → reload, fallback 3s). Tiha provjera na povratak u app (visibilitychange/focus, throttle 60s) + na ~30 min + ručno dugme.
 - `PWA.hadController` čuva da li je stranica bila kontrolisana pri učitavanju - bez toga bi prva instalacija lažno prijavila update (SW radi `clients.claim()`).
 
@@ -46,6 +47,18 @@ npx netlify deploy --prod --dir app        # objava (site se veže uz `netlify l
 - Nalozi (kreirani direktno u `auth.users`+`auth.identities` SQL-om, prijava testirana): Vesna `vmitrovic1989@gmail.com` / `Vesna2026`, Novica `nolje.mne@gmail.com` / `Novica2026`. Novi nalog/promjena šifre: Supabase dashboard ili SQL recept iz sesije 2.7.
 - **PostgREST vraća max 1000 redova po upitu** - `loadAll()` čita u serijama (`fetchAll` sa `.range()`); ne vraćati na obični `select('*')`.
 - Na svakom sljedećem deployu: bump `APP_VERSION` + `CACHE` (korisnici dobiju „Nova verzija je spremna").
+
+## Model boravka (od v1.5.0 - najvažnije)
+
+Ranije je boravak bio zakovan za JEDAN boks za cijeli period, pa se svaki prelazak u drugi boks (i svaka granica mjeseca) vodio kao NOVI boravak. To je Vesni i Novici sjeckalo boravke i cijene. Sada:
+
+- **`stays.boxes` (jsonb)** = niz perioda `[{"b":"mb2","f":"2026-07-01","t":"2026-07-31"}, …]`. Jedan boravak = jedan red od dolaska do odlaska, boks se mijenja usput („Premjesti u drugi boks"). `stays.box_id` je ostao samo kao trag starih zapisa (fallback u `stayBoxes()`); novi upisi pišu prvi boks iz niza.
+- `stayBoxes(st)` normalizuje periode (kliješti ih na termin boravka, siječe preklapanja, prvi počinje sa dolaskom a posljednji traje do odlaska). `stayBoxesLive(st)` je isto to ali skraćeno na `left_at` - koristi ga SVAKO računanje zauzetosti (kalendar, slobodni boksevi, kapacitet), dok prikaz reda koristi `stayBoxes`.
+- **Boks NIJE obavezan** (može se upisati kasnije). Popunjen kapacitet nije zabrana nego pitanje „X od Y dana je preko kapaciteta - Upiši / Odustani" (`sfCapacityAsk`).
+- **`stays.payments` (jsonb)** = niz naplata `[{"a":300,"d":"2025-11-09"}, …]`. Dug boravak može biti plaćen u više navrata a Zarada po mjesecima ostaje tačna (svaka naplata nosi svoj datum). Zarada čita `allPayments()`, ne `price`.
+- **`stays.arrived_at` / `left_at`** = štrik „Došao"/„Otišao" u Danas. Brojčanik i zauzetost boksa gledaju `stayHere()`; za ranije dane se podrazumijeva da je stigao/otišao (stara evidencija nema štrikove). Naplata na dan odlaska sama upisuje `left_at`; naplata usred boravka nudi „Samo naplata, ostaje u pansionu".
+- **Cijena se računa po NOĆENJIMA** (`stayNights` = `diffDays(from,to)`): 25.-31. = 6 noćenja, dan odlaska se ne naplaćuje. Dolazak i odlazak istog dana = cijena dnevnog čuvanja. Pragovi 10+ i mjesečno se gledaju po noćenjima.
+- Migracija 30.7.2026: rezervna kopija `stays_rez_20260730`, pa spojeni svi lanci (134 komada, 1528 → 1394 boravka). **Dnevna čuvanja se NIKAD ne spajaju** (dva dana = dva čuvanja) - jedan takav slučaj je vraćen nazad. Kontrola: zbir svih naplata prije i poslije = 102.264 € (isto do centa), i po svakom mjesecu isto.
 
 ## Naplata i depozit (od v1.2.0)
 
