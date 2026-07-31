@@ -686,7 +686,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.9.6';
+const APP_VERSION = 'v1.9.7';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -991,12 +991,12 @@ function stayPayments(st){
 }
 function stayPaidSum(st){ return stayPayments(st).reduce((s, p) => s + p.a, 0); }
 
-/* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu i 10+ noći.
-   MJESEČNA cijena se NE primjenjuje sama (ispravka 31.7. - Sanja Redzepagic, 2 mačke, 52 noćenja:
-   app računao 867 po mjesečnoj, a treba 1040 po danu) - mjesečno je poseban dogovor,
-   pa se tada dogovoreni iznos upiše ručno u polje Cijena. */
+/* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu, 10+ noći i mjesečnom.
+   Mjesečna tarifa od 30 noćenja je ISPRAVNA - Vesna i Novica potvrdile 31.7.2026.
+   (prvo prijavile kao grešku za Sanju Redzepagic pa se sjetile da mjesečna postoji - NE dirati). */
 function petCat(p){ return p.species === 'macka' ? 'macka' : (p.size === 'veliki' ? 'veliki' : 'mali'); }
 function catAmount(c, nights, pair){
+  if (nights >= 30) return (pair ? c.parMj : c.mj) * nights / 30;
   if (nights >= 10) return nights * (pair ? c.par10 : c.dan10);
   return nights * (pair ? c.par : c.dan);
 }
