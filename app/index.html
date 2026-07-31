@@ -686,7 +686,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.9.0';
+const APP_VERSION = 'v1.9.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2633,6 +2633,7 @@ function smsPotvrdaURI(st){
     kad + '\n' +
     (iznos ? '💶 Ukupan iznos: ' + money(iznos) + '\n' : '') +
     '\n🕘 Radno vrijeme prijema i preuzimanja ljubimaca:\n08:00-20:00\n\n' +
+    '🥣 Ne zaboravite da ponesete hranu na koju je vaš ljubimac navikao!\n\n' +
     'Hvala na ukazanom povjerenju. Radujemo se druženju sa vašim ljubimcem!';
   /* iPhone hoće &body=, ostali ?body= */
   const sep = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
