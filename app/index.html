@@ -164,6 +164,7 @@ p{text-wrap:pretty}
 .ban-ok{background:var(--ok-soft);color:var(--ok)}
 
 /* ===== dugmad ===== */
+a.btn,a.iconbtn{text-decoration:none}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   border-radius:13px;padding:12px 18px;font-weight:700;font-size:15px;
@@ -685,7 +686,7 @@ p{text-wrap:pretty}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.8.2';
+const APP_VERSION = 'v1.9.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -699,6 +700,7 @@ const I = {
   euro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.5 6.5A7 7 0 0 0 6.8 8.7a7.5 7.5 0 0 0 0 6.6 7 7 0 0 0 10.7 2.2"/><path d="M4 10.5h9M4 13.5h9"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.2 12a7.2 7.2 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.1-1.2L14.3 3h-4l-.4 2.7a7.4 7.4 0 0 0-2.1 1.2l-2.3-1-2 3.4 2 1.5a7.2 7.2 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1c.6.5 1.4.9 2.1 1.2l.4 2.7h4l.4-2.7a7.4 7.4 0 0 0 2.1-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>',
   phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l1.5 4.5L8 10a12 12 0 0 0 6 6l1.5-2.5L20 15v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+  sms: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.6 0-3.1-.4-4.4-1.2L3 20l1.2-5.1A8.5 8.5 0 1 1 21 11.5z"/><path d="M8 10.5h8M8 13.5h5"/></svg>',
   in: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
   chevL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>',
@@ -2201,6 +2203,9 @@ function renderStayForm(){
   if (SF.clientId){
     const c = clientById(SF.clientId);
     const before = D.stays.filter(s => s.clientId === c.id && s.id !== SF.id).length;
+    /* iz upisanog boravka se potvrda može poslati i naknadno - ikonica poruke */
+    const st0 = edit ? D.stays.find(s => s.id === SF.id) : null;
+    const smsURI = st0 ? smsPotvrdaURI(st0) : null;
     clientHTML = `<div class="row" style="border:none;padding:4px 0">
       <div class="row-tap tappable" data-act="client-open" data-id="${c.id}">
         <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
@@ -2208,6 +2213,7 @@ function renderStayForm(){
           <div class="row-meta">${c.phone ? `<span class="num">${esc(c.phone)}</span> · ` : ''}${before ? before + ' ranij' + (before === 1 ? 'i boravak' : 'ih boravaka') : 'prvi boravak'}</div></div>
         <span class="chev" style="width:18px;height:18px">${I.chev}</span>
       </div>
+      ${smsURI ? `<a class="iconbtn" href="${esc(smsURI)}" aria-label="Pošalji potvrdu porukom">${I.sms}</a>` : ''}
     </div>
     ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
   } else if (SF.newClient){
@@ -2606,6 +2612,42 @@ function sfSave(force){
   const st = sfPersist(); if (!st) return;
   closeModal(); closeSheet(); render();
   toast(edit ? 'Boravak sačuvan.' : 'Boravak dodat.');
+  /* nov boravak = rezervacija: odmah ponudi potvrdu klijentu porukom */
+  if (!edit) ponudiPotvrdu(st.id);
+}
+
+/* ============ POTVRDA REZERVACIJE PORUKOM ============
+   Otvori Poruke (SMS) sa brojem klijenta i već iskucanim tekstom - ostaje samo „pošalji".
+   Šalje se sa njihovog telefona i njihovog broja, ništa se ne plaća. */
+function smsPotvrdaURI(st){
+  const c = clientById(st.clientId);
+  if (!c || !c.phone) return null;
+  const broj = c.phone.replace(/[^\d+]/g, '');
+  if (!broj) return null;
+  const iznos = stayAmount(st);
+  const kad = st.from === st.to
+    ? '📅 Datum: ' + fmtDY(st.from)
+    : '📅 Dolazak: ' + fmtDY(st.from) + '\n📅 Odlazak: ' + fmtDY(st.to);
+  const text = 'Poštovanje,\n\n' +
+    'Vaša rezervacija u Cindyland pansionu za pse i mačke je uspješno evidentirana. 🐾\n\n' +
+    kad + '\n' +
+    (iznos ? '💶 Ukupan iznos: ' + money(iznos) + '\n' : '') +
+    '\n🕘 Radno vrijeme prijema i preuzimanja ljubimaca:\n08:00-20:00\n\n' +
+    'Hvala na ukazanom povjerenju. Radujemo se druženju sa vašim ljubimcem!';
+  /* iPhone hoće &body=, ostali ?body= */
+  const sep = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
+  return 'sms:' + broj + sep + 'body=' + encodeURIComponent(text);
+}
+function ponudiPotvrdu(stayId){
+  const st = D.stays.find(s => s.id === stayId); if (!st) return;
+  const uri = smsPotvrdaURI(st); if (!uri) return;
+  const c = clientById(st.clientId);
+  showModal(`<div class="modal-title">Boravak je upisan</div>
+    <div class="modal-text">Poslati potvrdu porukom? Otvoriće se Poruke sa gotovim tekstom za <b>${esc(c.name)}</b> (<span class="num">${esc(c.phone)}</span>).</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-act="modal-close">Ne sad</button>
+      <a class="btn btn-primary" data-act="modal-close" href="${esc(uri)}">${I.sms} Pošalji</a>
+    </div>`);
 }
 
 /* veliko Naplati na dnu boravka: prvo tiho sačuva izmjene iz forme, pa naplata */
