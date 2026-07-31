@@ -686,7 +686,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.9.4';
+const APP_VERSION = 'v1.9.5';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2625,6 +2625,9 @@ function smsPotvrdaURI(st){
   const broj = c.phone.replace(/[^\d+]/g, '');
   if (!broj) return null;
   const iznos = stayAmount(st);
+  /* depozit umanjuje cijenu - Vesna često traži dio unaprijed, pa klijent u poruci
+     vidi i depozit i koliko mu ostaje */
+  const dep = Number(st.deposit) || 0;
   const kad = st.from === st.to
     ? '📅 Datum: ' + fmtDY(st.from)
     : '📅 Dolazak: ' + fmtDY(st.from) + '\n📅 Odlazak: ' + fmtDY(st.to);
@@ -2632,6 +2635,7 @@ function smsPotvrdaURI(st){
     'Vaša rezervacija u Cindyland pansionu za pse i mačke je uspješno evidentirana. 🐾\n\n' +
     kad + '\n' +
     (iznos ? '💶 Ukupan iznos boravka: ' + money(iznos) + '\n' : '') +
+    (iznos && dep ? '💰 Depozit: ' + money(dep) + '\n💶 Ostatak za uplatu: ' + money(Math.max(0, iznos - dep)) + '\n' : '') +
     '\n🍽️ Molimo da ponesete samo njegovu hranu za period boravka. Sve ostalo je obezbijeđeno u pansionu.\n\n' +
     '🕘 Prijem i preuzimanje ljubimaca obavljamo u terminima:\n• 08:00 - 20:00h\n\n' +
     'Hvala na ukazanom povjerenju. Radujemo se druženju sa vašim ljubimcem!';
