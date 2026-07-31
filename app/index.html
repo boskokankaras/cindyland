@@ -686,7 +686,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.9.1';
+const APP_VERSION = 'v1.9.2';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2631,10 +2631,10 @@ function smsPotvrdaURI(st){
   const text = 'Poštovanje,\n\n' +
     'Vaša rezervacija u Cindyland pansionu za pse i mačke je uspješno evidentirana. 🐾\n\n' +
     kad + '\n' +
-    (iznos ? '💶 Ukupan iznos: ' + money(iznos) + '\n' : '') +
-    '\n🕘 Radno vrijeme prijema i preuzimanja ljubimaca:\n08:00-20:00\n\n' +
-    '🥣 Ne zaboravite da ponesete hranu na koju je vaš ljubimac navikao!\n\n' +
-    'Hvala na ukazanom povjerenju. Radujemo se druženju sa vašim ljubimcem!';
+    (iznos ? '💶 Ukupan iznos boravka: ' + money(iznos) + '\n' : '') +
+    '\n🍽️ Molimo da ponesete samo njegovu hranu za period boravka. Sve ostalo je obezbijeđeno u pansionu.\n\n' +
+    '🕘 Prijem i preuzimanje ljubimaca obavljamo u terminima:\n• 09:00-12:00\n• 17:00-20:00\n\n' +
+    'Hvala na povjerenju i vidimo se uskoro!';
   /* iPhone hoće &body=, ostali ?body= */
   const sep = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
   return 'sms:' + broj + sep + 'body=' + encodeURIComponent(text);
