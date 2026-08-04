@@ -10,6 +10,7 @@ PWA za evidenciju pansiona za pse i mačke. Korisnici: **Vesna i Novica** (vlasn
 - `app/config.js` - Supabase URL + anon ključ (`window.CINDY`). **Prazan config = lokalni probni režim** (localStorage + demo istorija iz `seed/seed.json`). Sa ključevima = prava app: prijava + baza + realtime.
 - `app/supabase.js` - lokalna kopija supabase-js v2 UMD (bez CDN-a, radi offline).
 - Podaci u bazi: `clients`, `pets`, `stays` (boravci; `pet_ids text[]`), `boxes`, `settings` (ključ `prices`). RLS: sve samo `authenticated`. Realtime na svim tabelama → app radi `loadAll()` refetch (debounce 600ms).
+- **PRAVILO: svaka nova tabela u `public` šemi mora ODMAH dobiti RLS** - i privremene rezervne kopije. Anon ključ je javan (stoji u `app/config.js` na sajtu), pa tabela bez RLS-a znači da je svako sa interneta može čitati I brisati. Naučeno 4.8.2026: `stays_rez_20260730` (kopija s migracije 30.7.) stajala je 5 dana otvorena; Supabase je poslao "security vulnerabilities" mejl. Recept: `alter table public.X enable row level security;` + `revoke all on public.X from anon, authenticated;` (za pomoćne tabele koje app ne dira), ili politika za `authenticated` (za tabele koje app koristi).
 - Mutacije: optimistički u `D` + `dbSave`/`dbKill` (upsert/delete po `id`); id-jevi su tekstualni (`uid()` / `c123`/`p123`/`s123` iz seed-a).
 - Boksovi: grupe `mb` (Mali boksevi: Boks 1-13, Kotilica, Kotilica 2), `vb` (Veliki boksevi: Boks 1,2,4,5,6,7 - VB 3 ne postoji fizički), `m` (Mačke: Boks 1-5) + improvizovana mjesta iz istorije (kavezi, Kuća - `active:false`).
 
