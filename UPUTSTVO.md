@@ -16,7 +16,7 @@ Od tada je otvaraš sa početnog ekrana kao svaku aplikaciju. Vas dvoje vidite i
 
 - **Danas** - prva stranica: koliko ih je u pansionu, slobodna mjesta po grupama, ko danas dolazi i ko odlazi.
 - **Kad ljubimac stigne** klikneš zeleno dugme **Došao** u redu - tek tada ulazi u brojčanik i zauzima svoj boks.
-- **Kad ode** klikneš **Otišao** i boks je odmah slobodan. Naplata takođe znači da je otišao.
+- **Kad ode** klikneš **Otišao** - silazi sa spiska prisutnih, ali boks ostaje njegov do kraja tog dana i slobodan je tek sjutra. Naplata takođe znači da je otišao.
 - **Dodaj boravak** (narandžasto dugme dole desno): izabereš klijenta (ili upišeš novog), ljubimce, u kalendaru klikneš dan dolaska pa dan odlaska, izabereš boks (ili ostaviš prazno pa upišeš kasnije) i sačuvaš. Cijena se predloži sama - možeš je promijeniti.
 
 ## Cijena se računa po noćenjima

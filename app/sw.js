@@ -1,7 +1,7 @@
 // Cindyland service worker.
 // VERZIJA: mora se podići na SVAKOM deployu (zajedno sa APP_VERSION u index.html i version.json).
 // Promjena ovog fajla je ono što browseru signalizira da postoji nova verzija.
-const CACHE = 'cindyland-v1.9.7';
+const CACHE = 'cindyland-v1.10.0';
 
 // Samo ono bez čega app ne radi - instalacija mora biti BRZA (ikone se keširaju usput).
 const CORE = [

@@ -686,7 +686,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.9.7';
+const APP_VERSION = 'v1.10.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -890,12 +890,16 @@ function boxOn(st, iso){
   for (const s of stayBoxes(st)) if (s.f <= iso && iso <= s.t) return s.b;
   return null;
 }
-/* STVARNO držanje boksa: kad je odlazak potvrđen, boks je slobodan od tog dana
-   (prikaz u redu boravka ostaje isti - ovo koristi samo računanje zauzetosti) */
+/* STVARNO držanje boksa: DAN ODLASKA JE ZAUZET, boks se nudi slobodan tek SJUTRADAN.
+   Štrik „Otišao" skida ljubimca sa spiska prisutnih i pamti trenutak odlaska, ali NE prazni
+   boks tog dana: pas je do 11. i štrikne se Otišao - boks je slobodan od 12.
+   Isto i kad ode prije kraja termina: štrik 9. znači slobodan od 10.
+   Zato se siječe ZAKLJUČNO sa leftAt, ne na leftAt-1.
+   Traženje Vesne i Novice 5.8.2026. NE vraćati na staro bez njihove riječi. */
 function stayBoxesLive(st){
   const segs = stayBoxes(st);
   if (!st.leftAt) return segs;
-  const end = addDays(st.leftAt, -1);
+  const end = st.leftAt;
   return segs.map(s => ({ b: s.b, f: s.f, t: s.t > end ? end : s.t })).filter(s => s.f <= s.t);
 }
 function boxOnLive(st, iso){
@@ -957,6 +961,19 @@ function freeRangesLabel(ranges, from, to){
 function stayArrived(st, t){ t = t || todayISO(); return !!st.arrivedAt || st.from < t; }
 function stayLeft(st, t){ t = t || todayISO(); return !!st.leftAt || st.to < t; }
 function stayHere(st, t){ t = t || todayISO(); return stayCovers(st, t) && stayArrived(st, t) && !stayLeft(st, t); }
+/* KO JE U PANSIONU NA DAN X - JEDINI račun, pitaju ga i Danas i kalendar i dan iz kalendara.
+   Ranije je svaki ekran računao po svome (kalendar je brojao BORAVKE iz termina, Danas LJUBIMCE
+   sa štrikovima) pa su za isti dan pokazivali različite brojeve.
+   Danas vrijede štrikovi Došao/Otišao; za ostale dane vrijedi termin, a dan odlaska se broji. */
+function stayHereOn(st, iso){
+  if (!stayCovers(st, iso)) return false;
+  if (iso === todayISO()) return stayHere(st, iso);
+  if (st.arrivedAt && st.arrivedAt > iso) return false;
+  if (st.leftAt && st.leftAt < iso) return false;
+  return true;
+}
+/* broj LJUBIMACA u pansionu na dan X (boravak sa dva psa vrijedi dva) */
+function petsHereOn(iso){ return staysOnDate(iso).reduce((n, st) => stayHereOn(st, iso) ? n + stayPets(st) : n, 0); }
 /* broji SAMO ljubimce koji stvarno postoje u imeniku - u starim zapisima zna ostati
    upisan ljubimac koji je u međuvremenu obrisan, pa bi brojčanik pokazivao više nego što jeste */
 function stayPets(st){ return Math.max(petsOfStay(st).length, 1); }
@@ -1122,14 +1139,18 @@ function vDanas(){
   const here = all.filter(st => stayHere(st, t));
   const staying = here;
 
+  /* „zauzeto X od Y" broji BOKSEVE po stvarnoj zauzetosti, ne po štrikovima: boks drži
+     i onaj ko danas dolazi a nije štriknut Došao, i onaj ko je danas otišao (do kraja dana).
+     Broj LJUBIMACA ostaje na štrikovima - to su oni koji su fizički tu. */
+  const use = boxUsage(t, t, null);
   const groups = ['mb', 'vb', 'm'].map(g => {
     const act = D.boxes.filter(b => b.active && b.group === g);
     const inG = here.filter(st => stayGroup(st, t) === g);
-    const occ = new Set(inG.map(st => boxOn(st, t)).filter(id => boxById(id)));
+    const used = act.filter(b => use[b.id] && use[b.id].days.has(t)).length;
     const petsN = inG.reduce((s, st) => s + stayPets(st), 0);
-    return { g, used: occ.size, total: act.length, petsN };
+    return { g, used, total: act.length, petsN };
   });
-  const petCount = here.reduce((s, st) => s + stayPets(st), 0);
+  const petCount = petsHereOn(t);   // isti račun kao ćelija kalendara
 
   const tmr = addDays(t, 1);
   const tmrIn = D.stays.filter(st => st.from === tmr).length;
@@ -1158,7 +1179,7 @@ function vDanas(){
         <span class="grow-num num" style="color:var(--${f.g})">${f.petsN}<small> ${f.g === 'm' ? plural(f.petsN, 'mačka', 'mačke', 'mačaka') : plural(f.petsN, 'pas', 'psa', 'pasa')}</small></span>
       </button>`).join('')}
     </div>
-    ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:8px;text-align:center">Sutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
+    ${(tmrIn || tmrOut) ? `<div class="hint" style="margin-top:8px;text-align:center">Sjutra: ${tmrIn ? tmrIn + (tmrIn === 1 ? ' dolazak' : ' dolaska') : ''}${tmrIn && tmrOut ? ', ' : ''}${tmrOut ? tmrOut + (tmrOut === 1 ? ' odlazak' : ' odlaska') : ''}</div>` : ''}
   </div>`;
 
   if (!all.length){
@@ -1247,12 +1268,15 @@ function calMrezaHTML(){
   for (let i = 0; i < startBlank; i++) cells += '<div class="cal-cell blank"></div>';
   for (let d = 1; d <= dim; d++){
     const iso = CAL_YM + '-' + pad(d);
-    const stays = staysOnDate(iso);
+    /* ko je otišao prije ovog dana ne stoji više na njemu */
+    const stays = staysOnDate(iso).filter(st => !(st.leftAt && st.leftAt < iso));
     const hasIn = stays.some(st => st.from === iso);
     const hasOut = stays.some(st => st.to === iso);
+    /* isti broj kao „U pansionu" na Danas - oba idu kroz petsHereOn */
+    const koliko = petsHereOn(iso);
     cells += `<div class="cal-cell ${iso === t ? 'today' : ''} ${iso < t ? 'past' : ''}" data-act="day-open" data-id="${iso}">
       <span class="cal-num num">${d}</span>
-      <span class="cal-cnt num ${stays.length ? '' : 'zero'}">${stays.length}</span>
+      <span class="cal-cnt num ${koliko ? '' : 'zero'}">${koliko}</span>
       <span class="cal-dots">${hasIn ? '<i style="background:var(--ok)"></i>' : ''}${hasOut ? '<i style="background:var(--mb)"></i>' : ''}</span>
     </div>`;
   }
@@ -1332,7 +1356,10 @@ function groupSheet(g){
   const t = todayISO();
   const inGroup = staysOnDate(t).filter(st => stayHere(st, t) && stayGroup(st, t) === g)
     .sort((a, b) => ((boxById(boxOn(a, t)) || {}).sort || 0) - ((boxById(boxOn(b, t)) || {}).sort || 0));
-  const occupied = new Set(inGroup.map(st => boxOn(st, t)));
+  /* slobodno se računa po BOKSU, ne po spisku prisutnih - inače boravak koji danas počinje
+     a nije još štriknut „Došao" ostavi svoj boks da piše slobodan, pa se klikom na taj čip
+     u njega upiše drugi ljubimac (tako dva psa završe u istom boksu) */
+  const occupied = new Set(staysOnDate(t).map(st => boxOnLive(st, t)).filter(Boolean));
   const freeBoxes = sortedBoxes().filter(b => b.active && b.group === g && !occupied.has(b.id));
   let html = '';
   if (inGroup.length){
@@ -1350,7 +1377,8 @@ function groupSheet(g){
 }
 
 function daySheet(iso){
-  const stays = staysOnDate(iso);
+  /* ko je otišao ranije ne stoji ni na spisku ni u zauzetosti tog dana */
+  const stays = staysOnDate(iso).filter(st => !(st.leftAt && st.leftAt < iso));
   const arrivals = stays.filter(st => st.from === iso);
   const departures = stays.filter(st => st.to === iso);
   const occupied = new Set(stays.map(st => boxOnLive(st, iso)).filter(Boolean));
@@ -1895,7 +1923,7 @@ function chargeStart(stayId){
     showModal(`<div class="modal-title">Naplata</div>
       <div class="modal-text"><b>${esc(stayLabel(st))}</b> danas ne napušta${n > 1 ? 'ju' : ''} pansion (boravak traje do ${fmtDY(st.to)}).</div>
       <div class="modal-actions modal-stack">
-        <button class="btn btn-primary" data-act="charge-force" data-id="${st.id}">Naplati i odjavi (boks se oslobađa)</button>
+        <button class="btn btn-primary" data-act="charge-force" data-id="${st.id}">Naplati i odjavi</button>
         <button class="btn btn-ghost" data-act="charge-stay" data-id="${st.id}">Samo naplata, ostaje u pansionu</button>
         <button class="btn btn-ghost" data-act="modal-close">Otkaži</button>
       </div>`);
@@ -1932,7 +1960,7 @@ function chargeConfirm(stayId, andLeave){
   pays.push({ a: val, d: todayISO() });
   st.payments = pays;
   if (andLeave){
-    /* boravak je zaključen: ukupna cijena = depozit + sve uplate, boks se oslobađa */
+    /* boravak je zaključen: ukupna cijena = depozit + sve uplate, boks se oslobađa sjutradan */
     st.price = dep + pays.reduce((s, p) => s + p.a, 0);
     st.paid = true; st.paidAt = todayISO();
     if (!st.leftAt) st.leftAt = todayISO();
@@ -2286,7 +2314,9 @@ function renderStayForm(){
   } else {
     const rows = segs.map((s, i) => {
       const b = boxById(s.b);
-      const busy = boxStays(s.b, s.f, s.t, SF.id);
+      const lim = sfLeftLimit();
+      const kraj = lim && s.t > lim ? lim : s.t;
+      const busy = kraj < s.f ? [] : boxStays(s.b, s.f, kraj, SF.id);
       return `<div class="bseg">
         <span class="badge b-${b ? b.group : 'line'}">${esc(boxFullName(b))}</span>
         <span class="bseg-d num">${segs.length > 1 ? fmtD(s.f) + ' - ' + fmtD(s.t) : 'cijeli boravak'}</span>
@@ -2371,6 +2401,13 @@ function sfSegs(){
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
   if (!from || !to || to < from) return (SF.boxes || []).filter(s => s && s.b);
   return stayBoxes({ boxes: SF.boxes, from, to, boxId: null });
+}
+/* dokle boravak koji se uređuje STVARNO drži boks: poslije štrika „Otišao" ga više ne drži,
+   pa se ni sudar ne smije tražiti po punom terminu (inače lažno vikne „Boks je već zauzet"
+   na boravak koji je odavno otišao a boks legalno dobio neko drugi) */
+function sfLeftLimit(){
+  const st0 = SF && SF.id ? D.stays.find(s => s.id === SF.id) : null;
+  return st0 && st0.leftAt ? st0.leftAt : null;
 }
 /* padajući meni bokseva: koliko je koji slobodan u izabranom terminu */
 function boxOptionsHTML(from, to, selected){
@@ -2581,11 +2618,15 @@ function sfBoxConflicts(){
   const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
   if (!from || !to || to < from) return [];
   const out = [];
+  const lim = sfLeftLimit();
   sfSegs().forEach(s => {
-    boxStays(s.b, s.f, s.t, SF.id).forEach(st => {
+    const kraj = lim && s.t > lim ? lim : s.t;
+    if (kraj < s.f) return;
+    boxStays(s.b, s.f, kraj, SF.id).forEach(st => {
       const b = boxById(s.b);
-      out.push({ boks: b ? b.name : '?', ko: stayLabel(st),
-        od: s.f > st.from ? s.f : st.from, do: s.t < st.to ? s.t : st.to });
+      out.push({ boks: GROUPS_1[b ? b.group : ''] ? GROUPS_1[b.group] + ' ' + b.name : (b ? b.name : '?'),
+        ko: stayLabel(st),
+        od: s.f > st.from ? s.f : st.from, do: kraj < st.to ? kraj : st.to });
     });
   });
   return out;
@@ -2680,13 +2721,13 @@ function stayMark(id, field){
   if (field === 'arrived'){ toast(stayLabel(st) + ' je u pansionu.'); return; }
   /* odlazak je pravi trenutak za naplatu - pitamo, ne naplaćujemo sami */
   if (!st.paid && chargeDue(st) > 0){ askCharge(st.id); return; }
-  toast(stayLabel(st) + ' je otišao - boks je slobodan.');
+  toast(stayLabel(st) + ' je otišao. Boks je slobodan od sjutra.');
 }
 function askCharge(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   const prije = stayPaidSum(st);
   showModal(`<div class="modal-title">Je li naplaćeno?</div>
-    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao - boks je slobodan.
+    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao. Boks je slobodan od sjutra.
       <br>${stayLenLabel(st)} · ${fmtD(st.from)} - ${fmtD(st.to)}
       ${prije ? `<br>Već uplaćeno: <b>${money(prije)}</b>` : ''}
       <br>Po cjenovniku: <b class="num">${money(chargeDue(st))}</b></div>
@@ -2699,7 +2740,7 @@ function askCharge(stayId){
 function chargeLaterInfo(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
   showModal(`<div class="modal-title">Ostaje za naplatu</div>
-    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao i boks je slobodan.
+    <div class="modal-text"><b>${esc(stayLabel(st))}</b> je otišao. Boks je slobodan od sjutra.
       <br><br>Iznos <b class="num">${money(chargeDue(st))}</b> čeka u <b>Finansije → Nenaplaćeno</b>, sa dugmetom Naplati.</div>
     <div class="modal-actions"><button class="btn btn-primary" data-act="modal-close">U redu</button></div>`);
 }
