@@ -1,6 +1,6 @@
 # Cindyland - kontekst projekta za Claude Code
 
-PWA za evidenciju pansiona za pse i mačke. Korisnici: **Vesna i Novica** (vlasnici pansiona, Boškovi prijatelji) - po jedan nalog svako, sve dijele. Boško (vlasnik repoa) nije programer: srpski (latinica, ijekavica), bez žargona; sve tehničko radi Claude.
+PWA za evidenciju pansiona za pse i mačke. Korisnici: **Vesna i Novica** (vlasnici pansiona, muž i žena, Boškovi prijatelji - **Novica je muško**, nikad o njima u ženskoj množini) - po jedan nalog svako, sve dijele. Boško (vlasnik repoa) nije programer: srpski (latinica, ijekavica), bez žargona; sve tehničko radi Claude.
 
 **PRAVILO (veće stvari):** prije isporuke ocijeni sam sebe 0-10 i revidiraj do min 9/10.
 

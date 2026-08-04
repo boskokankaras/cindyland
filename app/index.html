@@ -992,7 +992,7 @@ function stayPayments(st){
 function stayPaidSum(st){ return stayPayments(st).reduce((s, p) => s + p.a, 0); }
 
 /* cjenovnik kao na cindyland.me: po kategoriji, sa cijenom za dva u istom boksu, 10+ noći i mjesečnom.
-   Mjesečna tarifa od 30 noćenja je ISPRAVNA - Vesna i Novica potvrdile 31.7.2026.
+   Mjesečna tarifa od 30 noćenja je ISPRAVNA - Vesna i Novica potvrdili 31.7.2026.
    (prvo prijavile kao grešku za Sanju Redzepagic pa se sjetile da mjesečna postoji - NE dirati). */
 function petCat(p){ return p.species === 'macka' ? 'macka' : (p.size === 'veliki' ? 'veliki' : 'mali'); }
 function catAmount(c, nights, pair){
