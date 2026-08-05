@@ -483,6 +483,13 @@ a.btn,a.iconbtn{text-decoration:none}
 .pe-title{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
 .ce-head:has(.pe-title){align-items:flex-start}
 .pe-txt{min-width:0;flex:1}
+/* uvećana slika: iznad popupa (modal je 70) */
+.zoom-host{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;
+  background:rgba(30,22,18,0);transition:background .26s ease;-webkit-tap-highlight-color:transparent}
+.zoom-host.on{background:rgba(30,22,18,.82)}
+.zoom-img{width:min(78vw,58vh);height:min(78vw,58vh);border-radius:50%;object-fit:cover;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);will-change:transform}
+button.pe-av{border:none;padding:0;background:none;cursor:pointer}
 .pe-title .modal-title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2;white-space:normal;overflow:hidden;overflow-wrap:anywhere}
 .pe-av{width:52px;height:52px;min-height:52px;flex:0 0 52px;align-self:center;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pe-av img{width:100%;height:100%;object-fit:cover}
@@ -694,7 +701,7 @@ a.btn,a.iconbtn{text-decoration:none}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.11.0';
+const APP_VERSION = 'v1.12.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1905,7 +1912,8 @@ let POP_SKIP = false;
 function popBack(){ POP_SKIP = true; history.back(); }
 window.addEventListener('popstate', () => {
   if (POP_SKIP){ POP_SKIP = false; return; }
-  if (PE){ peDone(true); return; }         // „nazad" prvo zatvara karticu ljubimca
+  if (ZOOM){ zoomClose(true); return; }    // „nazad" prvo zatvara uvećanu sliku
+  if (PE){ peDone(true); return; }         // pa karticu ljubimca
   if (CE){ ceDone(true, true); return; }   // pa karticu klijenta
   if (sheetOpen) closeSheet(true);
 });
@@ -2869,6 +2877,54 @@ function pdResultHTML(from, to){
    i klikom na vlasnika iz boravka: podaci, ljubimci (uređivanje + slika) i boravci. */
 let CE = null; // {clientId, name, phone, note, black, petForm, added[], fromStay}
 
+/* ============ UVEĆANA SLIKA ============
+   Klik na sliku u kartici ljubimca je uveća u krug na sredini ekrana, pa je vrati nazad u avatar.
+   Radi se FLIP-om: slika se nacrta na KONAČNOM mjestu, transformom vrati tačno na avatar, pa pusti
+   u identitet. Animira se samo `transform`, pa je glatko i na starijem telefonu (ne width/height).
+   „Nazad" na telefonu prvo zatvara sliku, tek onda karticu - zato svoj korak u istoriji. */
+let ZOOM = null;
+const KADR = { duration: 300, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' };
+function zoomPhoto(url, odEl){
+  if (!url || ZOOM || !odEl) return;
+  const r = odEl.getBoundingClientRect();
+  if (!r.width) return;
+  const host = document.createElement('div');
+  host.className = 'zoom-host';
+  host.dataset.act = 'zoom-close';
+  host.innerHTML = `<img class="zoom-img" src="${esc(url)}" alt="">`;
+  document.body.appendChild(host);
+  const img = host.firstElementChild;
+  const k = img.getBoundingClientRect();
+  host.classList.add('on');
+  /* animate() umjesto CSS prelaza: sam kreće od zadatog kadra, ne traži trikove sa reflow-om
+     i ne zavisi od toga kad browser stigne da iscrta sljedeći kadar */
+  img.animate([{ transform: naAvatar(k, r) }, { transform: 'none' }], KADR);
+  history.pushState({ zoom: 1 }, '');
+  ZOOM = { host, img, kraj: k, el: odEl };
+}
+/* transform koji uvećanu sliku (pravougaonik `k`, bez transformacije) poklopi sa avatarom `r` */
+function naAvatar(k, r){
+  const s = r.width / k.width;
+  const dx = (r.left + r.width / 2) - (k.left + k.width / 2);
+  const dy = (r.top + r.height / 2) - (k.top + k.height / 2);
+  return `translate(${dx}px, ${dy}px) scale(${s})`;
+}
+function zoomClose(viaPop){
+  if (!ZOOM) return;
+  const { host, img, kraj, el } = ZOOM;
+  ZOOM = null;
+  /* avatar se u međuvremenu mogao pomjeriti (kartica se prescrolovala) - računa se iznova,
+     a ako ga više nema na ekranu slika se samo stopi umjesto da odleti nekud */
+  const r = el && el.isConnected ? el.getBoundingClientRect() : null;
+  host.classList.remove('on');
+  const a = r && r.width
+    ? img.animate([{ transform: 'none' }, { transform: naAvatar(kraj, r) }], KADR)
+    : img.animate([{ opacity: 1 }, { opacity: 0 }], KADR);   // avatar više nije na ekranu
+  a.onfinish = () => host.remove();
+  setTimeout(() => host.remove(), 600);   // pojas i tregeri, ako animacija ne javi kraj
+  if (!viaPop) popBack();
+}
+
 /* ============ KARTICA LJUBIMCA ============
    Traženje Vesne i Novice (5.8.2026): iz boravka im treba ŠTA PAS TRAŽI (kad jede, navike,
    ujeda li), a ne vlasnički karton. Zato ljubimac ima svoju karticu, a vlasnik je jedan klik dalje.
@@ -2931,7 +2987,8 @@ function renderPetPop(){
   showModal(`
     <div class="ce-head">
       <div class="pe-title">
-        <span class="pe-av ${cls}">${av}</span>
+        ${p.photo ? `<button class="pe-av ${cls}" data-act="pe-photo-zoom" aria-label="Uvećaj sliku">${av}</button>`
+                  : `<span class="pe-av ${cls}">${av}</span>`}
         <span class="pe-txt"><span class="modal-title">${esc(petLabel(p))}</span>
         <span class="pe-sub">${znacke.map(z => `<span class="badge b-line">${esc(z)}</span>`).join('')}</span></span>
       </div>
@@ -3663,6 +3720,8 @@ document.addEventListener('click', (e) => {
         else openPetPop(pid);
       } break;
     case 'pe-done': peDone(); break;
+    case 'pe-photo-zoom': { const p = PE ? petById(PE.petId) : null; if (p && p.photo) zoomPhoto(p.photo, t); } break;
+    case 'zoom-close': zoomClose(); break;
     case 'pe-stay-toggle': if (SF){ pePopSync(); SF.petIds.has(id) ? SF.petIds.delete(id) : SF.petIds.add(id); renderPetPop(); } break;
     case 'pe-client': { const cid = id; peDone(false, true); if (!PE) openClientPop(cid, false, true); } break;
     case 'pe-edit': { const pid = id, p = petById(pid);
