@@ -502,8 +502,6 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
 .pp-av svg{width:30px;height:30px}
 .pp.on .pp-av{border-color:var(--primary)}
 .pp.on .pp-name{color:var(--primary)}
-.pp-off .pp-av{opacity:.4}
-.pp-off .pp-name,.pp-off .pp-meta{color:var(--muted)}
 .pp-name{font-size:13.5px;font-weight:750;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pp-meta{font-size:11px;color:var(--muted);margin-top:-2px}
 .pp-add .pp-av{border:2px dashed var(--primary);color:var(--primary);background:var(--primary-soft)}
@@ -703,7 +701,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.13.0';
+const APP_VERSION = 'v1.13.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2108,11 +2106,8 @@ function ppHTML(p, act, opts){
   opts = opts || {};
   const av = p.photo ? `<img src="${esc(p.photo)}" alt="">` : (p.species === 'macka' ? I.cat : I.dog);
   const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
-  /* kad klijent ima više ljubimaca, ispod slike piše KO JE NA BORAVKU (a ne vrsta) -
-     inače se ne vidi da neko od njih ovaj put ne dolazi */
-  const meta = opts.meta != null ? opts.meta
-    : (p.species === 'macka' ? 'mačka' : (p.size === 'veliki' ? 'veliki pas' : 'mali pas'));
-  return `<button class="pp ${opts.on ? 'on' : ''} ${opts.off ? 'pp-off' : ''}" data-act="${act}" data-id="${opts.id != null ? opts.id : p.id}">
+  const meta = p.species === 'macka' ? 'mačka' : (p.size === 'veliki' ? 'veliki pas' : 'mali pas');
+  return `<button class="pp ${opts.on ? 'on' : ''}" data-act="${act}" data-id="${opts.id != null ? opts.id : p.id}">
     ${opts.del ? '<i class="pp-x">✕</i>' : ''}
     <span class="pp-av ${cls}">${av}</span>
     <span class="pp-name">${esc(petLabel(p))}</span>
@@ -2299,13 +2294,9 @@ function renderStayForm(){
     const existing = petsOfClient(SF.clientId);
     petsHTML = `<div class="fld"><label class="lbl">Ljubimci</label>
       <div class="pet-pick">
-        ${existing.map(p => {
-          const na = SF.petIds.has(p.id);
-          /* jedan ljubimac = app ga sam uključi, nema šta da se bira, pa ostaje vrsta ispod slike */
-          return ppHTML(p, 'pet-open', existing.length > 1
-            ? { on: na, off: !na, meta: na ? 'na boravku' : 'nije na boravku' }
-            : { on: na });
-        }).join('')}
+        ${/* ko je na boravku vidi se po CRVENOM KRUGU oko slike i po crvenom imenu.
+             Bez sivljenja onih koji nisu - Boško 5.8.: „izgleda kao da ne radi". */''}
+        ${existing.map(p => ppHTML(p, 'pet-open', { on: SF.petIds.has(p.id) })).join('')}
         <button class="pp pp-add" data-act="client-open" data-id="${SF.clientId}" data-newpet="1">
           <span class="pp-av">${I.plus}</span><span class="pp-name">Dodaj</span>
         </button>
