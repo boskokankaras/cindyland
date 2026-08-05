@@ -701,7 +701,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.13.1';
+const APP_VERSION = 'v1.14.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2588,7 +2588,9 @@ function sfSaveClient(){
     const p = { id: uid(), clientId: c.id, name: np.name.trim(), species: np.species,
       size: np.species === 'macka' ? null : np.size, sex: np.sex || null, breed: (np.breed || '').trim(), note: '', photo: null };
     D.pets.push(p); dbSave('pets', p);
-    SF.petIds.add(p.id);
+    /* isto pravilo kao kod postojećeg klijenta (sf-client-pick): app sam uključi SAMO kad je jedan.
+       Sa dva ljubimca se bira dodirom na ljubimca pa „Dodaj na ovaj boravak". */
+    if (pending.length === 1) SF.petIds.add(p.id);
   }
   SF.clientId = c.id; SF.newClient = null; SF.newPets = []; SF.petForm = null;
   render(); renderStayForm();
@@ -3027,7 +3029,7 @@ function renderPetPop(){
     ${stays.length > SHOW ? `<p class="hint">…i još ${stays.length - SHOW} starijih.</p>` : ''}
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-ghost" style="flex:1" data-act="pe-edit" data-id="${p.id}">Izmijeni</button>
-      <button class="btn btn-primary" style="flex:1" data-act="pe-done">Gotovo</button>
+      <button class="btn ${NA_BORAVKU && SF && !SF.petIds.has(p.id) ? 'btn-ghost' : 'btn-primary'}" style="flex:1" data-act="pe-done">Gotovo</button>
     </div>
   `, true, 'modal-card');
 }
@@ -3135,7 +3137,7 @@ function renderClientPop(){
     </div>
     <div class="fld" style="margin-bottom:6px"><label class="lbl">Ljubimci</label>
       <div class="pet-pick">
-        ${pets.map(p => ppHTML(p, 'pet-open')).join('')}
+        ${pets.map(p => ppHTML(p, 'pet-open', CE.fromStay && SF ? { on: SF.petIds.has(p.id) } : null)).join('')}
         ${CE.petForm ? '' : ppAddHTML('ce-pet-new', '', 'Dodaj')}
       </div>
       ${CE.petForm ? cePetFormHTML(CE.petForm) : ''}
@@ -3195,7 +3197,16 @@ function ceDone(blago, viaPop, zadrziKorak){
   CE = null;
   closeModal();
   if (hist && !viaPop && !zadrziKorak) popBack();
-  if (SF && SF.clientId === cid){ added.forEach(id => SF.petIds.add(id)); renderStayForm(); }
+  /* odustajanje (krstić, klik pored, dugme nazad) NE smije samo da upiše ljubimca na boravak -
+     u imenik je već upisan, a na boravak ga stavlja izričit dodir. Kad je dodat tačno jedan
+     i kartica je zatvorena dugmetom, uključuje se sam, jer je to očigledna namjera. */
+  if (SF && SF.clientId === cid){
+    if (!blago && !viaPop && added.length === 1){
+      SF.petIds.add(added[0]);
+      const np = petById(added[0]); if (np) toast(petLabel(np) + ' je na ovom boravku.');
+    }
+    renderStayForm();
+  }
   render();
 }
 
@@ -3730,10 +3741,17 @@ document.addEventListener('click', (e) => {
     case 'zoom-close': zoomClose(); break;
     /* izbor je jedini razlog zbog kog su ušli iz boravka - poslije njega se kartica zatvara sama */
     case 'pe-stay-toggle': if (SF){ pePopSync(); const bio = SF.petIds.has(id);
+        if (bio && SF.petIds.size === 1){ toast('Boravak mora imati bar jednog ljubimca.'); break; }
         bio ? SF.petIds.delete(id) : SF.petIds.add(id);
         const p0 = petById(id);
+        /* UPISAN boravak se mijenja ODMAH, kao štrik Došao/Otišao - inače poruka kaže da je
+           urađeno, a zatvaranje lista krstićem ili dugmetom nazad tiho poništi izmjenu */
+        if (SF.id){
+          const st = D.stays.find(s => s.id === SF.id);
+          if (st){ st.petIds = [...SF.petIds]; dbSave('stays', st); }
+        }
         peDone();
-        toast(petLabel(p0) + (bio ? ' je sklonjen sa boravka.' : ' je na ovom boravku.'));
+        toast(petLabel(p0) + (bio ? ' više nije na ovom boravku.' : ' je na ovom boravku.'));
       } break;
     case 'pe-client': { const cid = id; peDone(false, true); if (!PE) openClientPop(cid, false, true); } break;
     case 'pe-edit': { const pid = id, p = petById(pid);
