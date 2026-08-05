@@ -502,6 +502,8 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
 .pp-av svg{width:30px;height:30px}
 .pp.on .pp-av{border-color:var(--primary)}
 .pp.on .pp-name{color:var(--primary)}
+.pp-off .pp-av{opacity:.4}
+.pp-off .pp-name,.pp-off .pp-meta{color:var(--muted)}
 .pp-name{font-size:13.5px;font-weight:750;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pp-meta{font-size:11px;color:var(--muted);margin-top:-2px}
 .pp-add .pp-av{border:2px dashed var(--primary);color:var(--primary);background:var(--primary-soft)}
@@ -701,7 +703,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.12.0';
+const APP_VERSION = 'v1.13.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2106,8 +2108,11 @@ function ppHTML(p, act, opts){
   opts = opts || {};
   const av = p.photo ? `<img src="${esc(p.photo)}" alt="">` : (p.species === 'macka' ? I.cat : I.dog);
   const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
-  const meta = p.species === 'macka' ? 'mačka' : (p.size === 'veliki' ? 'veliki pas' : 'mali pas');
-  return `<button class="pp ${opts.on ? 'on' : ''}" data-act="${act}" data-id="${opts.id != null ? opts.id : p.id}">
+  /* kad klijent ima više ljubimaca, ispod slike piše KO JE NA BORAVKU (a ne vrsta) -
+     inače se ne vidi da neko od njih ovaj put ne dolazi */
+  const meta = opts.meta != null ? opts.meta
+    : (p.species === 'macka' ? 'mačka' : (p.size === 'veliki' ? 'veliki pas' : 'mali pas'));
+  return `<button class="pp ${opts.on ? 'on' : ''} ${opts.off ? 'pp-off' : ''}" data-act="${act}" data-id="${opts.id != null ? opts.id : p.id}">
     ${opts.del ? '<i class="pp-x">✕</i>' : ''}
     <span class="pp-av ${cls}">${av}</span>
     <span class="pp-name">${esc(petLabel(p))}</span>
@@ -2294,7 +2299,13 @@ function renderStayForm(){
     const existing = petsOfClient(SF.clientId);
     petsHTML = `<div class="fld"><label class="lbl">Ljubimci</label>
       <div class="pet-pick">
-        ${existing.map(p => ppHTML(p, 'pet-open', { on: SF.petIds.has(p.id) })).join('')}
+        ${existing.map(p => {
+          const na = SF.petIds.has(p.id);
+          /* jedan ljubimac = app ga sam uključi, nema šta da se bira, pa ostaje vrsta ispod slike */
+          return ppHTML(p, 'pet-open', existing.length > 1
+            ? { on: na, off: !na, meta: na ? 'na boravku' : 'nije na boravku' }
+            : { on: na });
+        }).join('')}
         <button class="pp pp-add" data-act="client-open" data-id="${SF.clientId}" data-newpet="1">
           <span class="pp-av">${I.plus}</span><span class="pp-name">Dodaj</span>
         </button>
@@ -2970,6 +2981,13 @@ function renderPetPop(){
   const t = todayISO();
   const stays = D.stays.filter(st => (st.petIds || []).includes(p.id)).sort((a, b) => b.from.localeCompare(a.from));
   const sada = stays.find(st => stayHereOn(st, t));
+  /* radnja zbog koje su i ušli u karticu iz boravka: da li ovaj ljubimac ide na taj boravak */
+  const NA_BORAVKU = PE.fromStay && SF && SF.clientId === p.clientId
+      && (petsOfClient(p.clientId).length > 1 || !SF.petIds.has(p.id))
+    ? (SF.petIds.has(p.id)
+      ? `<button class="btn btn-ghost btn-block" data-act="pe-stay-toggle" data-id="${p.id}" style="margin-top:4px">Skloni sa ovog boravka</button>`
+      : `<button class="btn btn-primary btn-block" data-act="pe-stay-toggle" data-id="${p.id}" style="margin-top:4px">${I.plus} Dodaj na ovaj boravak</button>`)
+    : '';
   const SHOW = 6;
   const rows = stays.slice(0, SHOW).map(st => {
     const status = stayStatus(st);
@@ -2997,15 +3015,12 @@ function renderPetPop(){
       </button>
     </div>
     ${sada ? `<div class="banner ban-ok" style="margin:4px 0 12px">${I.paw}<span>U pansionu do <b class="num">${fmtDY(sada.to)}</b></span></div>` : ''}
+    ${NA_BORAVKU}
     <div class="fld" style="margin-top:10px"><label class="lbl">Navike i ishrana</label>
       <textarea id="peNote" rows="5" placeholder="npr. jede u 8 i u 18, ne voli druge ${p.species === 'macka' ? 'mačke' : 'pse'}, kapi za oči ujutru…">${esc(PE.note)}</textarea>
     </div>
     ${sb ? `<button class="btn btn-ghost btn-sm btn-block" data-act="pet-photo-pick" style="margin-top:-4px">${p.photo ? 'Promijeni sliku' : I.plus + ' Dodaj sliku'}</button>
     <input type="file" id="petPhotoFile" accept="image/*" data-pet="${p.id}" style="display:none">` : ''}
-    ${PE.fromStay && SF && SF.clientId === p.clientId && (petsOfClient(p.clientId).length > 1 || !SF.petIds.has(p.id)) ? `<div class="paid-row" style="margin:14px 0 2px">
-      <span class="pr-lbl">Na ovom boravku</span>
-      <button class="switch ${SF.petIds.has(p.id) ? 'on' : ''}" data-act="pe-stay-toggle" data-id="${p.id}" aria-label="Na ovom boravku"></button>
-    </div>` : ''}
     ${c ? `<div class="lbl" style="margin:14px 2px 2px">Vlasnik</div>
     <div class="row" style="border:none">
       <div class="row-tap tappable" data-act="pe-client" data-id="${c.id}">
@@ -3722,7 +3737,13 @@ document.addEventListener('click', (e) => {
     case 'pe-done': peDone(); break;
     case 'pe-photo-zoom': { const p = PE ? petById(PE.petId) : null; if (p && p.photo) zoomPhoto(p.photo, t); } break;
     case 'zoom-close': zoomClose(); break;
-    case 'pe-stay-toggle': if (SF){ pePopSync(); SF.petIds.has(id) ? SF.petIds.delete(id) : SF.petIds.add(id); renderPetPop(); } break;
+    /* izbor je jedini razlog zbog kog su ušli iz boravka - poslije njega se kartica zatvara sama */
+    case 'pe-stay-toggle': if (SF){ pePopSync(); const bio = SF.petIds.has(id);
+        bio ? SF.petIds.delete(id) : SF.petIds.add(id);
+        const p0 = petById(id);
+        peDone();
+        toast(petLabel(p0) + (bio ? ' je sklonjen sa boravka.' : ' je na ovom boravku.'));
+      } break;
     case 'pe-client': { const cid = id; peDone(false, true); if (!PE) openClientPop(cid, false, true); } break;
     case 'pe-edit': { const pid = id, p = petById(pid);
         if (!p) break;
