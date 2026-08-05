@@ -701,7 +701,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.14.0';
+const APP_VERSION = 'v1.14.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2260,7 +2260,11 @@ function renderStayForm(){
           <div class="row-meta">${c.phone ? `<span class="num">${esc(c.phone)}</span> · ` : ''}${before ? before + ' ranij' + (before === 1 ? 'i boravak' : 'ih boravaka') : 'prvi boravak'}</div></div>
         <span class="chev" style="width:18px;height:18px">${I.chev}</span>
       </div>
-      ${smsURI ? `<a class="iconbtn" href="${esc(smsURI)}" aria-label="Pošalji potvrdu porukom">${I.sms}</a>` : ''}
+      ${!st0 ? '' : smsURI
+        ? `<a class="iconbtn" href="${esc(smsURI)}" aria-label="Pošalji potvrdu porukom">${I.sms}</a>`
+        /* bez broja se oblačić NE sklanja - ranije je nestajao, pa je izgledalo kao da je
+           slanje poruke ukinuto. Sad kaže šta fali i vodi pravo na upis broja. */
+        : `<button class="iconbtn" data-act="sms-bez-broja" data-id="${c.id}" aria-label="Pošalji potvrdu porukom">${I.sms}</button>`}
     </div>
     ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:6px 0 0">${I.warn}<span><b>Crna lista</b> - ranije loše iskustvo sa ovim klijentom.</span></div>` : ''}`;
   } else if (SF.newClient){
@@ -2708,13 +2712,28 @@ function smsPotvrdaURI(st){
 }
 function ponudiPotvrdu(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
-  const uri = smsPotvrdaURI(st); if (!uri) return;
-  const c = clientById(st.clientId);
+  const c = clientById(st.clientId); if (!c) return;
+  const uri = smsPotvrdaURI(st);
+  /* bez broja se ranije nije desavalo NISTA - ni prozor ni poruka, pa je izgledalo
+     kao da je slanje potvrde nestalo. Od 5.8.2026. se uvijek javi. */
+  if (!uri){ nemaBrojaModal(c.id); return; }
   showModal(`<div class="modal-title">Boravak je upisan</div>
     <div class="modal-text">Poslati potvrdu porukom? Otvoriće se Poruke sa gotovim tekstom za <b>${esc(c.name)}</b> (<span class="num">${esc(c.phone)}</span>).</div>
     <div class="modal-actions">
       <button class="btn btn-ghost" data-act="modal-close">Ne sad</button>
-      <a class="btn btn-primary" data-act="modal-close" href="${esc(uri)}">${I.sms} Pošalji</a>
+      <a class="btn btn-primary" data-act="sms-salji" href="${esc(uri)}">${I.sms} Pošalji</a>
+    </div>`);
+}
+
+/* isti prozor iz dva mjesta: sa oblačića u boravku i poslije upisa novog boravka */
+function nemaBrojaModal(cid){
+  const c = clientById(cid); if (!c) return;
+  showModal(`<div class="modal-title">Nema broja telefona</div>
+    <div class="modal-text"><b>${esc(c.name)}</b> nema upisan broj, pa se potvrda ne može poslati.
+      Upiši broj pa pošalji poruku iz boravka.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-act="modal-close">Ne sad</button>
+      <button class="btn btn-primary" data-act="client-open" data-id="${c.id}">Upiši broj</button>
     </div>`);
 }
 
@@ -3737,6 +3756,11 @@ document.addEventListener('click', (e) => {
         else openPetPop(pid);
       } break;
     case 'pe-done': peDone(); break;
+    case 'sms-bez-broja': nemaBrojaModal(id); break;
+    /* „Pošalji" je link na sms:. Ranije je nosio oznaku „zatvori prozor", pa je closeModal()
+       obrisao sam link jos u toku dodira - telefon onda ne stigne da otvori Poruke.
+       Sad se prozor zatvara TEK poslije, kad je otvaranje Poruka vec krenulo. */
+    case 'sms-salji': setTimeout(closeModal, 900); break;
     case 'pe-photo-zoom': { const p = PE ? petById(PE.petId) : null; if (p && p.photo) zoomPhoto(p.photo, t); } break;
     case 'zoom-close': zoomClose(); break;
     /* izbor je jedini razlog zbog kog su ušli iz boravka - poslije njega se kartica zatvara sama */
