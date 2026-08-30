@@ -701,7 +701,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.15.0';
+const APP_VERSION = 'v1.16.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1102,6 +1102,12 @@ function render(){
   else if (TAB === 'klijenti') v.innerHTML = vKlijenti();
   else if (TAB === 'zarada') v.innerHTML = vZarada();
   else v.innerHTML = vJos();
+  /* upis koji nije stigao na server stoji na SVAKOM ekranu (upisuje se i sa Kalendara
+     i iz kartice klijenta) - podatak je sačuvan na telefonu i šalje se ponovo */
+  const nes = nesacuvanoBroj();
+  if (nes) v.insertAdjacentHTML('afterbegin', `<div class="banner ban-warn">${I.warn}
+    <span style="flex:1"><b class="num">${nes}</b> ${plural(nes, 'unos', 'unosa', 'unosa')} ${plural(nes, 'nije stigao', 'nisu stigla', 'nije stiglo')} na server. ${nes === 1 ? 'Čuvam ga' : 'Čuvam ih'} na telefonu i šaljem ponovo.</span>
+    <button class="btn btn-primary btn-sm" data-act="sync-ponovi">Pošalji</button></div>`);
   /* u Klijentima nema dugmeta - tu se pretražuje i sređuje spisak, ne upisuju boravci */
   const show = (TAB === 'danas' || TAB === 'kalendar') && !KL_MERGE;
   $('#fabWrap').style.display = show ? 'flex' : 'none';
@@ -1574,6 +1580,9 @@ function clientMenu(cid){
 /* objedinjavanje: ljubimci, boravci i naplate selektovanih prelaze pod baznog klijenta */
 async function mergeClients(baseId, ids){
   const base = clientById(baseId); if (!base) return false;
+  /* spajanje pise pravo u bazu, mimo reda - zato prvo sačekaj da red bude prazan,
+     inače bi upis koji je još u letu vaskrsao klijenta kojeg upravo brišemo */
+  if (sb) await DB_RED.catch(() => {});
   for (const id of ids){
     if (id === baseId) continue;
     const c = clientById(id); if (!c) continue;
@@ -1584,6 +1593,7 @@ async function mergeClients(baseId, ids){
       if (r.error) return false;
       r = await sb.from('clients').delete().eq('id', id);
       if (r.error) return false;
+      cekaZaboravi(['clients:' + id]);   // spojeni klijent ne smije da vaskrsne iz nepotvrđenih upisa
     }
     D.pets.forEach(p => { if (p.clientId === id) p.clientId = baseId; });
     D.stays.forEach(s => { if (s.clientId === id) s.clientId = baseId; });
@@ -3259,6 +3269,9 @@ function ceDone(blago, viaPop, zadrziKorak){
 /* ============ KLIJENT / LJUBIMAC forme ============ */
 function clientDelete(cid){
   const n = D.stays.filter(st => st.clientId === cid).length;
+  /* server kaskadno briše i ljubimce i boravke - njihovi nepotvrđeni upisi nikad ne bi prošli */
+  cekaZaboravi(D.stays.filter(st => st.clientId === cid).map(st => 'stays:' + st.id)
+    .concat(D.pets.filter(p => p.clientId === cid).map(p => 'pets:' + p.id)));
   D.stays = D.stays.filter(st => st.clientId !== cid);
   D.pets = D.pets.filter(p => p.clientId !== cid);
   D.clients = D.clients.filter(c => c.id !== cid);
@@ -3310,11 +3323,11 @@ async function uploadPetPhoto(petId, file){
     const { error } = await sb.storage.from('slike').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
     if (error) throw error;
     p.photo = CFG.url + '/storage/v1/object/public/slike/' + path + '?v=' + Date.now();
-    await dbSave('pets', p);
+    const upisano = await dbSave('pets', p);
     if (PE){ pePopSync(); renderPetPop(); }     // isto i za karticu ljubimca
     if (CE){ cePopSync(); renderClientPop(); }   // bez sync-a bi se izgubilo ono što je u međuvremenu ukucano
     render();
-    toast('Slika sačuvana.');
+    toast(upisano ? 'Slika sačuvana.' : 'Slika je poslata, ali upis još nije prošao - pokušaću ponovo.');
   } catch (e){
     toast('Slika nije poslata - pokušaj drugu ili provjeri internet.');
   }
@@ -3337,30 +3350,164 @@ const DB_UNMAP = {
   boxes: r => ({ id: r.id, name: r.name, group: r.grp, active: !!r.active, sort: r.sort || 0 }),
 };
 
-async function dbSave(table, obj){
-  save();
-  if (!sb) return;
-  try {
-    const row = DB_MAP[table] ? DB_MAP[table](obj) : obj;
-    const { error } = await sb.from(table).upsert(row);
-    if (error) throw error;
-  } catch (e){ toast('Nije sačuvano na server - provjeri internet.'); }
+/* ============ UPIS NA SERVER IDE U REDU, JEDAN PO JEDAN ============
+   Do v1.15.0 je svaki upis kretao odmah, pa su išli PARALELNO. Kod novog klijenta
+   vlasnik i njegov ljubimac kreću u istoj hiljaditinki sekunde (izmjereno: razmak 4-5 ms),
+   pa je ljubimac znao stići u bazu PRIJE svog vlasnika. Baza tada odbija ljubimca
+   (svaki ljubimac mora imati postojećeg vlasnika), a app je tu grešku samo prećutao -
+   ljubimac je ostajao na ekranu dok ga prvo osvježavanje sa servera ne obriše.
+   Izmjereno na živim podacima 30.8.2026: 16 od 33 nova klijenta (48%) ostalo je bez
+   ljubimca koji je upisan u istom koraku; nijedan ljubimac dodat KASNIJE nije se izgubio.
+   Zato sada svi upisi idu jedan za drugim, tačno onim redom kojim su nastali. */
+let DB_RED = Promise.resolve();          // red čekanja za upise
+const DB_CEKA = new Map();               // 'tabela:id' -> {table, obj/id, del, pao, pokusaja}
+const CEKA_KLJUC = 'cindyland-ceka';     // nepotvrđeni upisi preživljavaju gašenje app-a
+const CEKA_SAM = 5;                      // poslije toliko neuspjeha app ne pokušava sam - čeka dugme „Pošalji"
+const TABELA_1 = { clients: 'Klijent', pets: 'Ljubimac', stays: 'Boravak', boxes: 'Boks', settings: 'Cjenovnik' };
+const DB_NIZ = { clients: 'clients', pets: 'pets', stays: 'stays', boxes: 'boxes' };
+
+function dbRed(fn){
+  const bez = async () => { try { return await fn(); } catch (e){ return false; } };
+  DB_RED = DB_RED.then(bez, bez);
+  return DB_RED;
 }
-async function dbKill(table, id){
-  save();
-  if (!sb) return;
+
+/* nepotvrđeni upisi se pamte na telefonu - ako se app ugasi prije nego što upis prođe,
+   poslije paljenja ide ponovo (traka na ekranu to i obećava) */
+function cekaSnimi(){ try { localStorage.setItem(CEKA_KLJUC, JSON.stringify([...DB_CEKA])); } catch (e){} }
+function cekaUcitaj(){
   try {
-    const { error } = await sb.from(table).delete().eq('id', id);
-    if (error) throw error;
-  } catch (e){ toast('Brisanje nije stiglo na server - provjeri internet.'); }
+    const raw = localStorage.getItem(CEKA_KLJUC); if (!raw) return;
+    JSON.parse(raw).forEach(([k, u]) => {
+      if (!u || !u.table || !(u.obj || u.id)) return;
+      /* poslije paljenja app-a nijedan od njih sigurno nije stigao na server -
+         svi se broje kao pali, da ih ponoviNesacuvano zaista pošalje */
+      u.pao = true; u.pokusaja = 0;
+      DB_CEKA.set(k, u);
+    });
+  } catch (e){}
 }
-async function dbSavePrices(){
+
+/* jedan upis: tri pokušaja (mreža na telefonu ume da zakaže na sekund-dva) + prekid ako zaglavi,
+   da jedan zaglavljen upis ne zaustavi cio red */
+async function dbPokusaj(napravi){
+  let zadnja = null;
+  for (let i = 0; i < 3; i++){
+    /* ako telefon kaže da nema interneta, ne troši vrijeme na ponavljanje -
+       upis ostaje u redu i kreće sam kad se veza vrati */
+    if (i && navigator.onLine === false) break;
+    if (i) await new Promise(r => setTimeout(r, i === 1 ? 700 : 2000));
+    const ctrl = new AbortController();
+    const tajmer = setTimeout(() => ctrl.abort(), 20000);
+    try {
+      const { error } = await napravi(ctrl.signal);
+      if (!error) return null;
+      zadnja = error;
+    } catch (e){ zadnja = e; }
+    finally { clearTimeout(tajmer); }
+  }
+  return zadnja || new Error('neuspjeh');
+}
+
+/* upis prošao: skini oznaku SAMO ako je i dalje naša (u međuvremenu je mogao stići noviji upis
+   ili brisanje istog reda - njegovu oznaku ne smijemo obrisati) */
+function dbUspjeh(unos, key){
+  if (DB_CEKA.get(key) === unos){ DB_CEKA.delete(key); cekaSnimi(); }
+  return true;
+}
+/* upis nije prošao: NE brišemo ga iz aplikacije - ostaje u DB_CEKA pa ga
+   osvježavanje sa servera ne može obrisati sa ekrana, i pokušavamo ponovo */
+function dbNeuspjeh(unos, key, table, brisanje){
+  if (DB_CEKA.get(key) === unos){
+    unos.pao = true;
+    unos.pokusaja = (unos.pokusaja || 0) + 1;
+    cekaSnimi();
+  }
+  const kome = TABELA_1[table] || 'Podatak';
+  toast(brisanje ? 'Brisanje nije stiglo na server - pokušaću ponovo.' : kome + ' nije sačuvan na server - pokušaću ponovo.');
+  render();
+  return false;
+}
+/* koliko upisa je stvarno palo (ono što je tek krenulo se ne broji, da traka ne treperi) */
+function nesacuvanoBroj(){ let n = 0; DB_CEKA.forEach(u => { if (u.pao) n++; }); return n; }
+
+function dbSave(table, obj){
   save();
-  if (!sb) return;
-  try {
-    const { error } = await sb.from('settings').upsert({ key: 'prices', value: D.prices });
-    if (error) throw error;
-  } catch (e){ toast('Nije sačuvano na server - provjeri internet.'); }
+  if (!sb) return Promise.resolve(true);
+  const key = table + ':' + obj.id;
+  const unos = { table, obj, del: false };
+  DB_CEKA.set(key, unos); cekaSnimi();
+  return dbRed(async () => {
+    if (!DB_CEKA.has(key)) return true;   // oznaka je u međuvremenu sklonjena (obrisan klijent, spajanje)
+    const row = DB_MAP[table] ? DB_MAP[table](obj) : obj;   // uzmi najsvježije stanje
+    const err = await dbPokusaj(sig => sb.from(table).upsert(row).abortSignal(sig));
+    return err ? dbNeuspjeh(unos, key, table, false) : dbUspjeh(unos, key);
+  });
+}
+function dbKill(table, id){
+  save();
+  if (!sb) return Promise.resolve(true);
+  const key = table + ':' + id;
+  const unos = { table, id, del: true };
+  DB_CEKA.set(key, unos); cekaSnimi();
+  return dbRed(async () => {
+    if (!DB_CEKA.has(key)) return true;   // oznaka je u međuvremenu sklonjena (obrisan klijent, spajanje)
+    const err = await dbPokusaj(sig => sb.from(table).delete().eq('id', id).abortSignal(sig));
+    return err ? dbNeuspjeh(unos, key, table, true) : dbUspjeh(unos, key);
+  });
+}
+/* cjenovnik nema kolonu id - i pamti se SNIMAK cijena, da ponovni pokušaj ne pošalje
+   ono što je u međuvremenu stiglo sa servera */
+function dbSavePrices(){
+  save();
+  if (!sb) return Promise.resolve(true);
+  return dbSaveCjenovnik(JSON.parse(JSON.stringify(D.prices)));
+}
+function dbSaveCjenovnik(vrijednost){
+  const key = 'settings:prices';
+  const unos = { table: 'settings', obj: { id: 'prices', value: vrijednost }, del: false };
+  DB_CEKA.set(key, unos); cekaSnimi();
+  return dbRed(async () => {
+    if (!DB_CEKA.has(key)) return true;   // oznaka je u međuvremenu sklonjena (obrisan klijent, spajanje)
+    const err = await dbPokusaj(sig => sb.from('settings').upsert({ key: 'prices', value: vrijednost }).abortSignal(sig));
+    return err ? dbNeuspjeh(unos, key, 'settings', false) : dbUspjeh(unos, key);
+  });
+}
+
+/* ono što još nije potvrđeno sa servera vraćamo u D poslije svakog čitanja -
+   inače bi svježe stanje sa servera obrisalo sa ekrana upravo ono što nije stiglo */
+function vratiNesacuvano(){
+  DB_CEKA.forEach(u => {
+    if (u.table === 'settings'){ if (u.obj && u.obj.value) D.prices = normalizePrices(u.obj.value); return; }
+    const ime = DB_NIZ[u.table]; if (!ime) return;
+    const niz = D[ime];
+    if (u.del){ const i = niz.findIndex(x => x.id === u.id); if (i >= 0) niz.splice(i, 1); return; }
+    const i = niz.findIndex(x => x.id === u.obj.id);
+    if (i >= 0) niz[i] = u.obj; else niz.push(u.obj);
+  });
+}
+/* nov pokušaj za ono što je PALO (ne i za ono što je još u letu - inače bi se red umnožavao).
+   rucno = Vesna je pritisnula „Pošalji", tada se broj pokušaja poništava. */
+function ponoviNesacuvano(rucno){
+  if (!sb || !DB_CEKA.size) return;
+  [...DB_CEKA].forEach(([k, u]) => {
+    if (!u.pao) return;
+    const dosad = u.pokusaja || 0;
+    if (!rucno && dosad >= CEKA_SAM) return;
+    if (u.table === 'settings') dbSaveCjenovnik(u.obj.value);
+    else if (u.del) dbKill(u.table, u.id);
+    else dbSave(u.table, u.obj);
+    const nov = DB_CEKA.get(k);
+    if (nov && nov !== u) nov.pokusaja = rucno ? 0 : dosad;   // brojač pokušaja se prenosi
+  });
+  cekaSnimi();
+}
+/* zapisi koje je server već obrisao (kaskadno ili spajanjem) ne smiju ostati u redu -
+   nikad ne bi prošli, a traka bi zauvijek stajala */
+function cekaZaboravi(kljucevi){
+  let dirnuto = false;
+  kljucevi.forEach(k => { if (DB_CEKA.delete(k)) dirnuto = true; });
+  if (dirnuto) cekaSnimi();
 }
 
 let loadTimer = null;
@@ -3379,6 +3526,9 @@ async function fetchAll(table){
 async function loadAll(){
   if (!sb) return;
   try {
+    /* sačekaj da se slegne ono što se upisuje, ali najviše 3 s -
+       jedan zaglavljen upis ne smije da zaustavi osvježavanje (nesačuvano čuva vratiNesacuvano) */
+    await Promise.race([DB_RED.catch(() => {}), new Promise(r => setTimeout(r, 3000))]);
     const [c, p, s, b, st] = await Promise.all([
       fetchAll('clients'), fetchAll('pets'), fetchAll('stays'), fetchAll('boxes'), fetchAll('settings'),
     ]);
@@ -3388,6 +3538,7 @@ async function loadAll(){
     if (b.length) D.boxes = b.map(DB_UNMAP.boxes);
     const pr = st.find(x => x.key === 'prices');
     if (pr && pr.value) D.prices = normalizePrices(pr.value);
+    vratiNesacuvano();
     OFFLINE = false;
     save(); render();
     /* otvorena kartica klijenta i provjera datuma moraju da se preračunaju sa svježim podacima -
@@ -3510,7 +3661,7 @@ async function saveNewPass(){
   toast('Šifra je promijenjena.');
   LOGIN_MODE = 'login';
   const { data: { session } } = await sb.auth.getSession();
-  if (session){ sb._cindyEmail = session.user.email; sb._cindyName = (session.user.user_metadata || {}).full_name || ''; showApp(); render(); loadAll(); initRealtime(); }
+  if (session){ sb._cindyEmail = session.user.email; sb._cindyName = (session.user.user_metadata || {}).full_name || ''; showApp(); render(); ponoviNesacuvano(true); loadAll(); initRealtime(); }
   else showLogin();
 }
 function doLogout(){
@@ -3721,6 +3872,7 @@ document.addEventListener('click', (e) => {
     /* kalendar */
     case 'cal-nav': CAL_YM = ymShift(CAL_YM, Number(id)); render(); break;
     case 'cal-today': CAL_YM = todayISO().slice(0, 7); render(); break;
+    case 'sync-ponovi': ponoviNesacuvano(true); render(); toast('Šaljem ponovo…'); break;
     case 'cal-view': CAL_VIEW = id; localStorage.setItem('cindyland-calview', id); render(); break;
     case 'day-open': daySheet(id); break;
     case 'group-open': groupSheet(id); break;
@@ -3974,13 +4126,17 @@ function dayTick(){
 }
 setInterval(dayTick, 60 * 1000);
 
-document.addEventListener('visibilitychange', () => { if (!document.hidden){ dayTick(); autoCheckUpdate(); if (sb && APP_SHOWN) scheduleReload(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden){ dayTick(); autoCheckUpdate(); ponoviNesacuvano(); if (sb && APP_SHOWN) scheduleReload(); } });
 window.addEventListener('focus', autoCheckUpdate);
+/* kad se internet vrati, ono što nije stiglo na server ide ponovo */
+window.addEventListener('online', () => { ponoviNesacuvano(); if (sb && APP_SHOWN) scheduleReload(); });
 setInterval(autoCheckUpdate, 30 * 60 * 1000);
 
 /* pokretanje */
 (async function boot(){
   initPWA();
+  cekaUcitaj();          // nepotvrđeni upisi od prošlog puta
+  vratiNesacuvano();     // i odmah nazad na ekran, da ih Vesna vidi
   if (!sb){
     await maybeSeedDemo();
     showApp(); render();
@@ -3990,7 +4146,7 @@ setInterval(autoCheckUpdate, 30 * 60 * 1000);
   if (session){
     sb._cindyEmail = session.user.email;
     sb._cindyName = (session.user.user_metadata || {}).full_name || '';
-    showApp(); render(); loadAll(); initRealtime();
+    showApp(); render(); ponoviNesacuvano(true); loadAll(); initRealtime();
   } else {
     showLogin();
   }
@@ -4004,7 +4160,7 @@ setInterval(autoCheckUpdate, 30 * 60 * 1000);
     if (ev === 'SIGNED_IN' && !APP_SHOWN && sess && LOGIN_MODE !== 'recovery'){
       sb._cindyEmail = sess.user.email;
       sb._cindyName = (sess.user.user_metadata || {}).full_name || '';
-      showApp(); render(); loadAll(); initRealtime();
+      showApp(); render(); ponoviNesacuvano(true); loadAll(); initRealtime();
     }
   });
 })();
