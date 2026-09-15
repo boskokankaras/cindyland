@@ -68,6 +68,27 @@ Ranije je boravak bio zakovan za JEDAN boks za cijeli period, pa se svaki prelaz
 - Svuda se broje LJUBIMCI, ne boravci (dva psa u jednom boksu = 2) - brojčanik i brojevi uz naslove na Danas moraju da se slažu. `stayPets()` broji samo ljubimce koji POSTOJE u imeniku (u starim zapisima zna ostati obrisani ljubimac).
 - Migracija 30.7.2026: rezervna kopija `stays_rez_20260730`, pa spojeni svi lanci (134 komada, 1528 → 1394 boravka). **Dnevna čuvanja se NIKAD ne spajaju** (dva dana = dva čuvanja) - jedan takav slučaj je vraćen nazad. Kontrola: zbir svih naplata prije i poslije = 102.264 € (isto do centa), i po svakom mjesecu isto. Naknadno ispravljeno: `paid` prati POSLJEDNJI komad (naplata na dan odlaska zatvara boravak) - 58 boravaka je pogrešno stajalo kao nenaplaćeno; i očišćeni nepostojeći ljubimci iz `pet_ids` (2 zapisa).
 
+## Kartica ljubimca - prikaz i izmjena (od v1.17.0)
+
+Novica je 15.9.2026 tražio dvije stvari, obje zbog slučajnih izmjena: navike da samo STOJE kao tekst, i da
+„Izmijeni" na ljubimcu ne otvara podatke o vlasniku (x puta je tako zabrljao vlasnika).
+
+- `PE` je sada `{ petId, fromStay, hist, form, top }`. **`form === null` = kartica samo PRIKAZUJE** (navike su
+  tekst u `.pe-ro` bloku, ne textarea); `PE.form` postavljen = izmjena. Staro stanje (`PE.note` + `peSave()`
+  koji je pri svakom zatvaranju tiho upisivao textarea) je UKLONJENO - to je bio uzrok slučajnih izmjena.
+- **Izmjena živi U KARTICI LJUBIMCA** (`pePetFormHTML`): ime, pas/mačka, mali/veliki, pol, rasa, navike,
+  „Obriši ljubimca". Nikad polja vlasnika. Ranije je `pe-edit` zatvarao karticu ljubimca i otvarao KARTON
+  VLASNIKA sa `CE.petForm` - **NE vraćati to**. Vlasnik se mijenja samo preko reda „Vlasnik" (`pe-client`).
+- Radnja `ce-pet-edit` (izmjena ljubimca iz kartona vlasnika) je obrisana - niko je nije ni pozivao, a vodila
+  je tačno tamo gdje Novica ne želi. `cePetFormHTML` ostaje samo za DODAVANJE novog ljubimca (`ce-pet-new`).
+- **Zatvaranje kartice ništa ne upisuje tiho.** Ako je u izmjeni nešto dirano (`peFormDirty`), krstić/klik
+  pored/Android-nazad pitaju „Odbaciti izmjene?" (`pe-discard` / `pe-back`). Kad potvrda dođe iz `popstate`,
+  `peDone` VRAĆA korak u istoriju (`history.pushState`) - bez toga bi sljedeće zatvaranje popovalo korak
+  ispod (sheet) i zatvorilo i formu boravka.
+- `PE.top` = sljedeći re-render počinje od vrha (prelaz prikaz<->izmjena); inače se skrol čuva (toggle
+  pas/mačka ne smije baciti karticu na vrh).
+- Slika ostaje SAMO u prikazu, ne u izmjeni: upload se upisuje odmah, pa bi u formi sa „Otkaži" lagao.
+
 ## Naplata i depozit (od v1.2.0)
 
 - `stays.deposit` (numeric, null = bez depozita) - upisuje se pri rezervaciji, **ulazi u cijenu**: modal naplate predlaže `cijena - depozit`, a po potvrdi se u `price` upiše ukupno (`depozit + naplaćeno`); Zarada tako ostaje tačna. Migracija: `sql/migracija_depozit.sql` (izvršena na živoj bazi 8.7.2026, prije deploya v1.2.0).
