@@ -19,6 +19,7 @@ Od tada je otvaraš sa početnog ekrana kao svaku aplikaciju. Vas dvoje vidite i
 - **Navike ljubimca** (kad jede, ujeda li, terapija) stoje kao tekst u njegovoj kartici: u boravku ili u Klijentima klikni na sliku ljubimca.
   Da ih promijeniš, klikni **Izmijeni** pa **Sačuvaj** - dok ne klikneš Izmijeni ništa se ne može slučajno prekucati.
   U izmjeni stoje samo podaci o ljubimcu; podatke o vlasniku mijenjaš kad klikneš na vlasnika.
+- **Novog ljubimca** dodaješ dugmetom **Dodaj** u redu Ljubimci - otvori se prazna kartica samo za njega.
 - **Kad ode** klikneš **Otišao** - silazi sa spiska prisutnih, ali boks ostaje njegov do kraja tog dana i slobodan je tek sjutra. Naplata takođe znači da je otišao.
 - **Dodaj boravak** (narandžasto dugme dole desno): izabereš klijenta (ili upišeš novog), ljubimce, u kalendaru klikneš dan dolaska pa dan odlaska, izabereš boks (ili ostaviš prazno pa upišeš kasnije) i sačuvaš. Cijena se predloži sama - možeš je promijeniti.
 

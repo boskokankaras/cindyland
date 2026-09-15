@@ -88,6 +88,27 @@ Novica je 15.9.2026 tražio dvije stvari, obje zbog slučajnih izmjena: navike d
 - `PE.top` = sljedeći re-render počinje od vrha (prelaz prikaz<->izmjena); inače se skrol čuva (toggle
   pas/mačka ne smije baciti karticu na vrh).
 - Slika ostaje SAMO u prikazu, ne u izmjeni: upload se upisuje odmah, pa bi u formi sa „Otkaži" lagao.
+- **„Dodaj" ljubimca iz forme boravka takođe NE otvara karton vlasnika** (`pet-new` → `openPetNew`): ista
+  kartica, samo prazna („Novi ljubimac", bez značaka i bez „Obriši"). Ranije je `client-open` sa
+  `data-newpet` vodio na miješani ekran sa živim poljima vlasnika koja se pri zatvaranju tiho upišu -
+  isti kvar na koji se Novica žalio. „Dodaj" iz KARTONA VLASNIKA (`ce-pet-new`) ostaje kakav je bio.
+- **Znački u izmjeni NEMA** (forma ispod je jedina istina), a avatar boju/ikonu vuče iz `PE.form` - inače
+  bi značka pisala staru vrstu/pol pa bi izgledalo da dodir nije primljen; kod pola je to opasno jer se
+  drugi dodir GASI (`sex === id ? null : id`) pa bi ga ponovni dodir poništio.
+- **`PE.pitanje`** = preko kartice stoji potvrda; dok je postavljeno, „nazad" znači Otkaži (vrati u
+  karticu). Bez toga je „nazad" u „Odbaciti izmjene?" samo ponovo crtao isti prozor (izgleda pokvareno),
+  a u potvrdi brisanja je jednim pritiskom zatvarao i potvrdu i cijelu karticu.
+- **`PE.base`** = snimak u trenutku ulaska u izmjenu. „Dirano" se mjeri prema njemu, NE prema trenutnom
+  zapisu (inače tuđi upis sa drugog telefona lažno prijavi izmjenu), a `peFormSave` upisuje **samo polja
+  koja je korisnik dirao** - ako je druga osoba u međuvremenu dopisala navike, njen upis se ne gazi.
+- `.pe-del` drži „Obriši ljubimca" odvojeno (34px niže, uže) - dupli dodir na „Izmijeni" je prije padao
+  tačno na njega.
+- `petDelete` sa nepostojećim ljubimcem (obrisan sa drugog uređaja dok je potvrda stajala) zatvara prozor
+  i javi „Ljubimac je već obrisan." - ranije je tiho izlazio i potvrda se zaglavljivala.
+- **NIJE mijenjano, svjesno** (za Boškovu odluku): brisanje ljubimca može ostaviti boravak bez ijednog
+  ljubimca (potvrda obećava „Boravci ostaju sačuvani", `stayLabel`/`stayPets` imaju fallback - ali se takav
+  boravak ne može ponovo snimiti dok mu se ne izabere ljubimac). I: brisanje klijenta iz liste otvorene
+  kao sheet ostavlja jedan mrtav korak u istoriji (zatiče se i u v1.16.0).
 
 ## Naplata i depozit (od v1.2.0)
 
