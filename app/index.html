@@ -385,6 +385,8 @@ a.btn,a.iconbtn{text-decoration:none}
 .pe-ro-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 6px}
 .pe-ro{background:var(--bg);border-radius:12px;padding:12px 13px;font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .pe-ro-prazno{color:var(--muted)}
+/* „Obriši ljubimca" odvojen i uži - da dupli dodir na „Izmijeni" ne padne na njega */
+.pe-del{display:flex;justify-content:center;margin-top:34px}
 .ce-stays .row-name{font-size:15px}
 .ce-stays .row-meta{white-space:normal}
 .ce-stays .b-line{background:var(--card)}
@@ -2336,7 +2338,9 @@ function renderStayForm(){
         ${/* ko je na boravku vidi se po CRVENOM KRUGU oko slike i po crvenom imenu.
              Bez sivljenja onih koji nisu - Boško 5.8.: „izgleda kao da ne radi". */''}
         ${existing.map(p => ppHTML(p, 'pet-open', { on: SF.petIds.has(p.id) })).join('')}
-        <button class="pp pp-add" data-act="client-open" data-id="${SF.clientId}" data-newpet="1">
+        ${/* Novica (15.9.): „Dodaj" NE vodi u karton vlasnika (tamo su mu polja vlasnika
+              bila na dohvat pa ih je brljao) - otvara praznu karticu ljubimca */''}
+        <button class="pp pp-add" data-act="pet-new" data-id="${SF.clientId}">
           <span class="pp-av">${I.plus}</span><span class="pp-name">Dodaj</span>
         </button>
       </div></div>`;
@@ -2996,11 +3000,21 @@ function zoomClose(viaPop){
    Prekidač „Na ovom boravku" je ono što je ranije radio klik na avatar (biranje ko je na boravku).
    Vidi se SAMO kad je kartica otvorena iz boravka I kad klijent ima više od jednog ljubimca -
    kod jednog ljubimca ga app sam uključi pa bi prekidač bio samo smetnja. */
-let PE = null;   /* { petId, fromStay, hist, form } - form=null znaci da kartica SAMO PRIKAZUJE */
+let PE = null;   /* { petId, clientId, novi, fromStay, hist, form, base, top, pitanje }
+                    form === null -> kartica SAMO PRIKAZUJE; novi -> prazna kartica za novog ljubimca */
 function openPetPop(petId, preuzmiKorak){
   const p = petById(petId); if (!p) return;
-  PE = { petId, fromStay: !!SF, hist: true, form: null };
+  PE = { petId, clientId: p.clientId, novi: false, fromStay: !!SF, hist: true, form: null, base: null };
   /* „nazad" na telefonu zatvara SAMO karticu; kad je preuzet korak od kartice klijenta se ne gura novi */
+  if (!preuzmiKorak) history.pushState({ pePop: 1 }, '');
+  renderPetPop();
+}
+/* NOVI ljubimac dobija istu karticu, samo praznu - dodavanje se nikad ne radi na
+   ekranu sa poljima vlasnika (Novica 15.9.) */
+function openPetNew(clientId, preuzmiKorak){
+  if (!clientById(clientId)) return;
+  const f = { name: '', species: 'pas', size: 'mali', sex: null, breed: '', note: '' };
+  PE = { petId: null, clientId, novi: true, fromStay: !!SF, hist: true, form: f, base: { ...f }, top: true };
   if (!preuzmiKorak) history.pushState({ pePop: 1 }, '');
   renderPetPop();
 }
@@ -3012,11 +3026,17 @@ function pePopSync(){
   if (g('peBreed')) PE.form.breed = g('peBreed').value;
   if (g('peNote')) PE.form.note = g('peNote').value;
 }
+const PE_POLJA = ['name', 'species', 'size', 'sex', 'breed', 'note'];
+const peIsto = (a, b) => ((a === undefined ? null : a) || null) === ((b === undefined ? null : b) || null);
+function peSnap(p){
+  return { name: p.name || '', species: p.species || 'pas',
+    size: p.species === 'macka' ? null : (p.size || 'mali'),
+    sex: p.sex || null, breed: p.breed || '', note: p.note || '' };
+}
 function peFormOpen(){
   const p = petById(PE.petId); if (!p) return;
-  PE.form = { name: p.name || '', species: p.species || 'pas',
-    size: p.species === 'macka' ? 'mali' : (p.size || 'mali'),
-    sex: p.sex || null, breed: p.breed || '', note: p.note || '' };
+  PE.base = peSnap(p);
+  PE.form = Object.assign({}, PE.base, { size: PE.base.size || 'mali' });
   PE.top = true;
   renderPetPop();
 }
@@ -3027,22 +3047,49 @@ function peFormValues(){
     size: f.species === 'macka' ? null : f.size, sex: f.sex || null,
     breed: (f.breed || '').trim(), note: (f.note || '').trim() };
 }
+/* „dirano" se mjeri prema stanju u trenutku ulaska u izmjenu (PE.base), NE prema trenutnom
+   zapisu - inace bi tudji upis sa drugog telefona lazno prijavio izmjenu */
 function peFormDirty(){
   if (!PE || !PE.form) return false;
-  const p = petById(PE.petId); if (!p) return false;
-  const v = peFormValues();
-  const pSize = p.species === 'macka' ? null : (p.size || 'mali');
-  return v.name !== (p.name || '') || v.species !== p.species || v.size !== pSize
-    || v.sex !== (p.sex || null) || v.breed !== (p.breed || '') || v.note !== (p.note || '');
+  const b = PE.base || {}, v = peFormValues();
+  return PE_POLJA.some(k => !peIsto(v[k], b[k]));
 }
 function peFormSave(){
-  const p = petById(PE.petId);
-  if (!p){ toast('Ljubimac je u međuvremenu obrisan.'); PE.form = null; renderPetPop(); return; }
   const v = peFormValues();
   if (!v.name){ toast('Upiši ime ljubimca.'); return; }
-  Object.assign(p, v);
+
+  /* novi ljubimac */
+  if (PE.novi){
+    if (!clientById(PE.clientId)){ toast('Klijent je u međuvremenu obrisan.'); PE.form = null; peDone(); return; }
+    const p = Object.assign({ id: uid(), clientId: PE.clientId, photo: null }, v);
+    D.pets.push(p); dbSave('pets', p);
+    const naBoravak = SF && SF.clientId === PE.clientId;
+    if (naBoravak){
+      SF.petIds.add(p.id);
+      /* UPISAN boravak se mijenja odmah (kao štrik Došao/Otišao) - inače bi poruka rekla da je
+         urađeno, a zatvaranje forme tiho poništilo */
+      if (SF.id){
+        const st = D.stays.find(s => s.id === SF.id);
+        if (st){ st.petIds = [...SF.petIds]; dbSave('stays', st); }
+      }
+    }
+    PE.form = null;
+    peDone();
+    toast(petLabel(p) + (naBoravak ? ' je na ovom boravku.' : ' je dodat.'));
+    return;
+  }
+
+  const p = petById(PE.petId);
+  if (!p){ toast('Ljubimac je u međuvremenu obrisan.'); PE.form = null; renderPetPop(); return; }
+  /* upisuju se SAMO polja koja je korisnik dirao - ako je druga osoba u međuvremenu dopisala
+     navike, njen upis se ne gazi zastarjelim draftom */
+  const b = PE.base || {}, izmjene = {};
+  PE_POLJA.forEach(k => { if (!peIsto(v[k], b[k])) izmjene[k] = v[k]; });
+  if (izmjene.species !== undefined) izmjene.size = v.size;   // vrsta i veličina idu u paru
+  PE.form = null; PE.base = null; PE.top = true;
+  if (!Object.keys(izmjene).length){ renderPetPop(); return; }
+  Object.assign(p, izmjene);
   dbSave('pets', p);
-  PE.form = null; PE.top = true;
   renderPetPop();
   render();
   toast('Sačuvano.');
@@ -3051,14 +3098,21 @@ function peFormSave(){
    zatvaranje kartice nista ne upisuje tiho, a ako je u izmjeni nesto dirano, pita. */
 function peDone(viaPop, zadrziKorak){
   if (!PE) return closeModal();
-  if (PE.form){
-    if (peFormDirty()){
-      /* „nazad" je korak iz istorije vec potrosio - vrati ga da kartica ostane svoj korak */
-      if (viaPop) history.pushState({ pePop: 1 }, '');
-      confirmModal('Odbaciti izmjene?', 'Izmjene na ljubimcu nisu sačuvane.', 'pe-discard', '', 'Odbaci', true, 'pe-back');
-      return;
-    }
-    PE.form = null;
+  /* dok preko kartice stoji potvrda, „nazad" znaci Otkaži - vrati u karticu, ne zatvaraj sve */
+  if (PE.pitanje){
+    PE.pitanje = false;
+    if (viaPop) history.pushState({ pePop: 1 }, '');
+    renderPetPop();
+    return;
+  }
+  if (PE.form && peFormDirty()){
+    /* „nazad" je korak iz istorije već potrošio - vrati ga da kartica ostane svoj korak */
+    if (viaPop) history.pushState({ pePop: 1 }, '');
+    PE.pitanje = true;
+    confirmModal(PE.novi ? 'Odbaciti novog ljubimca?' : 'Odbaciti izmjene?',
+      PE.novi ? 'Ljubimac još nije dodat.' : 'Izmjene na ljubimcu nisu sačuvane.',
+      'pe-discard', '', 'Odbaci', true, 'pe-back');
+    return;
   }
   const hist = PE.hist;
   PE = null;
@@ -3067,7 +3121,8 @@ function peDone(viaPop, zadrziKorak){
   if (SF) renderStayForm();
   render();
 }
-/* forma za izmjenu: SAMO podaci o ljubimcu (vlasnik je jedan klik dalje, na svojoj kartici) */
+/* forma: SAMO podaci o ljubimcu (vlasnik je jedan klik dalje, na svojoj kartici).
+   „Obriši" je odvojen dole (`.pe-del`) da ne padne tačno gdje je bilo „Izmijeni". */
 function pePetFormHTML(f, p){
   return `<div class="fld" style="margin-top:12px"><label class="lbl">Ime</label>
       <input type="text" id="peName" value="${esc(f.name)}"></div>
@@ -3089,41 +3144,47 @@ function pePetFormHTML(f, p){
       <textarea id="peNote" rows="5" placeholder="npr. jede u 8 i u 18, ne voli druge ${f.species === 'macka' ? 'mačke' : 'pse'}, kapi za oči ujutru…">${esc(f.note)}</textarea></div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-ghost" style="flex:1" data-act="pe-pf-cancel">Otkaži</button>
-      <button class="btn btn-primary" style="flex:1" data-act="pe-pf-save">Sačuvaj</button>
+      <button class="btn btn-primary" style="flex:1" data-act="pe-pf-save">${p ? 'Sačuvaj' : 'Dodaj ljubimca'}</button>
     </div>
-    <button class="btn btn-danger btn-sm btn-block" data-act="pe-pet-del" data-id="${p.id}" style="margin-top:10px">${I.trash} Obriši ljubimca</button>`;
+    ${p ? `<div class="pe-del"><button class="btn btn-danger btn-sm" data-act="pe-pet-del" data-id="${p.id}">${I.trash} Obriši ljubimca</button></div>` : ''}`;
 }
 function renderPetPop(){
-  const p = petById(PE.petId);
-  if (!p){ PE = null; closeModal(); toast('Ljubimac je u međuvremenu obrisan.'); return; }
+  const p = PE.novi ? null : petById(PE.petId);
+  if (!PE.novi && !p){ PE = null; closeModal(); toast('Ljubimac je u međuvremenu obrisan.'); return; }
   const stara = $('#modalHost') ? $('#modalHost').querySelector('.modal-card') : null;
-  const skrol = (PE.top || !stara) ? 0 : stara.scrollTop;   // prelaz prikaz<->izmjena pocinje od vrha
+  const skrol = (PE.top || !stara) ? 0 : stara.scrollTop;   // prelaz prikaz<->izmjena počinje od vrha
   PE.top = false;
-  const c = clientById(p.clientId);
-  const cls = p.species === 'macka' ? 'av-m' : (p.size === 'veliki' ? 'av-vb' : 'av-mb');
-  const av = p.photo ? `<img src="${esc(p.photo)}" alt="">` : (p.species === 'macka' ? I.cat : I.dog);
-  const znacke = [p.species === 'macka' ? 'Mačka' : (p.size === 'veliki' ? 'Veliki pas' : 'Mali pas'),
+  const f = PE.form;
+  /* avatar prati ONO ŠTO JE ODABRANO u formi; znački u izmjeni NEMA - forma ispod je jedina
+     istina, inače bi značka pokazivala staru vrstu/pol i izgledalo bi da dodir nije primljen */
+  const vrsta = f ? f.species : p.species;
+  const vel = f ? (f.species === 'macka' ? null : f.size) : (p.species === 'macka' ? null : p.size);
+  const cls = vrsta === 'macka' ? 'av-m' : (vel === 'veliki' ? 'av-vb' : 'av-mb');
+  const av = (p && p.photo) ? `<img src="${esc(p.photo)}" alt="">` : (vrsta === 'macka' ? I.cat : I.dog);
+  const znacke = f ? [] : [p.species === 'macka' ? 'Mačka' : (p.size === 'veliki' ? 'Veliki pas' : 'Mali pas'),
     p.breed || '', p.sex === 'muzjak' ? 'mužjak' : (p.sex === 'zenka' ? 'ženka' : '')].filter(Boolean);
+  const naslov = PE.novi ? 'Novi ljubimac' : esc(petLabel(p));
   const GLAVA = `<div class="ce-head">
       <div class="pe-title">
-        ${p.photo && !PE.form ? `<button class="pe-av ${cls}" data-act="pe-photo-zoom" aria-label="Uvećaj sliku">${av}</button>`
+        ${p && p.photo && !f ? `<button class="pe-av ${cls}" data-act="pe-photo-zoom" aria-label="Uvećaj sliku">${av}</button>`
                   : `<span class="pe-av ${cls}">${av}</span>`}
-        <span class="pe-txt"><span class="modal-title">${esc(petLabel(p))}</span>
-        <span class="pe-sub">${znacke.map(z => `<span class="badge b-line">${esc(z)}</span>`).join('')}</span></span>
+        <span class="pe-txt"><span class="modal-title">${naslov}</span>
+        ${znacke.length ? `<span class="pe-sub">${znacke.map(z => `<span class="badge b-line">${esc(z)}</span>`).join('')}</span>` : ''}</span>
       </div>
       <button class="sheet-x" data-act="modal-close" aria-label="Zatvori">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>`;
 
-  /* ---------- IZMJENA: samo polja ljubimca ---------- */
-  if (PE.form){
-    showModal(GLAVA + pePetFormHTML(PE.form, p), true, 'modal-card');
+  /* ---------- IZMJENA (i novi ljubimac): samo polja ljubimca ---------- */
+  if (f){
+    showModal(GLAVA + pePetFormHTML(f, p), true, 'modal-card');
     if (skrol){ const m = $('#modalHost').querySelector('.modal-card'); if (m) m.scrollTop = skrol; }
     return;
   }
 
   /* ---------- PRIKAZ: sve stoji kao tekst ---------- */
+  const c = clientById(p.clientId);
   const t = todayISO();
   const stays = D.stays.filter(st => (st.petIds || []).includes(p.id)).sort((a, b) => b.from.localeCompare(a.from));
   const sada = stays.find(st => stayHereOn(st, t));
@@ -3370,7 +3431,19 @@ function clientDelete(cid){
 }
 
 function petDelete(petId){
-  const p = petById(petId); if (!p) return;
+  const p = petById(petId);
+  /* obrisan sa drugog uređaja dok je potvrda stajala - zatvori, ne ostavljaj mrtav prozor */
+  if (!p){
+    if (PE && PE.petId === petId){
+      const hist = PE.hist;
+      PE = null; closeModal();
+      if (hist) popBack();
+      if (SF) renderStayForm();
+    } else closeModal();
+    render();
+    toast('Ljubimac je već obrisan.');
+    return;
+  }
   D.pets = D.pets.filter(x => x.id !== petId);
   const touched = D.stays.filter(st => (st.petIds || []).includes(petId));
   touched.forEach(st => { st.petIds = st.petIds.filter(id => id !== petId); });
@@ -4056,11 +4129,14 @@ document.addEventListener('click', (e) => {
     case 'pe-pf-species': if (PE && PE.form){ pePopSync(); PE.form.species = id; renderPetPop(); } break;
     case 'pe-pf-size': if (PE && PE.form){ pePopSync(); PE.form.size = id; renderPetPop(); } break;
     case 'pe-pf-sex': if (PE && PE.form){ pePopSync(); PE.form.sex = PE.form.sex === id ? null : id; renderPetPop(); } break;
-    case 'pe-pf-cancel': if (PE){ PE.form = null; PE.top = true; renderPetPop(); } break;
+    case 'pe-pf-cancel': if (PE){ PE.form = null; PE.base = null;
+        if (PE.novi) peDone(); else { PE.top = true; renderPetPop(); } } break;
     case 'pe-pf-save': if (PE && PE.form) peFormSave(); break;
-    case 'pe-pet-del': pePopSync(); confirmModal('Obrisati ljubimca?', 'Boravci ostaju sačuvani.', 'pet-del-yes', id, 'Obriši', true, 'pe-back'); break;
-    case 'pe-back': if (PE) renderPetPop(); break;
-    case 'pe-discard': if (PE){ PE.form = null; peDone(); } break;
+    case 'pe-pet-del': pePopSync(); if (PE) PE.pitanje = true;
+      confirmModal('Obrisati ljubimca?', 'Boravci ostaju sačuvani.', 'pet-del-yes', id, 'Obriši', true, 'pe-back'); break;
+    case 'pe-back': if (PE){ PE.pitanje = false; renderPetPop(); } break;
+    case 'pe-discard': if (PE){ PE.pitanje = false; PE.form = null; PE.base = null; peDone(); } break;
+    case 'pet-new': if (SF) sfSync(); openPetNew(id); break;
     case 'ce-new-stay': { const cid = CE.clientId; ceDone(false, false, true); if (!CE) openStayForm({ clientId: cid }); } break;
     case 'ce-stay-open': { const sid = id; ceDone(false, false, true); if (!CE) openStayForm({ stayId: sid }); } break;
     case 'sf-pet-toggle': sfSync(); SF.petIds.has(id) ? SF.petIds.delete(id) : SF.petIds.add(id); renderStayForm(); break;
@@ -4172,7 +4248,7 @@ document.addEventListener('click', (e) => {
     case 'modal-close':
       if (t.classList.contains('modal-overlay') && e.target.closest('.modal')) break;
       /* ako je preko kartice iskočila potvrda (brisanje), klik pored vraća u karticu - ne zatvara sve */
-      if (PE && !$('#modalHost').querySelector('.modal-card')){ closeModal(); renderPetPop(); break; }
+      if (PE && !$('#modalHost').querySelector('.modal-card')){ PE.pitanje = false; closeModal(); renderPetPop(); break; }
       if (CE && !$('#modalHost').querySelector('.modal-card')){ closeModal(); renderClientPop(); break; }
       if (PE){ peDone(); break; }     // kartica ljubimca nista ne upisuje tiho (pita ako je u izmjeni)
       if (CE){ ceDone(true); break; } // zatvaranje kartice klijenta i upisuje izmjene
