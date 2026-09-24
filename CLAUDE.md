@@ -144,7 +144,9 @@ povratak u app / svaki realtime događaj (i odjek sopstvenog upisa) mijenjao cio
   oštećen fajl / velika koje nema ide u `MALE_PRESKOCI` do sljedećeg paljenja. Staje i kad app ode u pozadinu ili
   nestane mreže. Potvrđene ADRESE pamti
   `localStorage['cindyland-male-slike']` (nova slika = nova adresa = nova provjera). **NIŠTA ne piše u bazu i nikad ne
-  dira veliku.** Samo prijavljeni (`sb`), ne u probnom režimu.
+  dira veliku.** Samo prijavljeni (`sb`), ne u probnom režimu. **Stanje 24.9.2026: male slike za svih 117 starih upisa su
+  već napravljene** (pušteno iz prijavljene sesije u pregledaču na Macu, 117/117, prosjek 15,6 KB) - telefoni ih samo
+  potvrde HEAD-om jednom i zapamte; dopuna ostaje kao osigurač za buduće slučajeve (pala mala pri uploadu).
 - `uploadPetPhoto` pravi obje slike iz iste bitmape, obje šalje sa `cacheControl` godinu dana i obje odmah stavlja u
   `cindyland-slike` (`kesSlikaUpisi`) - da se upravo poslato ne skida nazad. Ako mala ne prođe, velika se svejedno upiše,
   a malu dopuni `dopuniMaleSlike`.
