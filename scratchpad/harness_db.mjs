@@ -24,7 +24,7 @@ function napraviSb(srv){
     from(table){ return {
       upsert(row){ return builder(() => srv.upsert(table, row)); },
       delete(){ return builder(b => srv.del(table, b._id)); },
-      select(){ const b = { range(){ return b; }, then(r){ return Promise.resolve(r({ data:[...srv.t[table].values()], error:null })); } }; return b; },
+      select(){ const b = { order(){ return b; }, range(){ return b; }, then(r){ return Promise.resolve(r({ data:[...srv.t[table].values()], error:null })); } }; return b; },
     }; },
   };
 }
@@ -41,7 +41,7 @@ function pokreni(seed, staraLogika){
     D, sb: napraviSb(srv), console, setTimeout, clearTimeout, Promise, Map, Set, Array, Object, Number, JSON, Date, Math,
     AbortController: class { constructor(){ this.signal = {}; } abort(){} }, navigator: { onLine: true },
     save(){}, render(){}, toast(m){ porukе.push(m); }, normalizePrices: p => p,
-    OFFLINE:false, CE:null, PD:null, sheetOpen:false, $:()=>({textContent:''}), cePopSync(){}, renderClientPop(){}, renderDatesCheck(){},
+    OFFLINE:false, CE:null, PD:null, sheetOpen:false, $:()=>({textContent:''}), cePopSync(){}, renderClientPop(){}, renderDatesCheck(){}, dopuniMaleSlikeUskoro(){}, ocistiKesSlika(){},
     uid:()=>'x', esc:s=>s, I:{}, CFG:{}, defaultData:()=>D,
   };
   ctx.window = ctx; ctx.globalThis = ctx;

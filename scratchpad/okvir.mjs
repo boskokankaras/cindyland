@@ -28,7 +28,7 @@ export function napravi(seed, opts={}){
   const sb = { from(table){ return {
     upsert(row){ return builder(()=>srv.upsert(table,row)); },
     delete(){ return builder(b=>srv.del(table,b._id)); },
-    select(){ const b={ range(){return b;}, then(r){ return Promise.resolve(r({ data:[...srv.T[table].values()], error:null })); } }; return b; } }; } };
+    select(){ const b={ order(){return b;}, range(){return b;}, then(r){ return Promise.resolve(r({ data:[...srv.T[table].values()], error:null })); } }; return b; } }; } };
   const D = opts.D || { clients:[], pets:[], stays:[], boxes:[], prices:{ dnevni: 10 } };
   const poruke=[];
   const store = opts.store || new Map();
@@ -36,7 +36,7 @@ export function napravi(seed, opts={}){
   const ctx = { D, sb, console, setTimeout, clearTimeout, Promise, Map, Set, Array, Object, Number, JSON, Date, Math, localStorage,
     AbortController: class { constructor(){ this.signal={}; } abort(){} }, navigator:{ onLine:true },
     save(){}, render(){}, toast(m){poruke.push(m);}, normalizePrices:p=>p, OFFLINE:false, CE:null, PD:null, sheetOpen:false,
-    $:()=>({textContent:''}), cePopSync(){}, renderClientPop(){}, renderDatesCheck(){}, uid:()=>'x', esc:s=>s, I:{}, CFG:{}, defaultData:()=>D };
+    $:()=>({textContent:''}), cePopSync(){}, renderClientPop(){}, renderDatesCheck(){}, dopuniMaleSlikeUskoro(){}, ocistiKesSlika(){}, uid:()=>'x', esc:s=>s, I:{}, CFG:{}, defaultData:()=>D };
   ctx.window=ctx; ctx.globalThis=ctx; vm.createContext(ctx); vm.runInContext(kod, ctx);
   const g = izraz => vm.runInContext(izraz, ctx);
   return { ctx, srv, D, poruke, store, g, ceka:()=>g('DB_CEKA.size'), palo:()=>g('nesacuvanoBroj()') };
