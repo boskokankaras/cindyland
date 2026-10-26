@@ -1,4 +1,4 @@
-/* Provjera slika ljubimaca (v1.18.0): PRAVI kod iz app/sw.js i app/index.html nad lažnim serverom,
+/* Provjera slika ljubimaca (od v1.18.0): PRAVI kod iz app/sw.js i app/index.html nad lažnim serverom,
    kešom i storage-om. Pokretanje: node scratchpad/harness_slike.mjs */
 import vm from 'vm';
 import fs from 'fs';
@@ -115,9 +115,11 @@ console.log('\n== service worker: slike ljubimaca ==');
   oo.kes.caches.open = async () => { throw new Error('keš pukao'); };
   r = await oo.run(SB + 'pets/p1.jpg?v=1');
   eq(await r.text(), 'V', 'S12 keš ne radi -> slika ipak stiže sa mreže');
-  o.kes.stores.set('cindyland-v1.17.0', new Map()); o.kes.stores.set('cindyland-v1.18.0', new Map());
+  /* stari keš = svaka verzija osim one iz app/sw.js (CACHE) */
+  const tekuci = (sw.match(/const CACHE = '([^']+)'/) || [])[1];
+  o.kes.stores.set('cindyland-v1.0.0', new Map()); o.kes.stores.set(tekuci, new Map());
   let c; o.handlers.activate({ waitUntil(p){ c = p; } }); await c;
-  eq(o.kes.deleted, ['cindyland-v1.17.0'], 'S13 aktivacija briše stari keš app-a, a keš slika ostaje');
+  eq(o.kes.deleted, ['cindyland-v1.0.0'], 'S13 aktivacija briše stari keš app-a, a keš slika ostaje');
 }
 
 /* ================= APLIKACIJA: mala slika, upload, dopuna, čišćenje ================= */
@@ -314,11 +316,14 @@ console.log('\n== loadAll: precrtavanje samo kad ima promjene ==');
   const broj = { render: 0, save: 0, dopuna: 0, ciscenje: 0 };
   const ctx = { D, sb, console, setTimeout, clearTimeout, Promise, Map, Set, Array, Object, Number, JSON, Date, Math, localStorage,
     AbortController: class { constructor(){ this.signal = {}; } abort(){} }, navigator: { onLine: true },
-    save(){ broj.save++; }, toast(){}, normalizePrices: p => p, OFFLINE: false, CE: null, PE: null, PD: null, sheetOpen: false, NES_CRTANO: 0,
+    save(){ broj.save++; }, toast(){}, normalizePrices: p => p, OFFLINE: false, CE: null, PE: null, PD: null, NM: null, sheetOpen: false, NES_CRTANO: 0,
     $: () => ({ textContent: '' }), cePopSync(){}, renderClientPop(){}, renderDatesCheck(){}, renderPetPop(){}, uid: () => 'x', esc: s => s, I: {}, CFG: {}, defaultData: () => D,
     dopuniMaleSlikeUskoro(){ broj.dopuna++; }, ocistiKesSlika(){ broj.ciscenje++; } };
   ctx.render = function(){ broj.render++; ctx.NES_CRTANO = vm.runInContext('nesacuvanoBroj()', ctx); };
-  ctx.window = ctx; ctx.globalThis = ctx; vm.createContext(ctx); vm.runInContext(blokDb, ctx);
+  ctx.window = ctx; ctx.globalThis = ctx; vm.createContext(ctx);
+  /* od v1.19.0 DB_UNMAP.stays prebacuje stari depozit u avans (stayIzDepozita iz prvog bloka) */
+  vm.runInContext(b0.slice(b0.indexOf('function stayIzDepozita'), b0.indexOf('\n}\n', b0.indexOf('function stayIzDepozita')) + 2), ctx);
+  vm.runInContext(blokDb, ctx);
   T.clients.set('c1', { id: 'c1', name: 'Ana', phone: '1', note: '', blacklist: false });
   T.clients.set('c2', { id: 'c2', name: 'Bob', phone: '2', note: '', blacklist: false });
   T.pets.set('p1', { id: 'p1', client_id: 'c1', name: 'Rex', species: 'pas', size: 'mali', sex: null, breed: '', note: '', photo: null });

@@ -1,0 +1,252 @@
+[
+ {
+  "ekran": "Okvir (važi na svim ekranima)",
+  "funkcije": [
+   "Tabovi Danas / Kalendar / Klijenti / Finansije / Profil (data-act=tab); tačkica na Profilu kad čeka nova verzija",
+   "Dugme + (fab-toggle, fab-close na klik pored): Provjeri datume (dates-check) i Dodaj boravak (stay-new); vidi se SAMO na Danas i Kalendaru, nema ga u Klijentima i u objedinjavanju",
+   "Bočna traka na računaru: Dodaj boravak (stay-new), Provjeri datume (dates-check), broj verzije",
+   "Traka „X unosa nije stiglo na server“ na SVAKOM ekranu sa dugmetom Pošalji (sync-ponovi); nesačuvani upisi se pamte na telefonu i šalju sami pri paljenju / povratku interneta / povratku u app",
+   "Zaglavlje sheet-a: strelica ‹ sa imenom nivoa ispod (sheet-back, jedan nivo nazad), krstić i klik pored (sheet-close / sheetOverlay = zatvori sve); sistemsko nazad = jedan nivo (redom: zum slike, kartica ljubimca, kartica vlasnika, prozor naplate / „Sačuvati izmjene?“, pa sheet)",
+   "Toast poruke poslije svake radnje; poruka greške kad upis ne prođe („nije sačuvan na server - pokušaću ponovo“)",
+   "Poslije ponoći Danas sam prelazi na novi dan (dayTick); povratak u app = osvježavanje iz baze bez treptanja ekrana; tuđe izmjene stižu uživo (realtime)",
+   "Otvorena kartica vlasnika, kartica ljubimca (u prikazu) i Provjeri datume se same preračunaju kad stignu tuđe izmjene; forma boravka i spiskovi grupa/dana/Nenaplaćeno NE",
+   "Zum aplikacije blokiran (zbog zaglavlja tabele Boksevi)"
+  ]
+ },
+ {
+  "ekran": "Danas",
+  "funkcije": [
+   "Traka „Nema veze sa serverom“ (OFFLINE) i traka „Nova verzija je spremna“ sa Osvježi (upd-apply)",
+   "Brojčanik „U pansionu danas“ (broje se ljubimci po štrikovima Došao/Otišao)",
+   "Tri reda grupa Mali boksevi / Veliki boksevi / Mačke: „zauzeto X od Y“ (po stvarnoj zauzetosti boksa) + broj pasa/mačaka; klik otvara spisak grupe (group-open)",
+   "Napomena „Sjutra: N dolazaka, M odlazaka“",
+   "Danas dolaze: red (stay-edit) + dugme Došao (stay-arrived, upisuje odmah, toast „je u pansionu“)",
+   "Danas napuštaju: neispraćeni gore sa dugmetom Otišao (stay-left = otvara prozor Odlazak, ništa ne upisuje sam) i značkom „plaćeno“ kad je sve plaćeno; ispraćeni ostaju dolje prigušeni sa „otišao“ + „naplaćeno“ ili dugmetom „duguje X €“ (charge = prozor naplate)",
+   "U pansionu: redovi sa „do dd.mm.“",
+   "Svaki red: avatar (slika ili ikona po vrsti), ime(na) ljubimaca + znak „!“ ako bilo koji ljubimac ima napomenu (NAP_ZNAK), značka boksa (ili „bez boksa“), znak selidbe kad mijenja boks, ime vlasnika kad se razlikuje; klik na red otvara boravak (stay-edit)",
+   "Prazno stanje „Danas nema nikoga u pansionu“"
+  ]
+ },
+ {
+  "ekran": "Spisak grupe (npr. Mali boksevi - danas)",
+  "funkcije": [
+   "Ko je danas u grupi, poređano po boksu; ko danas odlazi ima dugme Otišao (stay-left), klik na red otvara boravak (stay-edit) - „nazad“ iz boravka vraća na ovaj spisak na isto mjesto",
+   "Slobodno danas: čipovi bokseva (grid-new) = nov boravak od danas u tom boksu",
+   "Spisak se sam osvježi poslije štrika/naplate (osvjeziSheet)"
+  ]
+ },
+ {
+  "ekran": "Forma boravka - postojeći boravak",
+  "funkcije": [
+   "Vlasnik: red sa imenom, telefonom i brojem ranijih boravaka -> kartica vlasnika (client-open, sfSync prije otvaranja)",
+   "Ikonica poruke: SMS potvrda sa gotovim tekstom (link sms:, sa avansom i ostatkom) ili, bez broja, prozor „Nema broja telefona“ (sms-bez-broja) sa „Upiši broj“ (client-open)",
+   "Crvena traka Crna lista kad je vlasnik na crnoj listi",
+   "Ljubimci vlasnika kao kružići (pet-open = kartica ljubimca); izabrani na boravku crveni krug; „!“ na kružiću ljubimca sa napomenom; Dodaj (pet-new = prazna kartica novog ljubimca, NE karton vlasnika)",
+   "Blok napomena ispod ljubimaca (svaki izabrani ljubimac sa navikama, red otvara karticu - pet-open)",
+   "Vrsta boravka Pansion / Dnevno čuvanje (sf-type; dnevno izjednači odlazak sa dolaskom)",
+   "Kalendar termina od-do (dr-pick; dr-nav ‹ › mjesec i « » godina), podnožje sa brojem noćenja",
+   "Upozorenja: „Pravi boksevi su puni … tada ide u kavez“ i crveno „Sve je popunjeno“ po danima",
+   "Redovi stanja: „Stigao · datum“ + Poništi (sf-undo-arrived, briše i odlazak), „Otišao · datum“ + Poništi (sf-undo-left), spisak „Uplate na ovaj boravak“ sa datumima i oznakom avansa (samo kad postoji bar jedna uplata koja nije avans)",
+   "Napomena boravka (sfNote)",
+   "Ukupno (€) sa predračunom kao placeholder + Avans (€) jedno do drugog; hint „Po cjenovniku X · N noćenja · N ljubimaca“; živi obračun ukupno - avans - uplaćeno = za naplatu / „sve je plaćeno“ (sfDue, mijenja se dok se kuca, bez gubitka fokusa)",
+   "Dugmad novca: „Naplaćeno · datum“ + Poništi (sf-unpay -> potvrda „Poništiti naplatu?“ -> sf-unpay-yes, briše zadnju uplatu koja nije avans); „Sve je plaćeno“ (bez dugmeta); dok je u pansionu Otišao (sf-left) + „Naplati X €“ (sf-charge, iznos se mijenja dok se kuca); poslije odlaska samo Naplati",
+   "Sačuvaj izmjene (sf-save) -> pitanja „Boks je već zauzet“ (Upiši svejedno = sf-save-force) i „Preko kapaciteta“ (Upiši = sf-save-force / Odustani); za završene boravke se ne pita",
+   "Obriši boravak (stay-del -> potvrda -> stay-del-yes); poslije čuvanja/brisanja/naplate vraća se jedan nivo nazad",
+   "Zatvaranje sa nesačuvanim izmjenama: „Sačuvati izmjene?“ (sf-izlaz-sacuvaj / sf-izlaz-odbaci / sf-izlaz-otkazi „Nazad u boravak“)",
+   "Boravak čiji je klijent u međuvremenu obrisan vraća se na pretragu vlasnika"
+  ]
+ },
+ {
+  "ekran": "Mjesto (boks) u formi boravka",
+  "funkcije": [
+   "Bez boksa: padajući meni (sfBox) samo sa grupama za vrstu ljubimca (mali pas samo mali boksevi itd.), uz svaki boks „slobodan dd.mm.-dd.mm.“ / „zauzet“; boks nije obavezan (hint „ostavi prazno - upisaćeš kasnije“)",
+   "Iskombinuj mjesta (sf-plan-show) -> Prijedlog rasporeda hronološki sa kavezom kao rezervom i „nema mjesta“ rupama -> Prihvati raspored (sf-plan-take); prijedlog se pojavi i SAM kad jedan pravi boks ne pokriva cijeli termin",
+   "Sa boksom: periodi (badge grupa+boks, datumi ili „cijeli boravak“, značka „zauzet“), ✕ (sf-box-del -> potvrda „Ukloniti mjesto?“ koja kaže ko preuzima te dane -> sf-box-del-yes)",
+   "Premjesti (sf-box-move, samo za boravak od bar 1 noćenja): prozor sa malim kalendarom (mv-nav, mv-pick, dozvoljeni samo dani boravka), izbor boksa (mvBox), Premjesti (sf-box-move-do)",
+   "Iskombinuj i kad boks već postoji",
+   "Prozor boravka koji je otišao ne javlja lažni sudar poslije dana odlaska (sfLeftLimit)"
+  ]
+ },
+ {
+  "ekran": "Forma boravka - novi boravak / izbor vlasnika",
+  "funkcije": [
+   "Otvara se iz: + Dodaj boravak, bočne trake, dana iz kalendara (stay-new sa datumom), praznog polja u tabeli Boksevi i čipa slobodnog boksa (grid-new = datum + boks), Provjeri datume (pd-upisi = termin + vrsta), kartice vlasnika (ce-new-stay), kartice ljubimca (pe-new-stay, taj ljubimac već izabran)",
+   "Pretraga vlasnika (sfClientQ: ime, telefon, ime ljubimca) i spisak (sf-client-pick; jedan ljubimac se sam izabere); crna lista značka u spisku",
+   "Plutajuće dugme „Dodaj klijenta“ u sheet-u (sf-client-new, prenosi ukucano ime)",
+   "Ostatak forme kao kod postojećeg boravka, bez redova stanja i dugmadi novca (novac prije dolaska = samo Avans)",
+   "Sačuvaj boravak (sf-save) pa odmah ponuda potvrde porukom (ponudiPotvrdu)",
+   "Zatvaranje sa izabranim podacima: „Boravak nije upisan“ (Upiši boravak / Izađi bez upisa / Nazad u boravak)"
+  ]
+ },
+ {
+  "ekran": "Novi klijent u formi boravka",
+  "funkcije": [
+   "nazad na pretragu (sf-client-clear)",
+   "Ime i prezime *, Telefon",
+   "Prekidač Crna lista (nc-black)",
+   "Ljubimci: Dodaj (sf-pet-form) -> mini forma: ime, Pas/Mačka (sf-pf-species), Mali/Veliki (sf-pf-size), Mužjak/Ženka sa poništavanjem drugim dodirom (sf-pf-sex), rasa sa predlozima (dlPas/dlMacka), Otkaži (sf-pf-cancel) / Dodaj (sf-pf-add); nacrti ljubimaca sa ✕ (sf-newpet-del)",
+   "Sačuvaj klijenta (sf-save-client): traži ime i bar jednog ljubimca; nedovršena mini forma sa imenom se takođe upiše; sa jednim ljubimcem on se sam stavi na boravak"
+  ]
+ },
+ {
+  "ekran": "Prozor naplate / odlaska (NM)",
+  "funkcije": [
+   "Otvara se iz: Otišao na Danas / spisku grupe / danu (stay-left), Otišao u formi (sf-left, prvo sačuva formu), Naplati u formi (sf-charge, prvo sačuva formu), „duguje X €“ na Danas i Naplati u Nenaplaćenom (charge)",
+   "Naslov Odlazak ili Naplata; avatar, ime, noćenja i datumi",
+   "Prije dana odlaska izbor „Ostaje u pansionu“ / „Odlazi danas“ (nm-odlazi)",
+   "Obračun: ukupno (po cjenovniku), avans · datum, uplaćeno ranije, za naplatu",
+   "Polje iznosa (nmIznos, unaprijed upisan ostatak); kad je manje od ostatka: „Ostaje još X“ + Duguje / Popust (nm-ostatak); Popust spušta cijenu na primljeno",
+   "Dugmad: Naplaćeno i otišao / Naplaćeno / Upiši uplatu (nm-ok), Otišao, plaća kasnije (nm-kasnije, samo kod odlaska), Otkaži (nm-otkazi = ništa se ne upisuje)",
+   "Kad je sve plaćeno (i avansom): „Sve je plaćeno avansom.“ + Potvrdi odlazak / Zatvori kao naplaćeno; bez iznosa: U redu",
+   "Sistemsko nazad = Otkaži (sheet ispod ostaje); poslije potvrde vraća jedan nivo nazad ili osvježi otvoren spisak"
+  ]
+ },
+ {
+  "ekran": "Potvrda rezervacije porukom (SMS)",
+  "funkcije": [
+   "Poslije upisa novog boravka: „Boravak je upisan - Poslati potvrdu porukom?“ Ne sad / Pošalji (sms-salji, prozor se zatvara tek poslije 0,9 s da telefon stigne otvoriti Poruke)",
+   "Tekst: datumi, ukupan iznos, avans, ostatak, hrana, termini prijema; iPhone &body= / ostali ?body=",
+   "Bez broja uvijek prozor „Nema broja telefona“ sa Upiši broj (client-open)",
+   "Naknadno slanje: ikonica poruke u formi upisanog boravka"
+  ]
+ },
+ {
+  "ekran": "Kartica ljubimca - prikaz",
+  "funkcije": [
+   "Avatar (slika ili ikona po vrsti/veličini); dodir na sliku = uvećana slika (pe-photo-zoom)",
+   "Značke vrsta / rasa / pol",
+   "Traka „U pansionu do dd.mm.gggg.“",
+   "Dodaj na ovaj boravak / Skloni sa ovog boravka (pe-stay-toggle) - SAMO kad je otvorena iz forme boravka istog vlasnika i vlasnik ima više ljubimaca (ili ovaj nije na boravku); upisan boravak se mijenja odmah; zadnji ljubimac se ne može skloniti",
+   "Navike i ishrana kao tekst (samo čitanje) + Izmijeni (pe-edit)",
+   "Dodaj sliku / Promijeni sliku (pet-photo-pick + skriveno polje petPhotoFile) - samo prijavljeni, samo u prikazu",
+   "Vlasnik: red -> kartica vlasnika (pe-client), ikonica poziva tel:",
+   "Boravci (6 najnovijijih, NISU klikabilni) sa „u pansionu“ / „rezervacija“, „…i još N starijih“",
+   "Novi boravak (pe-new-stay, ljubimac već izabran, nazad vraća u karticu)",
+   "Izmijeni (pe-edit) / Gotovo (pe-done); krstić i klik pored zatvaraju (modal-close)"
+  ]
+ },
+ {
+  "ekran": "Kartica ljubimca - izmjena i novi ljubimac",
+  "funkcije": [
+   "Ime, Pas/Mačka (pe-pf-species), Mali/Veliki (pe-pf-size), Mužjak/Ženka sa poništavanjem drugim dodirom (pe-pf-sex), Rasa sa predlozima, Navike i ishrana (peNote)",
+   "Avatar prati ono što je izabrano u formi; nema znački u izmjeni",
+   "Otkaži (pe-pf-cancel) / Sačuvaj ili Dodaj ljubimca (pe-pf-save); upisuju se samo dirana polja (ne gazi tuđi upis)",
+   "Obriši ljubimca odvojen niže (pe-pet-del -> „Obrisati ljubimca? Boravci ostaju sačuvani.“ -> pet-del-yes / pe-back)",
+   "Zatvaranje sa diranim poljima: „Odbaciti izmjene?“ / „Odbaciti novog ljubimca?“ (pe-discard / pe-back); nazad dok stoji potvrda = Otkaži",
+   "Novi ljubimac iz forme boravka ide odmah i na boravak (i na upisan boravak u bazi)",
+   "Ljubimac obrisan sa drugog telefona: kartica se zatvori uz poruku"
+  ]
+ },
+ {
+  "ekran": "Uvećana slika",
+  "funkcije": [
+   "Mala slika odmah, velika podmetnuta kad stigne (decode)",
+   "Dodir (zoom-close) ili sistemsko nazad vraća sliku u avatar animacijom"
+  ]
+ },
+ {
+  "ekran": "Kartica vlasnika",
+  "funkcije": [
+   "Otvara se iz: spiska Klijenti, forme boravka (red vlasnika), kartice ljubimca (pe-client), Crne liste, „Upiši broj“, menija na dugi dodir (kl-menu-edit), poslije objedinjavanja",
+   "Crvena traka Crna lista",
+   "ŽIVA polja: Ime i prezime, Telefon (+ ikonica poziva tel:), Napomena, prekidač Crna lista (ce-black) - upisuju se TIHO pri svakom zatvaranju (Gotovo, krstić, klik pored, nazad); prazno ime: Gotovo javlja „Ime je obavezno“, krstić zadrži staro",
+   "Ljubimci kao kružići (pet-open -> kartica ljubimca; kad je otvorena iz boravka pokazuje ko je na boravku)",
+   "Dodaj ljubimca (ce-pet-new) -> mini forma sa navikama (ce-pf-species / ce-pf-size / ce-pf-sex / ce-pf-cancel / ce-pf-save); kad se iz boravka doda tačno jedan i zatvori Gotovo, sam ide na boravak",
+   "Boravci (12 najnovijih, klikabilni ce-stay-open, i kad je kartica otvorena iz boravka) sa „naplaćeno iznos“, „duguje X €“, „u pansionu“, „rezervacija“, „avans X €“; isti boravak koji je već otvoren ispod se ne otvara dva puta (toast „vrati se strelicom nazad“)",
+   "Ukupno naplaćeno do sada",
+   "Novi boravak (ce-new-stay; nazad vraća u karticu)",
+   "Gotovo (ce-done); Obriši klijenta (ce-del -> potvrda -> client-del-yes / ce-back) - NEMA ga kad je kartica otvorena iz boravka",
+   "Klijent obrisan sa drugog telefona: kartica se zatvori uz poruku"
+  ]
+ },
+ {
+  "ekran": "Kalendar - Mjesec",
+  "funkcije": [
+   "Mjesec ‹ › (cal-nav); dodir na naziv mjeseca vraća na tekući mjesec (cal-today - skriveno)",
+   "Prekidač Mjesec / Boksevi (cal-view), pamti se na telefonu (cindyland-calview)",
+   "Ćelija dana: broj ljubimaca u pansionu (isti račun kao Danas), tačkice dolazak/odlazak, danas istaknut, prošli dani sivi; dodir = dan iz kalendara (day-open)",
+   "Legenda"
+  ]
+ },
+ {
+  "ekran": "Kalendar - Boksevi",
+  "funkcije": [
+   "Tabela dani × boksevi, zalijepljeni datumi lijevo i boksevi gore; red grupa iznad; ugašeni boksevi se vide kad imaju boravke u mjesecu",
+   "Zauzeta ćelija (ime ljubimca, više njih sa /) -> boravak (stay-edit); slobodna ćelija -> nov boravak za taj dan i boks (grid-new); dodir na datum -> dan (day-open)",
+   "Dan odlaska ostaje zauzet (stayBoxesLive); nedjelja i danas istaknuti"
+  ]
+ },
+ {
+  "ekran": "Dan iz kalendara",
+  "funkcije": [
+   "Odlaze / Dolaze / U pansionu (ko je otišao ranije se ne vidi); za DANAŠNJI dan redovi imaju dugmad Došao / Otišao",
+   "Klik na red -> boravak; nazad vraća na dan na isto mjesto",
+   "Slobodni boksevi kao čipovi sa grupom (grid-new)",
+   "Novi boravak - dd.mm. (stay-new sa datumom)",
+   "Prazan dan: „Ovaj dan je prazan“"
+  ]
+ },
+ {
+  "ekran": "Klijenti",
+  "funkcije": [
+   "Pretraga zalijepljena za vrh (klSearch: ime, telefon, ime i rasa ljubimca), krstić briše (kl-clear); fokus i kursor preživljavaju tuđe izmjene",
+   "Spisak A-Ž sa slovima kao zaglavljima, Č/Ć pod C, Š pod S, Ž pod Z, Đ pod D; red: inicijal, ime, značka crna lista, ljubimci, telefon, broj boravaka N×; dodir -> kartica vlasnika (client-open)",
+   "Prvih 80 + Prikaži sve (N) (kl-all)",
+   "A-Ž traka sa strane (kl-jump) samo bez pretrage i sa bar 4 slova; prevlačenje prstom sa velikim slovom i vibracijom",
+   "Dugi dodir 480 ms (i desni klik na računaru) na klijenta -> meni: Izmijeni podatke (kl-menu-edit), Objedini sa drugim (kl-merge-start), Otkaži",
+   "Objedinjavanje: traka „Objedinjavanje pod X“, dodir bira klijente (kl-merge-toggle, kvačica), donja traka Otkaži (kl-merge-cancel) / Objedini (n) (kl-merge-do -> potvrda -> kl-merge-yes); ljubimci, boravci i naplate prelaze, telefon/napomena/crna lista se prenose; poslije se otvara kartica objedinjenog",
+   "Bez dugmeta + na ovom ekranu"
+  ]
+ },
+ {
+  "ekran": "Finansije",
+  "funkcije": [
+   "Mjesec ‹ › (zar-nav)",
+   "Naplaćeno u mjesecu, broj naplata, ukupno u godini (po datumu svake uplate; avans ulazi u mjesec kad je primljen)",
+   "Traka Nenaplaćeno: broj završenih boravaka i ~iznos (unpaid-open) - samo boravci završeni u posljednjih 45 dana",
+   "Spisak naplata u mjesecu (avans označen „avans ·“), dodir -> boravak (stay-edit)"
+  ]
+ },
+ {
+  "ekran": "Nenaplaćeno",
+  "funkcije": [
+   "Završeni (štrik Otišao ili prošao datum) a neplaćeni boravci iz posljednjih 45 dana, najnoviji prvi",
+   "Dodir na ime -> boravak (nazad vraća na spisak na isto mjesto)",
+   "Dugme Naplati X € (charge) -> prozor naplate sa Duguje/Popust; spisak se poslije sam osvježi",
+   "Hint: nije za naplatu -> obriši ili upiši cijenu 0 i naplati"
+  ]
+ },
+ {
+  "ekran": "Profil",
+  "funkcije": [
+   "Ime i email prijavljenog (ili „Probni režim“)",
+   "Kutija Nova verzija je spremna + Osvježi i ažuriraj (upd-apply, čeka worker do 8 s, keš slika ostaje); „Već imaš posljednju verziju“",
+   "Cjenovnik (prices-open): dnevno čuvanje po ljubimcu + za mali pas / veliki pas / mačku: noćenje, dva u boksu, 10+, dva 10+, mjesec (30 noćenja), dva mjesec; Sačuvaj (prices-save, provjera iznosa)",
+   "Boksevi i mjesta (boxes-open): prekidač uključi/isključi po boksu (box-toggle), dodaj novo mjesto sa grupom (box-add); kavez/transport u imenu = rezervno mjesto",
+   "Crna lista (bl-open): spisak klijenata -> kartica vlasnika",
+   "Promijeni šifru (pw-open, samo prijavljeni): dva polja sa okom (pw-eye), min 6 znakova, poklapanje (pw-save)",
+   "Odjavi se (logout -> potvrda -> logout-yes; briše lokalne podatke)",
+   "Provjeri ažuriranje (upd-check, verzija), Kako da instaliram aplikaciju (install-help: iPhone/Android)",
+   "Podnožje sa verzijom"
+  ]
+ },
+ {
+  "ekran": "Provjeri datume",
+  "funkcije": [
+   "Vrsta: Mali pas / Veliki pas / Mačka (pd-vrsta; pamti se, datumi se brišu pri svakom otvaranju)",
+   "Kalendar od-do (pd-pick, pd-nav)",
+   "Rezultat: IMA MJESTA / IMA, ALI U KAVEZU / FALI N DANA / NEMA SAMO dd.mm. / NEMA MJESTA; „predug termin“ i „nema bokseva za vrstu“ posebno",
+   "Raspored po danima (boks ili „nema mjesta“), „Selio bi se N puta“ / „Cijelo vrijeme na istom mjestu“, upozorenje o boravcima bez boksa koji se ne broje",
+   "Upiši boravak za ovaj termin (pd-upisi -> nova forma sa terminom i vrstom)"
+  ]
+ },
+ {
+  "ekran": "Prijava",
+  "funkcije": [
+   "Email + šifra sa okom (pw-eye), Prijavi se (login), Enter šalje",
+   "Zaboravljena šifra (login-mode forgot -> send-reset) -> ekran „Provjeri email“ (sent) -> Nazad na prijavu",
+   "Link iz mejla otvara Nova šifra (recovery: save-newpass) pa ulazak u app",
+   "Bez config.js ključeva: probni režim sa demo istorijom"
+  ]
+ }
+]

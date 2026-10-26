@@ -15,7 +15,7 @@ PWA za evidenciju pansiona za pse i mačke. Korisnici: **Vesna i Novica** (vlasn
 - **Upisi na server idu U REDU, jedan po jedan** (`DB_RED` u `dbSave`/`dbKill`/`dbSavePrices`, od v1.16.0). Ranije je svaki upis kretao odmah, pa su išli paralelno - a `pets.client_id` i `stays.client_id` imaju strani ključ na `clients`. Kod novog klijenta vlasnik i ljubimac kretali su u istoj hiljaditinki sekunde (izmjereno: razmak 4-5 ms) i ljubimac je znao stići prvi -> baza ga odbije (23503) -> `dbSave` grešku progutao -> ljubimac ostane samo lokalno dok ga prvi `loadAll()` ne obriše sa ekrana. **Izmjereno nad živom bazom 30.8.2026: 16 od 33 nova klijenta (48%) ostalo je bez ljubimca upisanog u istom koraku; nijedan ljubimac dodat kasnije nije nestao.** NE vraćati paralelne upise.
 - Uz red idu i: 3 pokusaja po upisu (`dbPokusaj`, prekid poslije 20 s, bez ponavljanja kad `navigator.onLine` kaze da nema veze), mapa nepotvrdjenih upisa `DB_CEKA` KOJA SE PAMTI I NA TELEFONU (`cindyland-ceka`, `cekaSnimi`/`cekaUcitaj`) pa upis prezivi i gasenje app-a, `vratiNesacuvano()` poslije svakog citanja (da svjeze stanje sa servera ne obrise ono sto jos nije stiglo), `ponoviNesacuvano()` na paljenje app-a / `online` / `visibilitychange` (sam odustane poslije `CEKA_SAM` = 5 neuspjeha, dugme "Posalji" ga uvijek pokrene), i traka upozorenja na SVIM ekranima (`nesacuvanoBroj`, umece se u `#view` u `render()`). **Pravilo: nijedan neuspjeh upisa ne smije proci tiho.**
 - Tri stvari koje je nasla adversarna provjera, ne razbijati ih: (1) oznaka u `DB_CEKA` se brise SAMO ako je i dalje ista (`dbUspjeh`), inace bi uspjeh upisa progutao oznaku brisanja koje ceka iza njega; (2) `mergeClients` pise u bazu MIMO reda pa mora prvo `await DB_RED` i `cekaZaboravi('clients:'+id)`, inace spojeni klijent vaskrsne; (3) `clientDelete` mora `cekaZaboravi` za ljubimce i boravke tog klijenta (server ih brise kaskadno, njihovi upisi nikad ne bi prosli). Provjera: `scratchpad/harness_db*.mjs` pustaju PRAVI kod iz `app/index.html` nad laznim serverom koji provjerava strani kljuc.
-- Novac na boravku: `price` = ukupno (prazno → predračun po cjenovniku), `deposit`, `payments[]`; **za naplatu = ukupno − depozit − uplate** (`chargeDue`), forma to živo prikazuje ispod polja (`sfDueHTML`). Na odjavi se `price` prepiše na depozit+uplate.
+- Novac na boravku (od v1.19.0): `price` = ukupno (prazno → predračun po cjenovniku, do `stayKraj`), `payments[]` = SVE primljeno, uključujući **avans** (`{a, d, av:1}`); **za naplatu = ukupno − uplate** (`stayNovac`/`chargeDue`). Kolona `deposit` je ugašena (uvijek null) - vidi „Avans, odlazak i naplata".
 - Boksovi: grupe `mb` (Mali boksevi: Boks 1-13, Kotilica, Kotilica 2), `vb` (Veliki boksevi: Boks 1,2,4,5,6,7 - VB 3 ne postoji fizički), `m` (Mačke: Boks 1-5) + improvizovana mjesta iz istorije (kavezi, Kuća - `active:false`).
 
 ## Verzioniranje / PWA update (ista logika kao K-Sport Hub)
@@ -172,11 +172,62 @@ povratak u app / svaki realtime događaj (i odjek sopstvenog upisa) mijenjao cio
   offline, aktivacija čuva keš slika, dopuna malih, čišćenje, loadAll bez precrtavanja); u pregledaču demo (gore) sa
   pravom storage adresom: prvi put 488 ms (velika umjesto male), iz keša 3 ms.
 
-## Naplata i depozit (od v1.2.0)
+## Avans, odlazak i naplata (v1.19.0, Novica 25.10.2026)
 
-- `stays.deposit` (numeric, null = bez depozita) - upisuje se pri rezervaciji, **ulazi u cijenu**: modal naplate predlaže `cijena - depozit`, a po potvrdi se u `price` upiše ukupno (`depozit + naplaćeno`); Zarada tako ostaje tačna. Migracija: `sql/migracija_depozit.sql` (izvršena na živoj bazi 8.7.2026, prije deploya v1.2.0).
-- Naplata ide iz forme boravka (veliko zeleno „Naplati" na dnu; naplaćen boravak ima red „Naplaćeno · datum" + „Poništi"). U listama Danas nema dugmadi ni pilula - klik na red otvara boravak. „Naplati" prije dana odlaska (st.to ≠ danas) prvo pita „X danas ne napušta pansion…" (Ne/Da).
-- Zum aplikacije blokiran (viewport `maximum-scale=1` + `touch-action:pan-x pan-y` na `*`) - zbog fiksnih zaglavlja u tabeli Boksevi (sticky datumi lijevo + boksevi gore, skroluje se samo sadržaj).
+Novica: depozit se nije računao kao uplaćen (nije ulazio ni u Finansije), boravak plaćen unaprijed ostajao je
+„nenaplaćen", „Otišao" nije nudio naplatu, a ukucan depozit je nestajao (forma se zatvarala krstićem bez čuvanja).
+
+- **Avans = uplata sa oznakom `av:1`** i datumom kad je primljen. Ulazi u Finansije tog dana, oduzima se od ukupnog.
+  Polje „Avans" u formi pokazuje zbir; povećanje dodaje NOVU uplatu avansa današnjeg datuma, smanjenje skida najnovije,
+  prazno briše sve (`sfUpisiAvans`). U SMS potvrdi piše „Avans" i ostatak.
+- **Stari depozit** (`deposit`) se pri SVAKOM čitanju prebacuje u avans (`stayIzDepozita` - u DB_UNMAP, loadLocal,
+  applySeed, cekaUcitaj): datum = dan upisa boravka; ne dodaje se ako je isti novac već među uplatama (dupli unos
+  iz vremena kad se depozit nije brojao: uplate pokrivaju depozit, a depozit + uplate > cijena). Stara verzija app-a
+  pri čuvanju briše oznaku `av` - uplata prije dana dolaska zato dobija oznaku nazad. **`stayIzDepozita` se zove iz
+  `loadLocal()` prije nego što se učita ostatak skripte - NE smije koristiti `pad`/`isoFromDate` (TDZ = prazni podaci).**
+- **Trajni upis u bazu:** `node scripts/migracija-avans.mjs` (pregled) / `--upisi` (rezervna kopija sa RLS + upis u jednoj
+  transakciji). Koristi ISTU funkciju iz `app/index.html`. Stanje 25.10.2026: 11 boravaka sa depozitom, 9 dobija avans
+  (1.139 € ulazi u Finansije po mjesecima upisa), Doga i Marta Mihičić samo gube duplikat. **Pustiti tek kad oba
+  telefona pokazuju v1.19.0.**
+- **Jedan prozor naplate/odlaska** (`chargeStart` → `renderNaplata` → `naplataPotvrdi`; stanje `NM`): štrik „Otišao",
+  „Naplati" u boravku, „Naplati X €" na Danas i u Nenaplaćenom. Ništa se ne upisuje prije potvrde. Obračun ukupno /
+  avans / uplaćeno ranije / za naplatu; „Naplaćeno i otišao", „Otišao, plaća kasnije", a kad je sve plaćeno „Potvrdi
+  odlazak". Manji iznos → izbor **Duguje** (ostaje u Nenaplaćenom) / **Popust** (cijena = primljeno). Prije dana odlaska
+  izbor „Ostaje u pansionu / Odlazi danas". Uplata kojom se boravak zatvara nosi `z:1` - samo nju briše „poništi"
+  naplatu (`sfZatvarajucaUplata`); zatvaranje bez nove uplate poništava samo oznaku. Prije upisa provjera da druga
+  osoba nije u međuvremenu naplatila (`nmOtisk`). Prozor bez sheet-a/kartice ima svoj korak u istoriji (`NM.korak`).
+- **Prijevremeni odlazak** ne skraćuje `to`: boravak se računa do `leftAt` (`stayKraj` u `stayNights`/`stayEstimate`),
+  pa „poništi" odlazak vraća sve. Na Danas se ispraćeni (`leftAt === danas`) vide prigušeni, sa „naplaćeno" ili „Naplati X €".
+- **Stari dugovi iz Excela** (bez cijene, bez uplate, stariji od 45 dana - `stayStariDug`) nemaju izmišljen iznos:
+  u kartici vlasnika „nenaplaćeno", ne ulaze u „Duguje ukupno"; Nenaplaćeno ih drži u sklopljenom redu „Starije od 45 dana".
+
+## Forma boravka, „nazad" i kartice (v1.19.0)
+
+- **Upisan boravak = PREGLED** (`renderStayForm`, `edit`): kartica stanja (status + poništi, termin, boks, ljubimci,
+  vlasnik), žute napomene (navike ljubimaca + napomena boravka), kartica novca sa dugmadima po stanju (Došao / Otišao /
+  Naplati X € / Naplaćeno · poništi). Termin, Boks, Cijena i avans, Napomena su redovi koji se otvaraju dodirom (`SF.otv`).
+  Traka „Odbaci / Sačuvaj izmjene" (`sheetFoot`, `sfSaveBar`) se pojavi tek kad je nešto dirano. Otišao/Naplati rade nad
+  SAČUVANIM boravkom; sa diranom formom prvo pitaju (Sačuvaj pa nastavi / Odbaci pa nastavi). Novi boravak ostaje
+  otvorena forma + spisak tekućih boravaka klijenta (da se produži postojeći umjesto duplog).
+- **Dirano polje po polje** (`sfPolja`/`sfIzmjene`, `SF.base`): čuvanje upisuje SAMO dirana polja - avans/cijena koje je
+  druga osoba upisala dok je forma bila otvorena ostaju. Upisi koji idu odmah (ljubimac na boravak, poništi naplatu)
+  usklađuju bazu sa `sfBazaPolje`. Zatvaranje sa diranim poljima pita „Sačuvati izmjene?" i kaže šta je dirano.
+- **„Nazad"** (`SHEET_STACK`, `sheetGurni`/`sheetNazad`/`sheetZatvoriSve`): boravak otvoren sa spiska (grupa, dan,
+  Nenaplaćeno), iz drugog boravka ili iz kartice vlasnika/ljubimca vraća se tamo, na isto mjesto. Strelica „‹" u zaglavlju
+  i sistemsko nazad = jedan nivo; krstić = sve (ali prvo vrati na niži boravak sa nesačuvanim izmjenama). Svaki nivo
+  sheet-a ima tačno jedan korak u istoriji; kartica na dnu dijeli korak sa prvim nivoom. Bilo koji prozor preko sheet-a:
+  nazad = Otkaži. Isti boravak se ne otvara dva puta. `POP_SKIP` može biti funkcija (izvrši se kad stigne popstate).
+- **Kartica vlasnika = PRIKAZ** (kao kartica ljubimca od v1.17.0): Pozovi / Novi boravak gore, „Duguje ukupno", boravci
+  kratko (`fmtRaspon`), „Izmijeni podatke" otvara polja + crnu listu + Obriši klijenta. Zatvaranje NIŠTA ne upisuje
+  (ranije je svako zatvaranje tiho upisivalo polja); dirana izmjena pita „Odbaciti izmjene?". Dugmad „Gotovo" nema ni na
+  jednoj kartici (krstić). Kartica ljubimca: „Novi boravak" (ljubimac već izabran), redovi i traka „U pansionu" otvaraju boravak.
+- **Znak „!"** (`NAP_ZNAK`) pored imena u svim redovima i na kružiću ljubimca = ljubimac ima navike/napomenu ili boravak
+  ima napomenu.
+- **Danas:** brojčanik + tri pločice (ljubimaca, „slobodno N"), Dolaze / Odlaze / **Ostaju** (samo oni koji danas ne
+  odlaze - ranije su se odlasci ponavljali u „U pansionu"; Odlaze + Ostaju = brojčanik). Desno u redu uvijek jedna stvar;
+  „plaćeno" ide u red ispod imena. Poslije Došao poruka ima „Poništi". Dan iz kalendara ima isti redoslijed.
+- Provjera: `scratchpad/v1.19.0-slike/` (slike toka), E2E (20 tokova + inventar funkcija) je bio u sesiji 25.10. -
+  headless Playwright iz `~/tiramisu-upload/node_modules`; `harness_slike.mjs` usklađen (93/93).
 
 ## Predaja aplikacije - NE ZABORAVITI
 
