@@ -186,9 +186,10 @@ Novica: depozit se nije računao kao uplaćen (nije ulazio ni u Finansije), bora
   pri čuvanju briše oznaku `av` - uplata prije dana dolaska zato dobija oznaku nazad. **`stayIzDepozita` se zove iz
   `loadLocal()` prije nego što se učita ostatak skripte - NE smije koristiti `pad`/`isoFromDate` (TDZ = prazni podaci).**
 - **Trajni upis u bazu:** `node scripts/migracija-avans.mjs` (pregled) / `--upisi` (rezervna kopija sa RLS + upis u jednoj
-  transakciji). Koristi ISTU funkciju iz `app/index.html`. Stanje 25.10.2026: 11 boravaka sa depozitom, 9 dobija avans
-  (1.139 € ulazi u Finansije po mjesecima upisa), Doga i Marta Mihičić samo gube duplikat. **Pustiti tek kad oba
-  telefona pokazuju v1.19.0.**
+  transakciji). Koristi ISTU funkciju iz `app/index.html`. **IZVRŠENO 26.10.2026** (na Boškov zahtjev, dok je jedan
+  telefon još bio na v1.18.0): 12 boravaka, 10 dobilo avans (1.169 € ušlo u Finansije po mjesecima upisa), Doga i
+  Marta Mihičić samo izgubile duplikat; rezervna kopija `stays_rez_20261026` (RLS uključen). Kolona `deposit` je
+  prazna; stara verzija bi mogla ponovo upisati depozit - app ga pri čitanju opet prebaci (isti iznos se ne duplira).
 - **Jedan prozor naplate/odlaska** (`chargeStart` → `renderNaplata` → `naplataPotvrdi`; stanje `NM`): štrik „Otišao",
   „Naplati" u boravku, „Naplati X €" na Danas i u Nenaplaćenom. Ništa se ne upisuje prije potvrde. Obračun ukupno /
   avans / uplaćeno ranije / za naplatu; „Naplaćeno i otišao", „Otišao, plaća kasnije", a kad je sve plaćeno „Potvrdi
