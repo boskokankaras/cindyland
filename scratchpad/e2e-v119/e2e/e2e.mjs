@@ -175,7 +175,7 @@ await tok('Otišao (b): Popust -> zatvoren, cijena = primljeno', async (E, ok) =
   ok(s.paid === true && s.paidAt === E.t && s.leftAt === E.t, 'zatvoren kao naplaćen, otišao danas');
   ok(s.price === 110, 'cijena spuštena na primljeno 50 + 60 = 110 (' + s.price + ')');
   ok(JSON.stringify(s.payments) === JSON.stringify([{ a: 50, d: s.payments[0].d, av: 1 }, { a: 60, d: E.t, z: 1 }]), 'uplate: avans 50 + 60 danas: ' + JSON.stringify(s.payments));
-  ok(/naplaćeno/.test(await E.tekst('#view .row:has(.row-tap[data-id="fx7"]) .row-side')), 'red fx7 pokazuje „naplaćeno"');
+  ok(await E.ima('#view .row-tap[data-id="fx7"]') === 0, 'naplaćen fx7 nestao sa Danas (v1.19.1)');
   ok(!(await E.ev(`unpaidStays().some(s => s.id === 'fx7')`)), 'fx7 nije u Nenaplaćenom');
 });
 
@@ -194,7 +194,7 @@ await tok('Otišao (c): sve plaćeno avansom -> Potvrdi odlazak', async (E, ok) 
   const s = await E.st('fx2');
   ok(s.leftAt === E.t && s.paid === true && s.price === 100, 'otišao + zatvoren, cijena 100');
   ok((s.payments || []).length === 1 && s.payments[0].av === 1, 'nije dodata nova uplata (samo avans)');
-  ok(/naplaćeno/.test(await E.tekst('#view .row:has(.row-tap[data-id="fx2"]) .row-side')), 'red pokazuje „naplaćeno"');
+  ok(await E.ima('#view .row-tap[data-id="fx2"]') === 0, 'naplaćen fx2 nestao sa Danas (v1.19.1)');
 });
 
 await tok('Otišao (d): Otišao, plaća kasnije', async (E, ok) => {
@@ -240,7 +240,7 @@ await tok('Ispraćeni red: dugme „Naplati X €"', async (E, ok) => {
   await E.klik('#modalHost [data-act="nm-ok"]');
   const s = await E.st('fx5');
   ok(s.paid && s.price === iznos && s.paidAt === E.t && JSON.stringify(s.payments) === JSON.stringify([{ a: iznos, d: E.t, z: 1 }]), 'zatvoren: cijena = primljeno, jedna uplata danas: ' + JSON.stringify(s.payments));
-  ok(/naplaćeno/.test(await E.tekst('#view .row:has(.row-tap[data-id="fx5"]) .row-side')), 'red pokazuje „naplaćeno"');
+  ok(await E.ima('#view .row-tap[data-id="fx5"]') === 0, 'naplaćen fx5 nestao sa Danas (v1.19.1)');
 });
 
 /* ======================= FORMA BORAVKA ======================= */
@@ -426,7 +426,8 @@ await tok('Poništi naplatu briše samo zatvarajuću uplatu', async (E, ok) => {
   await E.klik('#modalHost [data-act="nm-ok"]');
   let s = await E.st('fx1');
   ok(s.paid && s.paidAt === E.t && s.payments.length === 3 && s.price === 360, 'zatvoren sa 3 uplate (300 av + 50 + 10): ' + JSON.stringify(s.payments));
-  await E.klik('#view .row-tap[data-act="stay-edit"][data-id="fx1"]');
+  ok(await E.ima('#view .row-tap[data-id="fx1"]') === 0, 'naplaćen nestao sa Danas (v1.19.1)');
+  await E.ev(`openStayForm({ stayId: 'fx1' })`); await new Promise(r => setTimeout(r, 350));
   ok(/Naplaćeno · /.test(await E.tekst('#sheetBody .sf-nv-red')), 'forma: „Naplaćeno · datum" + poništi');
   ok(await E.ima('#sheetBody .sf-novac .pay-list .pay-row') === 3, 'spisak uplata na boravku (3 reda, avans označen)');
   ok(/avans/.test(await E.tekst('#sheetBody .sf-novac .pay-list')), 'uplata avansa označena „avans"');
@@ -665,30 +666,21 @@ await tok('Nenaplaćeno: Naplati iz spiska, spisak se osvježi i ostane otvoren;
 });
 
 /* ======================= ZNAK „!" ======================= */
-await tok('Znak „!" na redovima sa napomenom ljubimca i napomenom boravka', async (E, ok, bilj) => {
-  const znak = id => E.ima(`#view .row-tap[data-id="${id}"] .row-name-w .nap-znak`);
-  ok(await znak('fx3') === 1, 'fx3 (ljubimac sa napomenom) ima „!"');
-  ok(await znak('fx6') === 1, 'fx6 (veliki pas, kapi) ima „!"');
-  ok(await znak('fx1') === 0 && await znak('fx4') === 0, 'fx1 i fx4 bez napomene nemaju „!"');
+await tok('Napomene: bez znaka „!" (v1.19.1), tekst u boravku', async (E, ok, bilj) => {
+  ok(await E.ima('#view .nap-znak') === 0, 'na Danas nema znaka „!"');
   await E.klik('#view .row-tap[data-act="stay-edit"][data-id="fx3"]');
-  const pid = (await E.st('fx3')).petIds[0];
-  ok(await E.ima(`#sheetBody .pp[data-id="${pid}"] .pp-nap .nap-znak`) === 1, '„!" na kružiću ljubimca');
-  ok(/Oće da ujede/.test(await E.tekst('#sheetBody .nap-box')), 'žuta napomena ljubimca u formi');
+  ok(await E.ima('#sheetBody .nap-znak') === 0, 'ni na kružiću ljubimca');
+  ok(/Oće da ujede/.test(await E.tekst('#sheetBody .nap-box')), 'žuta napomena ljubimca u formi ostaje');
   await E.klik('#sheet .sheet-x[data-act="sheet-close"]');
   await E.klik('#view .row-tap[data-act="stay-edit"][data-id="fx4"]');
   await E.klik('#sheetBody [data-act="sf-otv"][data-id="napomena"]');
   await E.upisi('#sfNote', 'Nosi svoju hranu');
   await E.klik('#sheetFoot [data-act="sf-save"]'); await E.posleSave(bilj);
   ok((await E.st('fx4')).note === 'Nosi svoju hranu', 'napomena boravka sačuvana');
-  ok(await znak('fx4') === 1, 'fx4 (napomena boravka) sada ima „!"');
   await E.klik('#view .row-tap[data-act="stay-edit"][data-id="fx4"]');
   ok(/Ovaj boravak Nosi svoju hranu/.test(await E.tekst('#sheetBody .nap-box')), 'žuta napomena „Ovaj boravak" u formi');
   await E.klik('#sheetBody .nap-row[data-act="sf-otv-nap"]');
   ok(await E.vidljiv('#sfNote'), 'dodir na napomenu otvara red Napomena');
-  await E.klik('#sheet .sheet-x[data-act="sheet-close"]');
-  await E.klik('#tabbar [data-act="tab"][data-id="kalendar"]');
-  await E.klik(`#view .cal-cell[data-act="day-open"][data-id="${E.t}"]`);
-  ok(await E.ima(`#sheetBody .row-tap[data-id="fx4"] .nap-znak`) === 1 && await E.ima(`#sheetBody .row-tap[data-id="fx3"] .nap-znak`) === 1, '„!" i u danu iz kalendara');
 });
 
 /* ======================= STARI DEPOZIT ======================= */

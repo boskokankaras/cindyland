@@ -198,7 +198,8 @@ Novica: depozit se nije računao kao uplaćen (nije ulazio ni u Finansije), bora
   naplatu (`sfZatvarajucaUplata`); zatvaranje bez nove uplate poništava samo oznaku. Prije upisa provjera da druga
   osoba nije u međuvremenu naplatila (`nmOtisk`). Prozor bez sheet-a/kartice ima svoj korak u istoriji (`NM.korak`).
 - **Prijevremeni odlazak** ne skraćuje `to`: boravak se računa do `leftAt` (`stayKraj` u `stayNights`/`stayEstimate`),
-  pa „poništi" odlazak vraća sve. Na Danas se ispraćeni (`leftAt === danas`) vide prigušeni, sa „naplaćeno" ili „Naplati X €".
+  pa „poništi" odlazak vraća sve. Na Danas ispraćen i NAPLAĆEN nestaje (v1.19.1, Novica 26.10.); ostaje samo ispraćen
+  koji duguje (`leftAt === danas`), prigušen, sa „Naplati X €".
 - **Stari dugovi iz Excela** (bez cijene, bez uplate, stariji od 45 dana - `stayStariDug`) nemaju izmišljen iznos:
   u kartici vlasnika „nenaplaćeno", ne ulaze u „Duguje ukupno"; Nenaplaćeno ih drži u sklopljenom redu „Starije od 45 dana".
 
@@ -222,8 +223,9 @@ Novica: depozit se nije računao kao uplaćen (nije ulazio ni u Finansije), bora
   kratko (`fmtRaspon`), „Izmijeni podatke" otvara polja + crnu listu + Obriši klijenta. Zatvaranje NIŠTA ne upisuje
   (ranije je svako zatvaranje tiho upisivalo polja); dirana izmjena pita „Odbaciti izmjene?". Dugmad „Gotovo" nema ni na
   jednoj kartici (krstić). Kartica ljubimca: „Novi boravak" (ljubimac već izabran), redovi i traka „U pansionu" otvaraju boravak.
-- **Znak „!"** (`NAP_ZNAK`) pored imena u svim redovima i na kružiću ljubimca = ljubimac ima navike/napomenu ili boravak
-  ima napomenu.
+- **Napomene** (navike ljubimca + napomena boravka) stoje kao žuti tekst u boravku. Znak „!" pored imena u spiskovima i na
+  kružiću ljubimca je bio u v1.19.0 i UKLONJEN je u v1.19.1 (Novica se predomislio 26.10.). „poništi dolazak" u boravku
+  OSTAJE (Novica ga je htio skloniti pa se predomislio) - radi samo na dan dolaska; za psa koji je stigao ranije ne mijenja ništa.
 - **Danas:** brojčanik + tri pločice (ljubimaca, „slobodno N"), Dolaze / Odlaze / **Ostaju** (samo oni koji danas ne
   odlaze - ranije su se odlasci ponavljali u „U pansionu"; Odlaze + Ostaju = brojčanik). Desno u redu uvijek jedna stvar;
   „plaćeno" ide u red ispod imena. Poslije Došao poruka ima „Poništi". Dan iz kalendara ima isti redoslijed.

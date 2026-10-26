@@ -1,7 +1,7 @@
 // Cindyland service worker.
 // VERZIJA: mora se podići na SVAKOM deployu (zajedno sa APP_VERSION u index.html i version.json).
 // Promjena ovog fajla je ono što browseru signalizira da postoji nova verzija.
-const CACHE = 'cindyland-v1.19.0';
+const CACHE = 'cindyland-v1.19.1';
 
 // Slike ljubimaca (Supabase storage) žive u SVOM kešu koji preživljava nove verzije aplikacije:
 // adresa slike nosi ?v=<vrijeme slanja>, pa je ista adresa uvijek ista slika - smije se čuvati zauvijek.

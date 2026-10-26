@@ -144,16 +144,9 @@ p{text-wrap:pretty}
 .av-p{background:var(--primary-soft);color:var(--primary)}
 .row-main{flex:1;min-width:0}
 .row-name{font-weight:650;font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* ime + znak napomene: znak se nikad ne odsiječe, dugo ime dobija „…" */
-.row-name-w{display:flex;align-items:center;gap:6px;min-width:0}
-.row-name-w .row-name{min-width:0}
-.nap-znak{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--warn);color:#fff;font-size:12.5px;font-weight:850;line-height:1;font-style:normal}
-.pp-nap{position:absolute;top:0;right:5px;z-index:1;display:flex}
-.pp-nap .nap-znak{width:20px;height:20px;line-height:20px;box-shadow:0 0 0 2px var(--bg)}
 .nap-box{background:var(--warn-soft);border-radius:12px;padding:6px 12px;margin:10px 0 14px}
 .nap-row{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;padding:6px 0;font-size:13.5px;line-height:1.35;color:var(--text)}
 .nap-row + .nap-row{border-top:1px solid rgba(183,121,31,.18)}
-.nap-row .nap-znak{margin-top:1px}
 .nap-txt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
 .nap-txt b{font-weight:750;margin-right:2px}
 /* ispraćen odlazak ostaje na spisku, prigušen; „duguje X €" ostaje živo dugme */
@@ -838,7 +831,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.19.0';
+const APP_VERSION = 'v1.19.1';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1386,10 +1379,11 @@ function vDanas(){
   const t = todayISO();
   const all = staysOnDate(t);
   const arrivals = all.filter(st => st.from === t && !stayArrived(st, t));
-  /* odlasci koji još nisu ispraćeni idu gore; ispraćeni OSTAJU na dnu (prigušeni, sa „naplaćeno" ili „Naplati X €"),
-     da se vidi šta je urađeno - ranije su samo nestajali (Novica 25.10.) */
+  /* odlasci koji još nisu ispraćeni idu gore; ispraćeni koji duguju ostaju na dnu, prigušeni */
   const departures = all.filter(st => st.to === t && !stayLeft(st, t));
-  const ispraceni = all.filter(st => st.leftAt === t);   // i prijevremeni odlasci (rezervisan duže, otišao danas)
+  /* ispraćen i naplaćen = nestaje sa početne (Novica 26.10.2026); ostaje samo ko je otišao a duguje, sa „Naplati X €"
+     (i prijevremeni odlazak - rezervisan duže, otišao danas) */
+  const ispraceni = all.filter(st => st.leftAt === t && !stayNovac(st).naplaceno);
   const here = all.filter(st => stayHere(st, t));
   const ostaju = here.filter(st => st.to > t);
 
@@ -1488,13 +1482,12 @@ function stayRowHTML(st, mode, iso){
     : 'od ' + fmtD(st.from);
   /* plaćen a još nije ispraćen: umjesto „od 20.10." stoji zelena kvačica (desno je samo dugme Otišao) */
   const meta = [placenoMeta ? '' : dat, who].filter(Boolean).join(' · ');
-  /* znak „!" = bar jedan ljubimac na boravku ima napomenu (navike, ujeda, terapija…) */
-  const nap = petsOfStay(st).some(imaNapomenu) || !!String(st.note || '').trim();
+
   return `<div class="row${gotov ? ' row-gotov' : ''}">
     <div class="row-tap tappable" data-act="stay-edit" data-id="${st.id}">
       ${groupAvatar(st)}
       <div class="row-main">
-        <div class="row-name-w"><span class="row-name">${esc(stayLabel(st))}</span>${nap ? NAP_ZNAK : ''}</div>
+        <div class="row-name">${esc(stayLabel(st))}</div>
         <div class="row-meta">${boxBadge(st, true)} ${placenoMeta ? `<span class="meta-ok">${I.check} plaćeno</span> ` : ''}${esc(meta)}</div>
       </div>
     </div>
@@ -2668,21 +2661,21 @@ function ppHTML(p, act, opts){
   const meta = p.species === 'macka' ? 'mačka' : (p.size === 'veliki' ? 'veliki pas' : 'mali pas');
   return `<button class="pp ${opts.on ? 'on' : ''}" data-act="${act}" data-id="${opts.id != null ? opts.id : p.id}">
     ${opts.del ? '<i class="pp-x">✕</i>' : ''}
-    <span class="pp-av ${cls}">${av}</span>${imaNapomenu(p) && !opts.del ? `<span class="pp-nap">${NAP_ZNAK}</span>` : ''}
+    <span class="pp-av ${cls}">${av}</span>
     <span class="pp-name">${esc(petLabel(p))}</span>
     <span class="pp-meta">${meta}</span>
   </button>`;
 }
-/* napomena o ljubimcu (polje „Navike i ishrana") je znak da se na tog ljubimca obrati pažnja (Novica 25.10.) */
+/* napomene ljubimaca (polje „Navike i ishrana") i boravka stoje kao tekst u boravku. Znak „!" u spiskovima je
+   uklonjen 26.10.2026 - Novica se predomislio. */
 const imaNapomenu = p => !!(p && String(p.note || '').trim());
-const NAP_ZNAK = '<span class="nap-znak" title="Ima napomenu" aria-label="ima napomenu">!</span>';
 function napomeneHTML(pets, napBoravka){
   const sa = (pets || []).filter(imaNapomenu);
   const nb = String(napBoravka || '').trim();
   if (!sa.length && !nb) return '';
   return `<div class="nap-box">${sa.map(p => `<button class="nap-row" data-act="pet-open" data-id="${p.id}">
-      ${NAP_ZNAK}<span class="nap-txt"><b>${esc(petLabel(p))}</b> ${esc(String(p.note).trim())}</span></button>`).join('')}${nb
-    ? `<button class="nap-row" data-act="sf-otv-nap">${NAP_ZNAK}<span class="nap-txt"><b>Ovaj boravak</b> ${esc(nb)}</span></button>` : ''}</div>`;
+      <span class="nap-txt"><b>${esc(petLabel(p))}</b> ${esc(String(p.note).trim())}</span></button>`).join('')}${nb
+    ? `<button class="nap-row" data-act="sf-otv-nap"><span class="nap-txt"><b>Ovaj boravak</b> ${esc(nb)}</span></button>` : ''}</div>`;
 }
 function ppAddHTML(act, id, label){
   return `<button class="pp pp-add" data-act="${act}" ${id ? `data-id="${id}"` : ''}>
