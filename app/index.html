@@ -161,6 +161,30 @@ p{text-wrap:pretty}
 .ce-naslov .modal-title{margin:0}
 .ce-sub{font-size:13px;color:var(--muted);font-weight:600;margin-top:1px}
 .ce-akcije{display:flex;gap:10px;margin:12px 0}
+/* kartica vlasnika: Pozovi i Novi boravak pune širine (broj telefona se u pola širine odsijecao) */
+.ce-akcije-v{flex-direction:column}
+.ce-akcije-v .btn{min-height:52px;font-size:16px}
+.ce-akcije-v .btn svg{width:20px;height:20px}
+/* izbor poruke: velike opcije - naziv, šta sadrži, iznos */
+.sms-opc{display:flex;align-items:center;gap:12px;width:100%;min-height:70px;padding:12px 16px 12px 12px;border-radius:16px;background:var(--bg);border:1.5px solid var(--line);color:var(--text);text-decoration:none;text-align:left;transition:transform .12s}
+.sms-opc + .sms-opc{margin-top:10px}
+.sms-opc:active{transform:scale(.97)}
+.sms-opc-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:var(--card);color:var(--primary);flex-shrink:0}
+.sms-opc-ico svg{width:22px;height:22px}
+.sms-opc-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sms-opc-t b{font-size:16.5px;font-weight:750}
+.sms-opc-t small{font-size:13px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sms-opc-i{font-size:18px;font-weight:800;white-space:nowrap}
+.sms-opc-gl{background:var(--primary);border-color:var(--primary);color:#fff}
+.sms-opc-gl .sms-opc-ico{background:rgba(255,255,255,.2);color:#fff}
+.sms-opc-gl .sms-opc-t small{color:rgba(255,255,255,.85)}
+/* zbir aktuelnih boravaka klijenta: naziv | iznos | poruka; ispod (kad ima avansa/uplata) koliko ostaje */
+.ce-zbir{display:grid;grid-template-columns:1fr auto auto;align-items:center;column-gap:12px;background:var(--bg);border-radius:14px;padding:10px 10px 10px 14px;margin:2px 0 12px}
+.ce-zbir-n{font-size:14px;font-weight:650;min-width:0}
+.ce-zbir b{font-size:19px;font-weight:800;white-space:nowrap}
+.ce-zbir .iconbtn{grid-column:3;background:var(--card)}
+.ce-zbir.ima-s .iconbtn{grid-row:1 / span 2}
+.ce-zbir-s{grid-row:2;grid-column:1 / span 2;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:-2px}
 .ce-akcije .btn{flex:1;min-width:0;white-space:nowrap}
 .ce-akcije .btn span{overflow:hidden;text-overflow:ellipsis}
 .pe-sada{width:100%;margin:4px 0 12px}
@@ -831,7 +855,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.19.1';
+const APP_VERSION = 'v1.20.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -2837,7 +2861,7 @@ function renderStayForm(){
     const before = D.stays.filter(s => s.clientId === c.id && s.id !== SF.id).length;
     /* iz upisanog boravka se potvrda može poslati i naknadno - ikonica poruke */
     const st0 = edit ? D.stays.find(s => s.id === SF.id) : null;
-    const smsURI = st0 ? smsPotvrdaURI(st0) : null;
+    const potvrdaURI = st0 ? smsPotvrdaURI(st0) : null;
     clientHTML = `<div class="row" style="border:none;padding:4px 0">
       <div class="row-tap tappable" data-act="client-open" data-id="${c.id}">
         <div class="row-av av-p">${esc((c.name || '?')[0].toUpperCase())}</div>
@@ -2845,8 +2869,10 @@ function renderStayForm(){
           <div class="row-meta">${c.phone ? `<span class="num">${esc(c.phone)}</span> · ` : ''}${before ? before + ' ' + plural(before, 'raniji boravak', 'ranija boravka', 'ranijih boravaka') : 'prvi boravak'}</div></div>
         <span class="chev" style="width:18px;height:18px">${I.chev}</span>
       </div>
-      ${!st0 ? '' : smsURI
-        ? `<a class="iconbtn" href="${esc(smsURI)}" aria-label="Pošalji potvrdu porukom">${I.sms}</a>`
+      ${!st0 ? '' : potvrdaURI && !stayLeft(st0) && klijentAktuelni(c.id).length > 1
+        ? `<button class="iconbtn" data-act="sms-izbor" data-id="${st0.id}" aria-label="Pošalji potvrdu porukom">${I.sms}</button>`
+        : potvrdaURI
+        ? `<a class="iconbtn" href="${esc(potvrdaURI)}" aria-label="Pošalji potvrdu porukom">${I.sms}</a>`
         /* bez broja se oblačić NE sklanja - ranije je nestajao, pa je izgledalo kao da je
            slanje poruke ukinuto. Sad kaže šta fali i vodi pravo na upis broja. */
         : `<button class="iconbtn" data-act="sms-bez-broja" data-id="${c.id}" aria-label="Pošalji potvrdu porukom">${I.sms}</button>`}
@@ -3379,11 +3405,18 @@ function sfSave(force, sve){
 /* ============ POTVRDA REZERVACIJE PORUKOM ============
    Otvori Poruke (SMS) sa brojem klijenta i već iskucanim tekstom - ostaje samo „pošalji".
    Šalje se sa njihovog telefona i njihovog broja, ništa se ne plaća. */
-function smsPotvrdaURI(st){
-  const c = clientById(st.clientId);
+const SMS_KRAJ = mnozina => '\n🍽️ Molimo da ponesete samo ' + (mnozina ? 'njihovu' : 'njegovu') + ' hranu za period boravka. Sve ostalo je obezbijeđeno u pansionu.\n\n' +
+  '🕘 Prijem i preuzimanje ljubimaca obavljamo u terminima:\n• 08:00 - 20:00h\n\n' +
+  'Hvala na ukazanom povjerenju. Radujemo se druženju sa ' + (mnozina ? 'vašim ljubimcima!' : 'vašim ljubimcem!');
+function smsURI(c, text){
   if (!c || !c.phone) return null;
   const broj = c.phone.replace(/[^\d+]/g, '');
   if (!broj) return null;
+  /* iPhone hoće &body=, ostali ?body= */
+  const sep = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
+  return 'sms:' + broj + sep + 'body=' + encodeURIComponent(text);
+}
+function smsPotvrdaURI(st){
   const iznos = stayAmount(st);
   /* avans umanjuje cijenu - Vesna često traži dio unaprijed, pa klijent u poruci
      vidi i avans i koliko mu ostaje; oduzimaju se i uplate upisane u međuvremenu */
@@ -3398,12 +3431,68 @@ function smsPotvrdaURI(st){
     (iznos ? '💶 Ukupan iznos boravka: ' + money(iznos) + '\n' : '') +
     (iznos && dep ? '💰 Avans: ' + money(dep) + '\n' : '') +
     (iznos && (dep || uplate) ? '💶 Ostatak za uplatu: ' + money(Math.max(0, iznos - dep - uplate)) + '\n' : '') +
-    '\n🍽️ Molimo da ponesete samo njegovu hranu za period boravka. Sve ostalo je obezbijeđeno u pansionu.\n\n' +
-    '🕘 Prijem i preuzimanje ljubimaca obavljamo u terminima:\n• 08:00 - 20:00h\n\n' +
-    'Hvala na ukazanom povjerenju. Radujemo se druženju sa vašim ljubimcem!';
-  /* iPhone hoće &body=, ostali ?body= */
-  const sep = /iPad|iPhone|iPod/.test(navigator.userAgent) ? '&' : '?';
-  return 'sms:' + broj + sep + 'body=' + encodeURIComponent(text);
+    SMS_KRAJ(petsOfStay(st).length > 1);
+  return smsURI(clientById(st.clientId), text);
+}
+/* ZAJEDNIČKA POTVRDA (Vesna 10.11.2026, Merve Cambol: mačka i pas u različitim terminima = dva boravka):
+   kad klijent ima više aktuelnih boravaka (rezervacije i oni koji su u toku), jedna poruka nosi svaki
+   boravak sa svojim terminom i iznosom i ZBIR. Račun je isti kao na kartici vlasnika (klijentZbir). */
+function klijentAktuelni(cid){
+  return D.stays.filter(s => s.clientId === cid && !stayLeft(s)).sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
+}
+function klijentZbir(cid){
+  const stays = klijentAktuelni(cid);
+  /* ostatak se sabira PO BORAVKU (preplata jednog ne umanjuje drugi - isto traži i prozor naplate);
+     boravak bez iznosa (obrisan ljubimac, cijena 0) u zbir ne unosi ni avans ni uplate */
+  const z = { stays, ukupno: 0, avans: 0, placeno: 0, ostalo: 0 };
+  stays.forEach(st => { const n = stayNovac(st); if (!(n.ukupno > 0)) return;
+    z.ukupno += n.ukupno; z.avans += n.avans; z.placeno += n.placeno; z.ostalo += n.ostalo; });
+  z.ostalo = Math.round(z.ostalo * 100) / 100;
+  /* ljubimci kroz sve boravke, svaki jednom (isti pas može imati dva termina) */
+  z.ljubimci = [...new Set(stays.flatMap(st => petsOfStay(st).map(petLabel)))];
+  return z;
+}
+function smsZbirnaURI(cid){
+  const z = klijentZbir(cid);
+  if (z.stays.length < 2) return null;
+  const znak = st => { const ps = petsOfStay(st); return !ps.length ? '🐾' : ps.every(p => p.species === 'macka') ? '🐱' : ps.every(p => p.species !== 'macka') ? '🐶' : '🐾'; };
+  const stavke = z.stays.map(st => {
+    const iznos = stayAmount(st);
+    return znak(st) + ' ' + stayLabel(st) + '\n' +
+      '📅 ' + (st.from === st.to ? fmtDY(st.from) : fmtDY(st.from) + ' - ' + fmtDY(st.to)) + '\n' +
+      (iznos ? '💶 ' + money(iznos) + '\n' : '');
+  }).join('\n');
+  const zbir = (z.ukupno ? '💶 Ukupan iznos: ' + money(z.ukupno) + '\n' : '') +
+    (z.ukupno && z.avans ? '💰 Avans: ' + money(z.avans) + '\n' : '') +
+    (z.ukupno && z.placeno ? '💶 Ostatak za uplatu: ' + money(z.ostalo) + '\n' : '');
+  const text = 'Poštovanje,\n\n' +
+    'Vaše rezervacije u Cindyland pansionu za pse i mačke su uspješno evidentirane. 🐾\n\n' +
+    stavke + (zbir ? '\n' + zbir : '') +
+    SMS_KRAJ(z.ljubimci.length > 1);
+  return smsURI(clientById(cid), text);
+}
+/* izbor: jedna poruka za sve aktuelne boravke klijenta ili samo za ovaj */
+function smsIzborModal(stayId, naslov){
+  const st = D.stays.find(s => s.id === stayId); if (!st) return;
+  const c = clientById(st.clientId); if (!c) return;
+  const sve = smsZbirnaURI(c.id), jedna = smsPotvrdaURI(st);
+  if (!jedna){ nemaBrojaModal(c.id); return; }
+  if (!sve){ location.href = jedna; return; }
+  const z = klijentZbir(c.id);
+  if (CE) CE.pitanje = true; else if (PE) PE.pitanje = true;
+  showModal(`<div class="nm-head"><div class="modal-title">${naslov || 'Potvrda porukom'}</div>
+      <button class="sheet-x" data-act="modal-close" aria-label="Zatvori">${I.x}</button></div>
+    <div class="modal-text" style="margin-top:6px"><b>${esc(c.name)}</b> · <span class="num">${esc(c.phone)}</span></div>
+    <a class="sms-opc sms-opc-gl" data-act="sms-salji" href="${esc(sve)}">
+      <span class="sms-opc-ico">${I.sms}</span>
+      <span class="sms-opc-t"><b>Svi boravci · ${z.stays.length}</b><small>${esc(z.ljubimci.join(', '))}</small></span>
+      ${z.ukupno ? `<span class="sms-opc-i num">${money(z.ukupno)}</span>` : ''}
+    </a>
+    <a class="sms-opc" data-act="sms-salji" href="${esc(jedna)}">
+      <span class="sms-opc-ico">${I.sms}</span>
+      <span class="sms-opc-t"><b>Samo ${esc(stayLabel(st))}</b><small class="num">${fmtRaspon(st.from, st.to)}</small></span>
+      ${stayAmount(st) ? `<span class="sms-opc-i num">${money(stayAmount(st))}</span>` : ''}
+    </a>`);
 }
 function ponudiPotvrdu(stayId){
   const st = D.stays.find(s => s.id === stayId); if (!st) return;
@@ -3412,6 +3501,8 @@ function ponudiPotvrdu(stayId){
   /* bez broja se ranije nije desavalo NISTA - ni prozor ni poruka, pa je izgledalo
      kao da je slanje potvrde nestalo. Od 5.8.2026. se uvijek javi. */
   if (!uri){ nemaBrojaModal(c.id); return; }
+  /* klijent već ima drugi aktuelan boravak: ponudi jednu poruku za sve */
+  if (!stayLeft(st) && smsZbirnaURI(c.id)){ smsIzborModal(stayId, 'Boravak je upisan'); return; }
   if (CE) CE.pitanje = true; else if (PE) PE.pitanje = true;
   showModal(`<div class="modal-title">Boravak je upisan</div>
     <div class="modal-text">Poslati potvrdu porukom? Otvoriće se Poruke sa gotovim tekstom za <b>${esc(c.name)}</b> (<span class="num">${esc(c.phone)}</span>).</div>
@@ -4025,6 +4116,16 @@ function renderClientPop(odVrha){
   const duguje = stays.reduce((s, st) => { const n = stayNovac(st); return s + (n.zavrsen && !n.naplaceno && !stayStariDug(st) ? n.ostalo : 0); }, 0);
   const SHOW = CE.sve ? stays.length : 6;
   const visePasa = pets.length > 1;
+  /* više aktuelnih boravaka (npr. dva ljubimca u različitim terminima): zbir i jedna poruka za sve */
+  const zb = klijentZbir(c.id);
+  const zbSms = zb.stays.length > 1 ? smsZbirnaURI(c.id) : null;
+  const zbirHTML = zb.stays.length > 1 && zb.ukupno ? `<div class="ce-zbir${zb.placeno ? ' ima-s' : ''}">
+      <span class="ce-zbir-n">${zb.stays.every(st => stayStatus(st) === 'rez') ? 'Rezervacije ukupno' : 'Boravci ukupno'}</span>
+      <b class="num">${money(zb.ukupno)}</b>
+      ${zbSms ? `<a class="iconbtn" href="${esc(zbSms)}" aria-label="Pošalji potvrdu za sve boravke">${I.sms}</a>`
+        : `<button class="iconbtn" data-act="ce-edit" aria-label="Dodaj broj za poruku">${I.sms}</button>`}
+      ${zb.placeno ? `<span class="ce-zbir-s num">${zb.avans ? 'avans ' + money(zb.avans) + ' · ' : ''}za naplatu ${money(zb.ostalo)}</span>` : ''}
+    </div>` : '';
   const rows = stays.slice(0, SHOW).map(st => {
     const status = stayStatus(st);
     const n = stayNovac(st);
@@ -4050,12 +4151,13 @@ function renderClientPop(odVrha){
       ${X}
     </div>
     ${c.blacklist ? `<div class="banner ban-warn" style="background:var(--danger-soft);color:var(--danger);margin:8px 0 4px">${I.warn}<span><b>Crna lista</b></span></div>` : ''}
-    <div class="ce-akcije">
+    <div class="ce-akcije ce-akcije-v">
       ${c.phone ? `<a class="btn btn-ghost" href="tel:${esc(c.phone)}">${I.phone} <span class="num">${esc(c.phone)}</span></a>`
         : `<button class="btn btn-ghost" data-act="ce-edit">${I.phone} Dodaj broj</button>`}
       <button class="btn btn-primary" data-act="ce-new-stay">${I.plus} Novi boravak</button>
     </div>
     ${duguje > 0 ? `<div class="banner ban-warn" style="margin:2px 0 12px">${I.euro}<span>Duguje ukupno <b class="num">${money(duguje)}</b></span></div>` : ''}
+    ${zbirHTML}
     ${c.note ? `<div class="pe-ro" style="margin-bottom:12px">${esc(c.note)}</div>` : ''}
     <div class="fld" style="margin-bottom:6px"><label class="lbl">Ljubimci</label>
       <div class="pet-pick">
@@ -4581,7 +4683,7 @@ async function loadAll(ponovo){
       if (CE && !CE.pitanje){ cePopSync(); renderClientPop(); }
       /* kartica ljubimca se osvježava SAMO u prikazu - u izmjeni bi re-crtanje pojelo kucanje,
          a draft je ionako jači od servera (upisuje se na „Sačuvaj") */
-      if (PE && !PE.form) renderPetPop();
+      if (PE && !PE.form && !PE.pitanje) renderPetPop();
       if (PD && sheetOpen && $('#sheetTitle').textContent === 'Provjeri datume') renderDatesCheck();
       /* spisak (grupa, dan, Nenaplaćeno) i pregled upisanog boravka pokazuju svježe stanje; forma se ne dira
          dok se u njoj kuca, a dirana polja ostaju (čuvanje ionako upisuje samo njih) */
@@ -5011,6 +5113,7 @@ document.addEventListener('click', (e) => {
         if ((SF && SF.id === sid) || SHEET_STACK.some(n => n.sf && n.sf.id === sid)){ peDone(); if (SF && SF.id !== sid) toast('Taj boravak je već otvoren - vrati se strelicom nazad.'); break; }
         peDone(false, true); if (!PE) izKarticeBoravak({ stayId: sid }, { k: 'ljubimac', id: pid }); } break;
     case 'sms-bez-broja': nemaBrojaModal(id); break;
+    case 'sms-izbor': smsIzborModal(id); break;
     /* „Pošalji" je link na sms:. Ranije je nosio oznaku „zatvori prozor", pa je closeModal()
        obrisao sam link jos u toku dodira - telefon onda ne stigne da otvori Poruke.
        Sad se prozor zatvara TEK poslije, kad je otvaranje Poruka vec krenulo. */

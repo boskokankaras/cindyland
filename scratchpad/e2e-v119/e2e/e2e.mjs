@@ -559,10 +559,14 @@ await tok('Kartica vlasnika: Klijenti -> boravak -> strelica nazad -> kartica; I
   await E.klik(`#sheetBody [data-act="dr-pick"][data-id="${d2}"]`);
   await E.klik('#sheetFoot [data-act="sf-save"]'); await E.posleSave(bilj);
   s = await E.stanje();
-  ok(s.modal === 'Boravak je upisan' && await E.ima('#modalHost a[data-act="sms-salji"][href^="sms:"]') === 1, 'poslije upisa: „Boravak je upisan" + Pošalji (sms:)');
+  /* v1.20.0: klijent već ima aktuelan boravak -> izbor „Svi boravci" / „Samo ovaj" (2 linka); inače jedan „Pošalji" */
+  const linkova = await E.ima('#modalHost a[data-act="sms-salji"][href^="sms:"]');
+  const vise = await E.ev(`klijentAktuelni(${JSON.stringify(cid)}).length > 1`);
+  ok(s.modal === 'Boravak je upisan' && linkova === (vise ? 2 : 1), 'poslije upisa: „Boravak je upisan" + poruka (sms:), linkova ' + linkova);
   ok(s.CE === cid && !s.sheet, 'poslije upisa vraća u karticu vlasnika: ' + JSON.stringify(s));
   rucno('8.0', s.modal === 'Boravak je upisan' && await E.ima('#modalHost [data-act="modal-close"]') >= 1, 'Ne sad / Pošalji');
-  await E.klik('#modalHost .modal-actions [data-act="modal-close"]');
+  await E.klik('#modalHost button[data-act="modal-close"]');
+  ok(await E.ev(`!!CE && !CE.pitanje && !!document.querySelector('#modalHost .modal-card')`), 'zatvaranje potvrde vraća karticu vlasnika');
 });
 
 /* ======================= KALENDAR ======================= */
@@ -704,6 +708,8 @@ await tok('Stari zapis sa deposit (fx7) postaje avans (učitan sa servera / fixt
   ok(/avans · /.test(await E.tekst('#modalHost .pay-list')), 'prozor Odlazak: „avans · datum"');
   await E.klik('#modalHost [data-act="nm-otkazi"]');
   await E.klik('#tabbar [data-act="tab"][data-id="zarada"]');
+  /* avans je primljen 12 dana ranije - to može biti prošli mjesec */
+  await E.ev(`(() => { ZAR_YM = stayAvansDatum(D.stays.find(s => s.id === 'fx7')).slice(0, 7); render(); })()`);
   const fin = await E.tekst('#view .row[data-act="stay-edit"][data-id="fx7"]');
   ok(/avans/.test(fin) && fin.includes(await E.novac(50)), 'Finansije: avans fx7 u mjesecu prijema: ' + fin);
 });
@@ -733,6 +739,8 @@ await tok('Stari zapis sa deposit u memoriji telefona -> ponovno pokretanje app-
   ok(await E.vr('#sfAvans') === '50', 'polje Avans = 50');
   await E.klik('#sheet .sheet-x[data-act="sheet-close"]');
   await E.klik('#tabbar [data-act="tab"][data-id="zarada"]');
+  /* avans je primljen 12 dana ranije - to može biti prošli mjesec */
+  await E.ev(`(() => { ZAR_YM = stayAvansDatum(D.stays.find(s => s.id === 'fx7')).slice(0, 7); render(); })()`);
   const fin = await E.tekst('#view .row[data-act="stay-edit"][data-id="fx7"]');
   ok(/avans/.test(fin) && fin.includes(await E.novac(50)), 'Finansije: avans fx7 u mjesecu prijema: ' + fin);
 });

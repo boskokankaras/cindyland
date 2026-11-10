@@ -232,6 +232,25 @@ Novica: depozit se nije računao kao uplaćen (nije ulazio ni u Finansije), bora
 - Provjera: `scratchpad/v1.19.0-slike/` (slike toka), E2E (20 tokova + inventar funkcija) je bio u sesiji 25.10. -
   headless Playwright iz `~/tiramisu-upload/node_modules`; `harness_slike.mjs` usklađen (93/93).
 
+## Zajednička potvrda i zbir po klijentu (v1.20.0, Vesna 10.11.2026)
+
+Merve Cambol: mačka 13.11.-7.12. i pas 16.11.-7.12. = DVA boravka (vrste se ne miješaju, termini različiti). Vesna je
+htjela jednu cifru (450 €) i jednu poruku klijentu.
+
+- `klijentAktuelni(cid)` = boravci koji nisu završeni (`!stayLeft`: rezervacije + u toku). `klijentZbir(cid)` sabira
+  **po boravku** (`stayNovac`): ukupno / avans / uplaćeno / ostatak. Preplata jednog boravka NE umanjuje drugi; boravak bez
+  iznosa (obrisan ljubimac, cijena 0) ne unosi ni avans. `ljubimci` = jedinstvena imena (isti pas može imati dva termina).
+- `smsZbirnaURI(cid)` (samo kad su 2+ aktuelna): svaki boravak sa znakom vrste (🐱/🐶), terminom i iznosom, pa „Ukupan
+  iznos / Avans / Ostatak za uplatu". Množina („njihovu hranu", „ljubimcima") samo kad je više ljubimaca - isto i u
+  pojedinačnoj poruci (`SMS_KRAJ(mnozina)`). `smsURI(c, text)` pravi adresu (iPhone `&body=`, ostali `?body=`).
+- Gdje se nudi: (1) kartica vlasnika - red `.ce-zbir` „Rezervacije ukupno" (ili „Boravci ukupno" kad je neko već u
+  pansionu) + iznos + ikonica poruke, ispod „avans X · za naplatu Y"; (2) ikonica poruke u boravku i prozor poslije upisa
+  novog boravka otvaraju izbor `smsIzborModal`: „Svi boravci · N" / „Samo <ljubimac>" (velike opcije `.sms-opc`).
+  Klijent sa jednim boravkom: sve kao prije (provjereno poređenjem sa v1.19.1).
+- Kartica vlasnika: „Pozovi" i „Novi boravak" su pune širine jedno ispod drugog (`.ce-akcije-v`) - u pola širine se broj
+  telefona odsijecao.
+- Provjera: `scratchpad/e2e-v119/zbirna.mjs` (20 provjera) + cio E2E (20/20).
+
 ## Predaja aplikacije - NE ZABORAVITI
 
 - Vesna i Novica i dalje pune stari Excel. Na dan predaje se PITAJU šta žele sa istorijom, pa jedno od dva:
