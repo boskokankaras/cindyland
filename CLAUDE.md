@@ -292,8 +292,8 @@ htjela jednu cifru (450 €) i jednu poruku klijentu.
 - Čitanje: `node scripts/istorija.mjs <ime ljubimca/klijenta> [dana]` ili `--sve [dana]` (samo čita, vrijeme po Podgorici).
 - Proba 12.11. u poništenoj transakciji: Novicin upis koji skida boks zabilježen kao `boxes: [vb2…] -> []`, upis bez
   promjene ne bilježi ništa, authenticated dobija 42501 na čitanje.
-- **Stanje: NIJE uključeno na živoj bazi** dok Boško ne odobri (`node scripts/run-sql.mjs sql/istorija.sql`, ili SQL
-  nalijepiti u Supabase SQL editor).
+- **UKLJUČENO na živoj bazi 12.11.2026** (Boško odobrio; `node scripts/run-sql.mjs sql/istorija.sql`). Provjereno: okidač
+  na sve 4 tabele (insert/update/delete), RLS uključen, anon i authenticated nemaju ni čitanje ni upis.
 
 ## Predaja aplikacije - NE ZABORAVITI
 
