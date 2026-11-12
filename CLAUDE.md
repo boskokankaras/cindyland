@@ -283,6 +283,18 @@ htjela jednu cifru (450 €) i jednu poruku klijentu.
   kad prijedlog ima dane „nema mjesta".
 - Provjera: `scratchpad/e2e-v119/boks.mjs` (13 provjera) + cio E2E (20/20).
 
+## Dnevnik izmjena (12.11.2026)
+
+- Povod: Maša „izgubila" boks, Moni i Bubi ujutru „u pansionu" - bez istorije se nije moglo utvrditi ko je šta uradio.
+- `sql/istorija.sql`: tabela `istorija` (kada, ko = auth.uid(), tabela, red_id, akcija dodat/izmijenjen/obrisan, staro/novo -
+  kod izmjene SAMO promijenjena polja) + okidač na `stays`, `clients`, `pets`, `boxes`. Bilježi baza sama, sa svakog
+  telefona i svake verzije; app se ne mijenja. RLS + revoke: app i internet ga ne vide.
+- Čitanje: `node scripts/istorija.mjs <ime ljubimca/klijenta> [dana]` ili `--sve [dana]` (samo čita, vrijeme po Podgorici).
+- Proba 12.11. u poništenoj transakciji: Novicin upis koji skida boks zabilježen kao `boxes: [vb2…] -> []`, upis bez
+  promjene ne bilježi ništa, authenticated dobija 42501 na čitanje.
+- **Stanje: NIJE uključeno na živoj bazi** dok Boško ne odobri (`node scripts/run-sql.mjs sql/istorija.sql`, ili SQL
+  nalijepiti u Supabase SQL editor).
+
 ## Predaja aplikacije - NE ZABORAVITI
 
 - Vesna i Novica i dalje pune stari Excel. Na dan predaje se PITAJU šta žele sa istorijom, pa jedno od dva:
