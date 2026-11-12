@@ -251,6 +251,22 @@ htjela jednu cifru (450 €) i jednu poruku klijentu.
   telefona odsijecao.
 - Provjera: `scratchpad/e2e-v119/zbirna.mjs` (20 provjera) + cio E2E (20/20).
 
+## Gratis (v1.21.0, Novica 12.11.2026)
+
+- U prozoru naplate/odlaska dugme **„Gratis" / „Gratis i otišao"** - samo kad se boravak zatvara, ima ostatka i NIŠTA
+  nije uplaćeno (ako jeste, to je Popust). Boravak: `paid=true`, `price=0`, u `payments` jedna stavka
+  `uplataGratis(d, c)` = `{a:0, d, z:1, g:1, c}` gdje je `c` cijena od prije (null = po cjenovniku). `stayGratis(st)`.
+- Isti oblik i redoslijed ključeva prave `stayPayments`, `DB_UNMAP.stays` i `uplataGratis` - inače bi `loadAll` odjek
+  upisa vidio kao promjenu.
+- Prikaz: pregled boravka („gratis" + poklon, „Gratis · datum · poništi"), spisak uplata („gratis 0 €"), Finansije (red sa
+  značkom „gratis", NE broji se u „naplata"), kartica vlasnika i redovi dana. Ne ulazi u Nenaplaćeno, „Duguje ukupno"
+  ni zbir klijenta.
+- „Poništi" gratis briše stavku i vraća `price = c`. Dok je gratis, polje cijene je zaključano (inače bi upisana cijena
+  stajala uz „Gratis"). Poništen pa ponovljen odlazak: prozor pokazuje „gratis" i samo „Potvrdi odlazak" - novac se ne dira.
+- **Stara verzija (v1.20.0) gubi oznaku `g`/`c` kad sačuva takav boravak** (njen DB_UNMAP zadržava samo a/d/av/z) -
+  novac ostaje tačan (0 €), ali boravak tada piše „Naplaćeno 0 €". Prije korištenja oba telefona na v1.21.0.
+- Provjera: `scratchpad/e2e-v119/gratis.mjs` (22 provjere) + cio E2E (20/20), harness 93/93.
+
 ## Predaja aplikacije - NE ZABORAVITI
 
 - Vesna i Novica i dalje pune stari Excel. Na dan predaje se PITAJU šta žele sa istorijom, pa jedno od dva:
