@@ -857,7 +857,7 @@ button.pe-av{border:none;padding:0;background:none;cursor:pointer}
    Jedan fajl, bez builda. Podaci: Supabase (config.js) ili lokalno.
    VERZIJA: podigni i ovdje i CACHE u sw.js na svakom deployu.
    ================================================================ */
-const APP_VERSION = 'v1.21.0';
+const APP_VERSION = 'v1.22.0';
 const STORAGE_KEY = 'cindyland-data';
 const CFG = (typeof window.CINDY === 'object' && window.CINDY) || {};
 const sb = (CFG.url && CFG.key && window.supabase) ? window.supabase.createClient(CFG.url, CFG.key) : null;
@@ -1095,6 +1095,28 @@ function stayBoxId(st){
 }
 function stayHoldsBox(st, boxId, from, to){
   return stayBoxesLive(st).some(s => s.b === boxId && s.f <= to && from <= s.t);
+}
+/* SUDARI BOKSA PO DANU (v1.22.0): ključ `drugiBoravak|dan`, samo za dane od danas (prošlost je istorija -
+   stari dupli upisi iz vremena „Upiši svejedno" ne smiju blokirati produženje ili izmjenu boravka koji traje) */
+/* isti ljubimac nije sudar sam sa sobom: stalni gost (Kan) ima mjesečne boravke koji se dodiruju na dan odlaska */
+function sudariBoksa(segs, exceptId, lim, petIds){
+  const t = todayISO(), out = new Map();
+  const moji = new Set(petIds || []);
+  (segs || []).forEach(s => {
+    const od = s.f > t ? s.f : t;
+    const kraj = lim && s.t > lim ? lim : s.t;
+    for (let d = od; d <= kraj; d = addDays(d, 1))
+      boxStays(s.b, d, d, exceptId).forEach(o => {
+        if ((o.petIds || []).some(id => moji.has(id))) return;
+        const k = o.id + '|' + d; if (!out.has(k)) out.set(k, { st: o, b: s.b, d }); });
+  });
+  return out;
+}
+/* periodi boksa koji NISU za ove ljubimce (vrste se ne miješaju: mali pas samo mali, veliki samo veliki, mačka samo mačji) */
+function boksoviTudjeGrupe(segs, pets){
+  const g = new Set(pets.filter(Boolean).map(p => p.species === 'macka' ? 'm' : (p.size === 'veliki' ? 'vb' : 'mb')));
+  if (!g.size) return [];
+  return (segs || []).filter(s => { const b = boxById(s.b); return b && !g.has(b.group); });
 }
 function boxStays(boxId, from, to, exceptId){
   return D.stays.filter(st => st.id !== exceptId && stayHoldsBox(st, boxId, from, to));
@@ -2821,7 +2843,6 @@ function sfLoadDays(){
   }
   return { puni, kavezi };
 }
-function sfFullDays(){ return sfLoadDays().puni; }
 function dayRanges(days){
   const out = [];
   for (const d of days){
@@ -2838,22 +2859,6 @@ function sfPetsSuffix(){
   const pets = sfDraftPets();
   const dog = pets.some(p => p.species !== 'macka'), cat = pets.some(p => p.species === 'macka');
   return cat && !dog ? ' za mačke' : (dog && !cat ? ' za pse' : '');
-}
-/* Popunjeno NIJE zabrana: pitamo i upisujemo ako Vesna/Novica tako odluče. */
-function sfCapacityAsk(next){
-  const days = sfFullDays();
-  if (!days.length) return false;
-  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
-  const uk = diffDays(from, to) + 1;
-  showModal(`<div class="modal-title">Preko kapaciteta</div>
-    <div class="modal-text"><b class="num">${days.length}</b> od <b class="num">${uk}</b> ${plural(uk, 'dana', 'dana', 'dana')} ovog boravka je preko predviđenog kapaciteta${sfPetsSuffix()}:
-      <br><b class="num">${fullDaysLabel(days)}</b>
-      <br><span class="hint" style="display:block;margin-top:8px">Boravak se svejedno može upisati.</span></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" data-act="modal-close">Odustani</button>
-      <button class="btn btn-primary" data-act="${next}">Upiši</button>
-    </div>`);
-  return true;
 }
 
 /* živi obračun ispod Ukupno/Avans: (ukupno ili predračun) - avans - ostale uplate.
@@ -3163,7 +3168,9 @@ function boxOptionsHTML(from, to, selected){
         const lbl = freeRangesLabel(boxFreeRanges(b.id, from, to, use), from, to);
         if (lbl) suffix = ' - ' + lbl;
       }
-      return `<option value="${b.id}" ${selected === b.id ? 'selected' : ''}>${esc(b.name + suffix)}</option>`;
+      /* zauzet cijeli termin = ne može se izabrati (strogo od v1.22.0); djelimično slobodan ostaje za kombinovanje */
+      const zauzet = suffix === ' - zauzet' && selected !== b.id;
+      return `<option value="${b.id}" ${selected === b.id ? 'selected' : ''}${zauzet ? ' disabled' : ''}>${esc(b.name + suffix)}</option>`;
     }).join('');
     out += '</optgroup>';
   }
@@ -3241,7 +3248,7 @@ function autoPlanHTML(from, to, tarzi){
     <div class="plan-head">${I.swap} Prijedlog rasporeda · <span class="num">${fmtD(from)} - ${fmtD(to)}</span></div>
     ${redovi || '<p class="hint" style="margin:0">Nema nijednog slobodnog mjesta u ovom terminu.</p>'}
     ${imaKaveza ? `<div class="plan-note">U kavezu je onih dana kad su svi pravi boksevi puni.</div>` : ''}
-    ${plan.segs.length ? `<button class="btn btn-primary btn-block btn-sm" data-act="sf-plan-take" style="margin-top:10px">Prihvati raspored</button>` : ''}
+    ${plan.segs.length && !plan.full.length ? `<button class="btn btn-primary btn-block btn-sm" data-act="sf-plan-take" style="margin-top:10px">Prihvati raspored</button>` : ''}
   </div>`;
 }
 
@@ -3377,47 +3384,45 @@ function sfUpisiAvans(pays, iznos){
   return out.length ? out : null;
 }
 
-/* da li je izabrani boks u tom periodu već nečiji (dva psa u istom boksu = greška u tabeli) */
-function sfBoxConflicts(){
-  const from = SF.from, to = SF.type === 'dnevni' ? SF.from : SF.to;
-  if (!from || !to || to < from) return [];
-  const out = [];
-  const lim = sfLeftLimit();
-  sfSegs().forEach(s => {
-    const kraj = lim && s.t > lim ? lim : s.t;
-    if (kraj < s.f) return;
-    boxStays(s.b, s.f, kraj, SF.id).forEach(st => {
-      const b = boxById(s.b);
-      out.push({ boks: GROUPS_1[b ? b.group : ''] ? GROUPS_1[b.group] + ' ' + b.name : (b ? b.name : '?'),
-        ko: stayLabel(st),
-        od: s.f > st.from ? s.f : st.from, do: kraj < st.to ? kraj : st.to });
-    });
-  });
-  return out;
-}
 /* namjera čuvanja (ostani u boravku pa nastavi sa Otišao/Naplati, ili zatvori sve) preživljava pitanja
-   „Boks je već zauzet" / „Preko kapaciteta" i briše se kad se čuvanje završi ili se odustane */
+   provjeru boksa i briše se kad se čuvanje završi ili se odustane */
 function sfOcistiNamjeru(){ if (SF){ SF.ostani = false; SF.posle = null; SF.sve = false; } }
 function sfSave(force, sve){
   if (!SF) return;
   if (sve) SF.sve = true;
   sfSync();
-  /* popunjeno i zauzet boks = pitanje, ne zabrana; za završene boravke se i ne pita */
+  /* OBAVEZAN SLOBODAN BOKS (v1.22.0, Vesna i Novica 12.11.2026 - „strogo, bez izuzetka"): rezervacija se ne upisuje
+     bez boksa, ni u boks koji je bilo kog dana termina zauzet (dan odlaska je zauzet - boks je slobodan tek sjutradan).
+     Ranije je boks bio neobavezan, a zauzet boks i „preko kapaciteta" samo pitanje „Upiši svejedno".
+     Provjerava se kod novog boravka i kad se na upisanom mijenjaju termin, vrsta ili boks; izmjena samo napomene,
+     cijene ili avansa ne traži boks (stari zapisi bez boksa se i dalje mogu sređivati). Završeni boravci se ne provjeravaju. */
+  /* prvo klijent i ljubimci (inače bi prva poruka bila „Izaberi boks" za formu bez vlasnika) */
+  if (!SF.clientId || !SF.petIds.size){ sfOcistiNamjeru(); sfPersist(); return; }
   const zavrsen = SF.id && SF.to && SF.to < todayISO();
-  if (!force && !zavrsen){
-    const konf = sfBoxConflicts();
-    if (konf.length){
-      showModal(`<div class="modal-title">Boks je već zauzet</div>
-        <div class="modal-text">${konf.slice(0, 4).map(k => `<b>${esc(k.boks)}</b> drži <b>${esc(k.ko)}</b> <span class="num">${k.od === k.do ? fmtD(k.od) : fmtD(k.od) + ' - ' + fmtD(k.do)}</span>`).join('<br>')}
-        ${konf.length > 4 ? '<br>…' : ''}
-        <br><span class="hint" style="display:block;margin-top:8px">Ako upišeš, dva ljubimca će biti u istom boksu.</span></div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" data-act="modal-close">Odustani</button>
-          <button class="btn btn-primary" data-act="sf-save-force">Upiši svejedno</button>
-        </div>`);
+  const dir = SF.id ? new Set(sfIzmjene(SF)) : null;
+  const diraBoks = !SF.id || ['t', 'f', 'to', 'b', 'p'].some(k => dir.has(k));
+  if (!zavrsen && diraBoks && SF.from && (SF.type === 'dnevni' || SF.to)){
+    const pokazi = () => { if (SF.id){ SF.otv = SF.otv || {}; SF.otv.boks = true; renderStayForm(); }
+      const el = $('#sfBox') || $('#sheetBody .bsegs'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
+    const segs = sfSegs();
+    if (!segs.length){ sfOcistiNamjeru(); closeModal(); pokazi(); toast('Izaberi boks.'); return; }
+    if (boksoviTudjeGrupe(segs, sfDraftPets()).length){ sfOcistiNamjeru(); closeModal(); pokazi(); toast('Taj boks nije za ovog ljubimca - izaberi drugi.'); return; }
+    /* blokira se samo sudar koji OVA izmjena uvodi (od danas): stari dupli ostaje kakav je bio */
+    const st0 = SF.id ? D.stays.find(x => x.id === SF.id) : null;
+    const bilo = st0 ? sudariBoksa(stayBoxes(st0), SF.id, st0.leftAt, st0.petIds) : new Map();
+    const novi = [...sudariBoksa(segs, SF.id, sfLeftLimit(), [...SF.petIds]).entries()].filter(([k]) => !bilo.has(k)).map(([, v]) => v);
+    if (novi.length){
+      sfOcistiNamjeru();
+      /* po boksu i boravku: od-do */
+      const grupe = new Map();
+      novi.forEach(v => { const k = v.b + '|' + v.st.id; const g = grupe.get(k); if (!g) grupe.set(k, { b: v.b, st: v.st, od: v.d, do: v.d }); else { if (v.d < g.od) g.od = v.d; if (v.d > g.do) g.do = v.d; } });
+      const redovi = [...grupe.values()].slice(0, 4).map(g => { const bx = boxById(g.b);
+        return `<b>${esc(bx ? GROUPS_1[bx.group] + ' ' + bx.name : '?')}</b> drži <b>${esc(stayLabel(g.st))}</b> <span class="num">${g.od === g.do ? fmtD(g.od) : fmtD(g.od) + ' - ' + fmtD(g.do)}</span>`; });
+      showModal(`<div class="modal-title">Boks je zauzet</div>
+        <div class="modal-text">${redovi.join('<br>')}${grupe.size > 4 ? '<br>…' : ''}</div>
+        <div class="modal-actions"><button class="btn btn-primary btn-block" data-act="sf-boks-izaberi">Izaberi drugi boks</button></div>`);
       return;
     }
-    if (sfCapacityAsk('sf-save-force')) return;
   }
   const edit = !!SF.id;
   const ostani = edit && SF.ostani, posle = SF.posle;
@@ -3561,10 +3566,17 @@ function nemaBrojaModal(cid){
 
 /* štrik Došao / Otišao. „Otišao" NE upisuje ništa sam - otvara prozor odlaska sa obračunom (avans, uplate,
    za naplatu), a odlazak se upisuje tek na potvrdu, zajedno sa naplatom ili sa „plaća kasnije". */
+/* vraćanje odlaska (poništi / ponovni Došao) vraća i zauzetost boksa za preostale dane - samo ako je boks slobodan */
+function boksSlobodanPoslijeOdlaska(st){
+  if (!st.leftAt || st.leftAt >= st.to) return true;
+  const segs = stayBoxes(st).map(x => ({ ...x, f: x.f > st.leftAt ? x.f : addDays(st.leftAt, 1) })).filter(x => x.f <= x.t);
+  return !sudariBoksa(segs, st.id, null, st.petIds).size;
+}
 function stayMark(id, field){
   const st = D.stays.find(s => s.id === id); if (!st) return;
   if (field === 'left'){ chargeStart(id, true); return; }
   const t = todayISO();
+  if (st.leftAt && st.leftAt < t && !boksSlobodanPoslijeOdlaska(st)){ toast('Boks je u međuvremenu zauzet - prvo premjesti boravak u drugi boks.'); return; }
   st.arrivedAt = t;
   if (st.leftAt && st.leftAt < t) st.leftAt = null;
   dbSave('stays', st);
@@ -3576,6 +3588,7 @@ function stayMark(id, field){
 function stayUnmark(id, field){
   const st = D.stays.find(s => s.id === id); if (!st) return;
   if (SF && SF.id === id) sfSync();          // bez ovoga bi poništavanje pojelo ukucan avans/cijenu/napomenu
+  if (st.leftAt && !boksSlobodanPoslijeOdlaska(st)){ toast('Boks je u međuvremenu zauzet - prvo premjesti boravak u drugi boks.'); return; }
   if (field === 'arrived'){ st.arrivedAt = null; st.leftAt = null; } else st.leftAt = null;
   dbSave('stays', st);
   render(); if (SF && SF.id === id) renderStayForm();
@@ -3850,7 +3863,8 @@ function peFormSave(){
     if (!clientById(PE.clientId)){ toast('Klijent je u međuvremenu obrisan.'); PE.form = null; peDone(); return; }
     const p = Object.assign({ id: uid(), clientId: PE.clientId, photo: null }, v);
     D.pets.push(p); dbSave('pets', p);
-    const naBoravak = SF && SF.clientId === PE.clientId;
+    /* na upisan boravak samo ako boks odgovara njegovoj vrsti (inače ostaje u imeniku, boravak se upisuje posebno) */
+    const naBoravak = SF && SF.clientId === PE.clientId && !(SF.id && boksoviTudjeGrupe(sfSegs(), [...SF.petIds].map(petById).concat([p])).length);
     if (naBoravak){
       SF.petIds.add(p.id);
       /* UPISAN boravak se mijenja odmah (kao štrik Došao/Otišao) - inače bi poruka rekla da je
@@ -5167,6 +5181,8 @@ document.addEventListener('click', (e) => {
     /* izbor je jedini razlog zbog kog su ušli iz boravka - poslije njega se kartica zatvara sama */
     case 'pe-stay-toggle': if (SF){ pePopSync(); const bio = SF.petIds.has(id);
         if (bio && SF.petIds.size === 1){ toast('Boravak mora imati bar jednog ljubimca.'); break; }
+        if (!bio && SF.id && boksoviTudjeGrupe(sfSegs(), [...SF.petIds, id].map(petById)).length){
+          toast(petLabel(petById(id)) + ' ne može u boks ovog boravka - upiši mu poseban boravak.'); break; }
         bio ? SF.petIds.delete(id) : SF.petIds.add(id);
         const p0 = petById(id);
         /* UPISAN boravak se mijenja ODMAH, kao štrik Došao/Otišao - inače poruka kaže da je
@@ -5265,7 +5281,8 @@ document.addEventListener('click', (e) => {
         closeModal(); renderStayForm();
       } break;
     case 'sf-save': sfSave(); break;
-    case 'sf-save-force': sfSave(true); break;
+    case 'sf-boks-izaberi': closeModal(); if (SF){ if (SF.id){ SF.otv = SF.otv || {}; SF.otv.boks = true; } renderStayForm();
+        const el = $('#sfBox') || $('#sheetBody .bsegs'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } break;
     case 'sf-charge': if (SF && SF.id){ if (!sfTrebaPitati('akcija', false, 'charge')) chargeStart(SF.id); } break;
     /* Otišao / Naplati rade nad SAČUVANIM boravkom; ako je nešto dirano, prvo Sačuvaj ili Odbaci */
     case 'sf-left': if (SF && SF.id){ if (!sfTrebaPitati('akcija', false, 'left')) chargeStart(SF.id, true); } break;

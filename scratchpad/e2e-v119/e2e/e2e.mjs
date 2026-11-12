@@ -75,13 +75,16 @@ async function alati(page, ctx, greske){
     db: () => ev('window.__db.splice(0)'),
     /* sistemsko „nazad" (dugme na telefonu) */
     nazad: async () => { try { await page.goBack({ waitUntil: 'commit', timeout: 1500 }); } catch (e){ await ev('history.back()'); } await W(450); },
-    /* poslije Sačuvaj: pitanja „Boks je već zauzet" / „Preko kapaciteta" se potvrđuju i bilježe */
+    /* v1.22.0: boks je obavezan i mora biti slobodan - u novoj formi se bira prvi slobodan iz menija */
+    slobodanBoks: async () => {
+      const v = await ev(`(() => { const o = [...document.querySelectorAll('#sfBox option')].find(o => o.value && !o.disabled && !/zauzet|slobodan/.test(o.textContent)); return o ? o.value : ''; })()`);
+      if (v){ await page.locator('#sfBox').selectOption(v); await W(300); }
+      return v;
+    },
+    /* poslije Sačuvaj (v1.22.0): „Boks je zauzet" više nema „Upiši svejedno" - samo se bilježi */
     posleSave: async (bilj) => {
-      for (let i = 0; i < 2; i++){
-        const m = await ev(`(document.querySelector('#modalHost .modal-title') || {}).textContent || ''`);
-        if (m === 'Boks je već zauzet' || m === 'Preko kapaciteta'){ if (bilj) bilj('pitanje „' + m + '" -> potvrđeno'); await E.klik('#modalHost [data-act="sf-save-force"]'); }
-        else break;
-      }
+      const m = await ev(`(document.querySelector('#modalHost .modal-title') || {}).textContent || ''`);
+      if (m === 'Boks je zauzet' && bilj) bilj('„Boks je zauzet" - nije upisano');
     },
   };
   return E;
@@ -352,24 +355,26 @@ await tok('Forma boravka: avans iz Mali boksevi, Sačuvaj na isto mjesto, Finans
   ok(Math.abs(avZbir(st) - 60) < 0.01, 'smanjenje na 60 skida sa najnovije uplate avansa: ' + JSON.stringify(st.payments));
 }, { h: 560 });
 
-await tok('Forma boravka: krstić -> Sačuvaj sa zauzetim boksom („Upiši svejedno")', async (E, ok, bilj) => {
+await tok('Forma boravka: krstić -> Sačuvaj sa zauzetim boksom (v1.22.0: ne upisuje)', async (E, ok, bilj) => {
   await E.klik('#view [data-act="group-open"][data-id="mb"]');
   await E.klik('#sheetBody .row-tap[data-act="stay-edit"][data-id="fx3"]');
+  const stari = (await E.st('fx3')).boxId;
   await E.klik('#sheetBody [data-act="sf-otv"][data-id="boks"]');
   await E.klik('#sheetBody [data-act="sf-box-del"]');
   await E.klik('#modalHost [data-act="sf-box-del-yes"]');
   const tudji = (await E.st('fx1')).boxId;   // boks koji danas drži fx1
-  await E.page.locator('#sfBox').selectOption(tudji); await E.W(300);
-  ok(await E.ev(`SF.boxes.length === 1 && SF.boxes[0].b === ${JSON.stringify(tudji)}`), 'izabran zauzet boks ' + tudji);
+  ok(await E.ev(`/zauzet|slobodan/.test([...document.querySelectorAll('#sfBox option')].find(o => o.value === ${JSON.stringify(tudji)}).textContent)`), 'tuđi boks u meniju je označen (zauzet / djelimično slobodan)');
+  await E.ev(`(() => { SF.boxes = [{ b: ${JSON.stringify(tudji)}, f: SF.from, t: SF.to }]; renderStayForm(); })()`); await E.W(250);
   await E.klik('#sheet .sheet-x[data-act="sheet-close"]');
   ok((await E.stanje()).modal === 'Sačuvati izmjene?', 'krstić pita (boks)');
   await E.klik('#modalHost [data-act="sf-izlaz-sacuvaj"]');
   const m = (await E.stanje()).modal;
-  ok(m === 'Boks je već zauzet', 'pitanje „Boks je već zauzet": ' + m);
-  await E.klik('#modalHost [data-act="sf-save-force"]');
+  ok(m === 'Boks je zauzet' && await E.ima('#modalHost [data-act="sf-save-force"]') === 0, 'zauzet boks: „Boks je zauzet" bez „Upiši svejedno": ' + m);
+  ok((await E.st('fx3')).boxId === stari, 'boks nije promijenjen');
+  await E.klik('#modalHost [data-act="sf-boks-izaberi"]');
   const s = await E.stanje();
-  ok((await E.st('fx3')).boxId === tudji, 'boks upisan');
-  ok(!s.sheet && s.idx === 0, 'poslije „Upiši svejedno" krstić i dalje zatvara SVE (a ne samo jedan nivo): ' + JSON.stringify({ sheet: s.sheet, k: s.k, naslov: s.naslov, idx: s.idx }));
+  ok(s.sheet && s.sf === 'fx3' && !s.modal, 'ostaje u boravku da se izabere drugi boks: ' + JSON.stringify({ sheet: s.sheet, sf: s.sf, modal: s.modal }));
+  await E.ev(`(() => { if (SF){ SF.ostani = false; } sheetZatvoriSve(true); })()`); await E.W(300);
 });
 
 await tok('Forma boravka: Otišao sa diranim poljem pita pa nastavlja', async (E, ok, bilj) => {
@@ -465,6 +470,7 @@ await tok('Kartica ljubimca iz forme -> Novi boravak (ljubimac izabran) -> Saču
   await E.klik(`#sheetBody [data-act="dr-pick"][data-id="${d2}"]`);
   ok(/Trajanje: 3 noćenja/.test(await E.tekst('#sheetBody .dr-foot')), 'termin izabran: ' + await E.tekst('#sheetBody .dr-foot'));
   ok(/Sačuvaj boravak/.test(await E.tekst('#sheetFoot')) && (await E.stanje()).foot, 'traka „Sačuvaj boravak"');
+  ok(!!(await E.slobodanBoks()), 'izabran slobodan boks (v1.22.0 obavezan)');
   const n0 = await E.ev('D.stays.length');
   await E.klik('#sheetFoot [data-act="sf-save"]'); await E.posleSave(bilj);
   s = await E.stanje();
@@ -557,6 +563,7 @@ await tok('Kartica vlasnika: Klijenti -> boravak -> strelica nazad -> kartica; I
   for (let i = 0; i < pomak; i++) await E.klik('#sheetBody [data-act="dr-nav"][data-id="1"]', { w: 150 });
   await E.klik(`#sheetBody [data-act="dr-pick"][data-id="${d1}"]`);
   await E.klik(`#sheetBody [data-act="dr-pick"][data-id="${d2}"]`);
+  ok(!!(await E.slobodanBoks()), 'izabran slobodan boks (v1.22.0 obavezan)');
   await E.klik('#sheetFoot [data-act="sf-save"]'); await E.posleSave(bilj);
   s = await E.stanje();
   /* v1.20.0: klijent već ima aktuelan boravak -> izbor „Svi boravci" / „Samo ovaj" (2 linka); inače jedan „Pošalji" */
@@ -920,7 +927,7 @@ await tok('Obilazak svih ekrana (inventar)', async (E, ok, bilj) => {
     await E.klik(`#sheetBody [data-act="dr-pick"][data-id="${await E.ev('addDays(todayISO(), 2)')}"]`);
     const opc = await E.ev(`[...document.querySelectorAll('#sfBox option')].map(o => o.textContent)`);
     const meniOk = await E.ima('#sfBox') === 1 && JSON.stringify(grupe0) === '["Veliki boksevi"]' && opc.some(o => /zauzet|slobodan/.test(o));
-    const hint = /upisaćeš kasnije|ostavi prazno/.test(SRC);
+    const hint = true;   // v1.22.0: boks je obavezan - hint „ostavi prazno" je namjerno uklonjen
     rucno('4.0', meniOk && hint, 'padajući meni radi (samo grupa za vrstu: ' + grupe0.join(', ') + '; uz boks „' + (opc.find(o => /zauzet|slobodan/.test(o)) || 'nema oznake') + '"), boks i dalje nije obavezan'
       + (hint ? '' : ', ali hint „Ako još ne znaš gdje ide, ostavi prazno - upisaćeš kasnije." je uklonjen'));
     await E.klik('#sheet .sheet-x[data-act="sheet-close"]');
@@ -1043,7 +1050,7 @@ const STARA = readFileSync(new URL('../index_v1.18.0.html', import.meta.url), 'u
 [...STARA.matchAll(/case '([a-z0-9-]+)'/g)].forEach(m => SVA.add(m[1]));
 const NIJE_U_DEMO = { 'pet-photo-pick': 'samo prijavljeni', 'pw-open': 'samo prijavljeni', 'pw-save': 'samo prijavljeni', 'pw-eye': 'prijava', 'login': 'prijava', 'login-mode': 'prijava',
   'send-reset': 'prijava', 'save-newpass': 'prijava', 'upd-apply': 'tek kad čeka nova verzija', 'sync-ponovi': 'tek kad upis ne prođe', 'pe-photo-zoom': 'demo nema slika', 'zoom-close': 'demo nema slika',
-  'sf-save-force': 'tek kad je boks zauzet / preko kapaciteta', 'kl-merge-yes': 'nije potvrđeno (trajno)', 'client-del-yes': 'nije potvrđeno (trajno)', 'pet-del-yes': 'nije potvrđeno (trajno)',
+  'kl-merge-yes': 'nije potvrđeno (trajno)', 'client-del-yes': 'nije potvrđeno (trajno)', 'pet-del-yes': 'nije potvrđeno (trajno)',
   'stay-del-yes': 'nije potvrđeno (trajno)', 'logout-yes': 'nije potvrđeno', 'sms-salji': 'link sms: nije dodirnut', 'sf-box-move-do': 'nije potvrđeno', 'box-add': 'nije dodato' };
 const INVENTAR = [];
 const FALE = [];

@@ -63,7 +63,8 @@ Ranije je boravak bio zakovan za JEDAN boks za cijeli period, pa se svaki prelaz
 
 - **`stays.boxes` (jsonb)** = niz perioda `[{"b":"mb2","f":"2026-07-01","t":"2026-07-31"}, …]`. Jedan boravak = jedan red od dolaska do odlaska, boks se mijenja usput („Premjesti u drugi boks"). `stays.box_id` je ostao samo kao trag starih zapisa (fallback u `stayBoxes()`); novi upisi pišu prvi boks iz niza.
 - `stayBoxes(st)` normalizuje periode (kliješti ih na termin boravka, siječe preklapanja, prvi počinje sa dolaskom a posljednji traje do odlaska). `stayBoxesLive(st)` je isto to ali skraćeno ZAKLJUČNO SA `left_at` - koristi ga SVAKO računanje zauzetosti (kalendar, slobodni boksevi, kapacitet), dok prikaz reda koristi `stayBoxes`. **DAN ODLASKA JE ZAUZET**: štrik „Otišao" skida ljubimca sa spiska prisutnih ali NE oslobađa boks tog dana, boks je slobodan tek sjutradan (traženje Vesne i Novice, v1.10.0). Dan odlaska se NE naplaćuje, ali boks tog dana JESTE zauzet - to su dvije različite stvari.
-- **Boks NIJE obavezan** (može se upisati kasnije). Popunjen kapacitet nije zabrana nego pitanje „X od Y dana je preko kapaciteta - Upiši / Odustani" (`sfCapacityAsk`).
+- **Boks JE obavezan i mora biti slobodan (od v1.22.0, „strogo, bez izuzetka")** - vidi „Obavezan slobodan boks". Ranije je
+  boks bio neobavezan, a zauzet boks / preko kapaciteta samo pitanje „Upiši svejedno" (`sfCapacityAsk`, uklonjeno).
 - **`stays.payments` (jsonb)** = niz naplata `[{"a":300,"d":"2025-11-09"}, …]`. Dug boravak može biti plaćen u više navrata a Zarada po mjesecima ostaje tačna (svaka naplata nosi svoj datum). Zarada čita `allPayments()`, ne `price`.
 - **`stays.arrived_at` / `left_at`** = štrik „Došao"/„Otišao" u Danas. Brojčanik LJUBIMACA gleda `stayHereOn()` (i Danas i kalendar, da bi pokazivali ISTI broj za isti dan); zauzetost BOKSA svuda ide preko `stayBoxesLive` - i pločica „zauzeto X od Y" i „Slobodno danas" (od v1.10.0; ranije su gledale `stayHere` pa su nudile zauzet boks kao slobodan); za ranije dane se podrazumijeva da je stigao/otišao (stara evidencija nema štrikove). Naplata na dan odlaska sama upisuje `left_at`; naplata usred boravka nudi „Samo naplata, ostaje u pansionu".
 - **Cijena se računa po NOĆENJIMA** (`stayNights` = `diffDays(from,to)`): 25.-31. = 6 noćenja, dan odlaska se ne naplaćuje. Dolazak i odlazak istog dana = cijena dnevnog čuvanja. Pragovi 10+ i mjesečno se gledaju po noćenjima.
@@ -266,6 +267,21 @@ htjela jednu cifru (450 €) i jednu poruku klijentu.
 - **Stara verzija (v1.20.0) gubi oznaku `g`/`c` kad sačuva takav boravak** (njen DB_UNMAP zadržava samo a/d/av/z) -
   novac ostaje tačan (0 €), ali boravak tada piše „Naplaćeno 0 €". Prije korištenja oba telefona na v1.21.0.
 - Provjera: `scratchpad/e2e-v119/gratis.mjs` (22 provjere) + cio E2E (20/20), harness 93/93.
+
+## Obavezan slobodan boks (v1.22.0, Vesna i Novica 12.11.2026)
+
+- `sfSave`: novi boravak, ili upisan kad se mijenjaju termin/vrsta/boks/ljubimci (`sfIzmjene` t/f/to/b/p), a nije završen:
+  bez boksa → „Izaberi boks" (otvori red Boks); boks druge vrste (`boksoviTudjeGrupe`) → ne; sudar → prozor „Boks je zauzet"
+  samo sa „Izaberi drugi boks". NEMA „Upiši svejedno" ni „Preko kapaciteta". Dan odlaska je zauzet, pa dolazak u isti
+  boks istog dana nije moguć - osim za ISTOG ljubimca (stalni gost Kan: mjesečni boravci se dodiruju na dan odlaska).
+- `sudariBoksa(segs, exceptId, lim, petIds)` = sudari po danu, **samo od danas**; kod izmjene se blokira samo sudar koji
+  izmjena UVODI (stari dupli iz vremena „Upiši svejedno" ne blokira produženje). Izmjena samo napomene/cijene/avansa ne
+  traži boks (stari zapisi bez boksa se i dalje sređuju).
+- „poništi" odlazak i ponovni Došao ne vraćaju psa u boks koji je u međuvremenu dat drugom (`boksSlobodanPoslijeOdlaska`).
+  Ljubimac druge vrste se ne može dodati na upisan boravak (`pe-stay-toggle`, novi ljubimac iz forme).
+- Meni boksa: zauzet cijeli termin = onemogućen; djelimično slobodan ostaje (za Premjesti). „Prihvati raspored" se ne nudi
+  kad prijedlog ima dane „nema mjesta".
+- Provjera: `scratchpad/e2e-v119/boks.mjs` (13 provjera) + cio E2E (20/20).
 
 ## Predaja aplikacije - NE ZABORAVITI
 
